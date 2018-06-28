@@ -19,14 +19,24 @@ public class MetadataTest {
 
   @Test
   public void testMetadataEmpty() {
-    final Metadata metadata = new Metadata();
+    final Metadata<Object> metadata = new Metadata<>();
+    assertFalse(metadata.hasValue());
+    assertFalse(metadata.hasOperation());
+  }
+
+  @Test
+  public void testMetadataObject() {
+    final Object object = new Object();
+    final Metadata<Object> metadata = Metadata.withObject(object);
+    assertTrue(metadata.hasObject());
+    assertEquals(object, metadata.object);
     assertFalse(metadata.hasValue());
     assertFalse(metadata.hasOperation());
   }
 
   @Test
   public void testMetadataValue() {
-    final Metadata metadata = Metadata.withValue("value");
+    final Metadata<Object> metadata = Metadata.withValue("value");
     assertTrue(metadata.hasValue());
     assertEquals("value", metadata.value);
     assertFalse(metadata.hasOperation());
@@ -34,7 +44,7 @@ public class MetadataTest {
 
   @Test
   public void testMetadataOperation() {
-    final Metadata metadata = Metadata.withOperation("op");
+    final Metadata<Object> metadata = Metadata.withOperation("op");
     assertFalse(metadata.hasValue());
     assertTrue(metadata.hasOperation());
     assertEquals("op", metadata.operation);
@@ -42,11 +52,16 @@ public class MetadataTest {
 
   @Test
   public void testMetadataValueOperation() {
-    final Metadata metadata = Metadata.with("value", "op");
+    final Metadata<Object> metadata = Metadata.with("value", "op");
     assertTrue(metadata.hasValue());
     assertEquals("value", metadata.value);
     assertTrue(metadata.hasOperation());
     assertEquals("op", metadata.operation);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void testMetadataIllegalObject() {
+    Metadata.with(null, "", "");
   }
 
   @Test(expected = IllegalArgumentException.class)
@@ -62,6 +77,6 @@ public class MetadataTest {
   @Test(expected = IllegalArgumentException.class)
   public void testMetadataIllegalValueOperation() {
     // this actually fails on value test as already tested above
-    Metadata.with(null, null);
+    Metadata.with(null, null, null);
   }
 }

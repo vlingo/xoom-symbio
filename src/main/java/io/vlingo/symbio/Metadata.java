@@ -7,33 +7,60 @@
 
 package io.vlingo.symbio;
 
-public class Metadata {
-  public final static Metadata Null = new Metadata();
+public class Metadata<T> {
+  public final static Object EmptyObject = new Object();
+  public final static Metadata<?> Null = new Metadata<>();
 
+  public final T object;
   public final String operation;
   public final String value;
 
-  public static Metadata withOperation(final String operation) {
-    return new Metadata("", operation);
+  public static <T> Metadata<T> withObject(final T object) {
+    return new Metadata<>(object, "", "");
   }
 
-  public static Metadata withValue(final String value) {
-    return new Metadata(value, "");
+  public static <T> Metadata<T> withOperation(final String operation) {
+    return new Metadata<>(emptyObject(), "", operation);
   }
 
-  public static Metadata with(final String value, final String operation) {
-    return new Metadata(value, operation);
+  public static <T> Metadata<T> withValue(final String value) {
+    return new Metadata<>(emptyObject(), value, "");
   }
 
-  public Metadata(final String value, final String operation) {
+  public static<T> Metadata<T> with(final String value, final String operation) {
+    return new Metadata<>(emptyObject(), value, operation);
+  }
+
+  public static<T> Metadata<T> with(final T object, final String value, final String operation) {
+    return new Metadata<>(object, value, operation);
+  }
+
+  @SuppressWarnings("unchecked")
+  private static <T> T emptyObject() {
+    return (T) EmptyObject;
+  }
+
+  public Metadata(final T object, final String value, final String operation) {
+    if (object == null) throw new IllegalArgumentException("Metadata object must not be null.");
+    this.object = object;
+
     if (value == null) throw new IllegalArgumentException("Metadata value must not be null.");
     this.value = value;
+
     if (operation == null) throw new IllegalArgumentException("Metadata operation must not be null.");
     this.operation = operation;
   }
 
+  public Metadata(final String value, final String operation) {
+    this(emptyObject(), value, operation);
+  }
+
   public Metadata() {
-    this("", "");
+    this(emptyObject(), "", "");
+  }
+
+  public boolean hasObject() {
+    return object != emptyObject();
   }
 
   public boolean hasOperation() {
