@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.vlingo</groupId>
   <artifactId>vlingo-symbio</artifactId>
-  <version>0.2.1</version>
+  <version>0.2.2</version>
   <name>vlingo-symbio</name>
   <description>The reactive, scalable, and resilient CQRS storage and projection tool for services and applications built on the vlingo/platform.</description>
   <url>https://github.com/vlingo/vlingo-actors</url>

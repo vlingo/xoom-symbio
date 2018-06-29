@@ -17,7 +17,7 @@ The reactive, scalable, and resilient CQRS storage and projection tool for servi
     <dependency>
       <groupId>io.vlingo</groupId>
       <artifactId>vlingo-symbio</artifactId>
-      <version>0.2.1</version>
+      <version>0.2.2</version>
       <scope>compile</scope>
     </dependency>
   </dependencies>
@@ -25,7 +25,7 @@ The reactive, scalable, and resilient CQRS storage and projection tool for servi
 
 ```gradle
 dependencies {
-    compile 'io.vlingo:vlingo-symbio:0.2.1'
+    compile 'io.vlingo:vlingo-symbio:0.2.2'
 }
 
 repositories {
