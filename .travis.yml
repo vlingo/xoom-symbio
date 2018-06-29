@@ -13,7 +13,7 @@ deploy:
   provider: bintray
   file: bintray.json
   skip_cleanup: true
-  user: vaughnvernon
+  user: VaughnVernon
   on:
     branch: master
   passphrase:
