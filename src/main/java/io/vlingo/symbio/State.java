@@ -36,7 +36,7 @@ public abstract class State<T> {
   }
 
   protected State(final String id, final Class<?> type, final int typeVersion, final T data, final int dataVersion) {
-    this(id, type, typeVersion, data, dataVersion, Metadata.Null);
+    this(id, type, typeVersion, data, dataVersion, Metadata.nullMetadata());
   }
 
   public boolean hasMetadata() {
@@ -99,7 +99,7 @@ public abstract class State<T> {
     }
 
     public BinaryState() {
-      super(NoOp, Object.class, 1, State.EmptyBytesData, 1, Metadata.Null);
+      super(NoOp, Object.class, 1, State.EmptyBytesData, 1, Metadata.nullMetadata());
     }
 
     @Override
@@ -123,7 +123,7 @@ public abstract class State<T> {
     }
 
     public TextState() {
-      super(NoOp, Object.class, 1, State.EmptyTextData, 1, Metadata.Null);
+      super(NoOp, Object.class, 1, State.EmptyTextData, 1, Metadata.nullMetadata());
     }
 
     @Override
@@ -139,7 +139,7 @@ public abstract class State<T> {
 
   public static final class NullState extends State<Object> {
     public NullState() {
-      super(NoOp, Object.class, 1, State.EmptyObjectData, 1, Metadata.Null);
+      super(NoOp, Object.class, 1, State.EmptyObjectData, 1, Metadata.nullMetadata());
     }
 
     public boolean isNull() {

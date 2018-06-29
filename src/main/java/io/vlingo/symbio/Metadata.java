@@ -7,40 +7,38 @@
 
 package io.vlingo.symbio;
 
-public class Metadata<T> {
+public class Metadata {
   public final static Object EmptyObject = new Object();
-  public final static Metadata<?> Null = new Metadata<>();
 
-  public final T object;
+  public final Object object;
   public final String operation;
   public final String value;
 
-  public static <T> Metadata<T> withObject(final T object) {
-    return new Metadata<>(object, "", "");
+  public static Metadata nullMetadata() {
+    return new Metadata(EmptyObject, "", "");
   }
 
-  public static <T> Metadata<T> withOperation(final String operation) {
-    return new Metadata<>(emptyObject(), "", operation);
+  public static Metadata withObject(final Object object) {
+    return new Metadata(object, "", "");
   }
 
-  public static <T> Metadata<T> withValue(final String value) {
-    return new Metadata<>(emptyObject(), value, "");
+  public static Metadata withOperation(final String operation) {
+    return new Metadata(EmptyObject, "", operation);
   }
 
-  public static<T> Metadata<T> with(final String value, final String operation) {
-    return new Metadata<>(emptyObject(), value, operation);
+  public static Metadata withValue(final String value) {
+    return new Metadata(EmptyObject, value, "");
   }
 
-  public static<T> Metadata<T> with(final T object, final String value, final String operation) {
-    return new Metadata<>(object, value, operation);
+  public static Metadata with(final String value, final String operation) {
+    return new Metadata(EmptyObject, value, operation);
   }
 
-  @SuppressWarnings("unchecked")
-  private static <T> T emptyObject() {
-    return (T) EmptyObject;
+  public static Metadata with(final Object object, final String value, final String operation) {
+    return new Metadata(object, value, operation);
   }
 
-  public Metadata(final T object, final String value, final String operation) {
+  public Metadata(final Object object, final String value, final String operation) {
     if (object == null) throw new IllegalArgumentException("Metadata object must not be null.");
     this.object = object;
 
@@ -52,15 +50,15 @@ public class Metadata<T> {
   }
 
   public Metadata(final String value, final String operation) {
-    this(emptyObject(), value, operation);
+    this(EmptyObject, value, operation);
   }
 
   public Metadata() {
-    this(emptyObject(), "", "");
+    this(EmptyObject, "", "");
   }
 
   public boolean hasObject() {
-    return object != emptyObject();
+    return object != EmptyObject;
   }
 
   public boolean hasOperation() {
@@ -73,5 +71,10 @@ public class Metadata<T> {
 
   public boolean isEmpty() {
     return !hasOperation() && !hasValue();
+  }
+
+  @SuppressWarnings("unchecked")
+  public <T> T typedObject() {
+    return (T) object;
   }
 }

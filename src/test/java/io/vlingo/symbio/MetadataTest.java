@@ -19,7 +19,7 @@ public class MetadataTest {
 
   @Test
   public void testMetadataEmpty() {
-    final Metadata<Object> metadata = new Metadata<>();
+    final Metadata metadata = new Metadata();
     assertFalse(metadata.hasValue());
     assertFalse(metadata.hasOperation());
   }
@@ -27,7 +27,7 @@ public class MetadataTest {
   @Test
   public void testMetadataObject() {
     final Object object = new Object();
-    final Metadata<Object> metadata = Metadata.withObject(object);
+    final Metadata metadata = Metadata.withObject(object);
     assertTrue(metadata.hasObject());
     assertEquals(object, metadata.object);
     assertFalse(metadata.hasValue());
@@ -36,7 +36,7 @@ public class MetadataTest {
 
   @Test
   public void testMetadataValue() {
-    final Metadata<Object> metadata = Metadata.withValue("value");
+    final Metadata metadata = Metadata.withValue("value");
     assertTrue(metadata.hasValue());
     assertEquals("value", metadata.value);
     assertFalse(metadata.hasOperation());
@@ -44,7 +44,7 @@ public class MetadataTest {
 
   @Test
   public void testMetadataOperation() {
-    final Metadata<Object> metadata = Metadata.withOperation("op");
+    final Metadata metadata = Metadata.withOperation("op");
     assertFalse(metadata.hasValue());
     assertTrue(metadata.hasOperation());
     assertEquals("op", metadata.operation);
@@ -52,7 +52,7 @@ public class MetadataTest {
 
   @Test
   public void testMetadataValueOperation() {
-    final Metadata<Object> metadata = Metadata.with("value", "op");
+    final Metadata metadata = Metadata.with("value", "op");
     assertTrue(metadata.hasValue());
     assertEquals("value", metadata.value);
     assertTrue(metadata.hasOperation());
