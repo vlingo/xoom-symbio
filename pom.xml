@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.vlingo</groupId>
   <artifactId>vlingo-symbio</artifactId>
-  <version>0.2.2</version>
+  <version>0.2.3</version>
   <name>vlingo-symbio</name>
   <description>The reactive, scalable, and resilient CQRS storage and projection tool for services and applications built on the vlingo/platform.</description>
   <url>https://github.com/vlingo/vlingo-actors</url>
@@ -97,8 +97,7 @@
     <dependency>
       <groupId>org.hsqldb</groupId>
       <artifactId>hsqldb</artifactId>
-      <version>2.4.0</version>
-      <scope>test</scope>
+      <version>2.4.1</version>
     </dependency>
   </dependencies>
   <distributionManagement>

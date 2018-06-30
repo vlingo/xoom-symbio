@@ -7,11 +7,17 @@
 
 package io.vlingo.symbio.store.state;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class StateTypeStateStoreMap {
   private static final Map<String,String> stateStoreNames = new ConcurrentHashMap<>();
+
+  public static Collection<String> allStoreNames() {
+    return Collections.unmodifiableCollection(stateStoreNames.values());
+  }
 
   public static void stateTypeToStoreName(final Class<?> type, final String storeName) {
     stateStoreNames.putIfAbsent(type.getName(), storeName);

@@ -10,6 +10,18 @@ package io.vlingo.symbio.store.state;
 import io.vlingo.symbio.State;
 
 public interface StateStore {
+  public enum DataFormat {
+    Binary {
+      @Override public boolean isBinary() { return true; }
+    },
+    Text {
+      @Override public boolean isText() { return true; }
+    };
+
+    public boolean isBinary() { return false; }
+    public boolean isText() { return false; }
+  };
+
   public enum Result {
     ConcurrentyViolation {
       @Override public boolean isConcurrentyViolation() { return true; }
@@ -46,5 +58,20 @@ public interface StateStore {
   public static interface ResultInterest<T> {
     void readResultedIn(final Result result, final String id, final State<T> state);
     void writeResultedIn(final Result result, final String id, final State<T> state);
+  }
+
+  public static interface StorageDelegate {
+    void beginRead() throws Exception;
+    void beginWrite() throws Exception;
+    void close();
+    void complete() throws Exception;
+    <C> C connection() throws Exception;
+    void drop(final String storeName) throws Exception;
+    void dropAll() throws Exception;
+    void fail();
+    <R> R readExpressionFor(final String storeName, final String id) throws Exception;
+    <S> S session() throws Exception;
+    <S,R> S stateFrom(final R result, final String id) throws Exception;
+    <W,S> W writeExpressionFor(final String storeName, final State<S> state) throws Exception;
   }
 }

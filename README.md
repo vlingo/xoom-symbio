@@ -4,6 +4,32 @@
 
 The reactive, scalable, and resilient CQRS storage and projection tool for services and applications built on the vlingo/platform.
 
+### Name
+The name "symbio" highlights the symbiotic relationship between domain models and persistence mechanisms.
+Domain models must be persisted and individual parts must be reconstituted to memory when needed. Persistence
+mechanisms crave data to store. Hence we can conclude that the two need and benefit from the other.
+
+Interestingly too is that the name "symbio" ends with the letters, i and o, for input and output.
+The `StateStorage`, introduced next, produces domain model output to disk, and input from disk back to
+the domain model.
+
+
+### State Storage
+The `StateStore` is a simple object storage mechanism that can be run against a number of persistence engines.
+These are the available storage implementations:
+
+   - In-memory binary: `InMemoryBinaryStateStoreActor`
+   - In-memory text: `InMemoryTextStateStoreActor`
+   - General-purpose JDBC: `JDBCTextStateStoreActor`
+
+The `JDBCTextStateStoreActor` has a single database delegate implementation:
+
+   - HSQLDB: `HSQLDBStorageDelegate`
+
+Adding additional JDBC storage delegates is a straightforward process requiring a few hours of work.
+
+We welcome you to add support for your favorite database!
+
 ### Bintray
 
 ```xml
@@ -17,7 +43,7 @@ The reactive, scalable, and resilient CQRS storage and projection tool for servi
     <dependency>
       <groupId>io.vlingo</groupId>
       <artifactId>vlingo-symbio</artifactId>
-      <version>0.2.2</version>
+      <version>0.2.3</version>
       <scope>compile</scope>
     </dependency>
   </dependencies>
@@ -25,7 +51,7 @@ The reactive, scalable, and resilient CQRS storage and projection tool for servi
 
 ```gradle
 dependencies {
-    compile 'io.vlingo:vlingo-symbio:0.2.2'
+    compile 'io.vlingo:vlingo-symbio:0.2.3'
 }
 
 repositories {

@@ -7,7 +7,9 @@
 
 package io.vlingo.symbio;
 
-public class Metadata {
+import java.util.Comparator;
+
+public class Metadata implements Comparable<Metadata> {
   public final static Object EmptyObject = new Object();
 
   public final Object object;
@@ -76,5 +78,38 @@ public class Metadata {
   @SuppressWarnings("unchecked")
   public <T> T typedObject() {
     return (T) object;
+  }
+
+  @Override
+  public int compareTo(final Metadata other) {
+    if (!this.object.equals(other.object)) return 1;
+    return Comparator
+            .comparing((Metadata m) -> m.value)
+            .thenComparing(m -> m.operation)
+            .compare(this, other);
+  }
+
+  @Override
+  public int hashCode() {
+    return 31 * value.hashCode() + operation.hashCode() + object.hashCode();
+  }
+
+  @Override
+  public boolean equals(final Object other) {
+    if (other == null || other.getClass() != this.getClass()) {
+      return false;
+    }
+
+    final Metadata otherMetadata = (Metadata) other;
+
+    return value.equals(otherMetadata.value) &&
+            operation.equals(otherMetadata.operation) &&
+            object.equals(otherMetadata.object);
+  }
+
+  @Override
+  public String toString() {
+    return getClass().getSimpleName() +
+            "[value=" + value + " operation=" + operation + " object=" + object + "]";
   }
 }

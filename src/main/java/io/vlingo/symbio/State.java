@@ -7,7 +7,9 @@
 
 package io.vlingo.symbio;
 
-public abstract class State<T> {
+import java.util.Comparator;
+
+public abstract class State<T> implements Comparable<State<T>> {
   private final static byte[] EmptyBytesData = new byte[0];
   private final static Object EmptyObjectData = new Object();
   private final static String EmptyTextData = "";
@@ -69,8 +71,22 @@ public abstract class State<T> {
   }
 
   @Override
+  public int compareTo(final State<T> other) {
+    final int dataDiff = compareData(this, other);
+    if (dataDiff != 0) return dataDiff;
+
+    return Comparator
+      .comparing((State<T> s) -> s.id)
+      .thenComparing(s -> s.type)
+      .thenComparingInt(s -> s.typeVersion)
+      .thenComparingInt(s -> s.dataVersion)
+      .thenComparing(s -> s.metadata)
+      .compare(this, other);
+  }
+
+  @Override
   public int hashCode() {
-    return id.hashCode();
+    return 31 * id.hashCode();
   }
 
   @Override
@@ -87,6 +103,25 @@ public abstract class State<T> {
             "[id=" + id + " type=" + type + " typeVersion=" + typeVersion +
             " data=" + (isText() ? data.toString() : "(binary)") + " dataVersion=" + dataVersion +
             " metadata=" + metadata + "]";
+  }
+
+  private int compareData(final State<T> state1, final State<T> state2) {
+    if (state1.isText() && state2.isText()) {
+      return ((String) state1.data).compareTo((String) state2.data);
+    } else if (state1.isBinary() && state2.isBinary()) {
+      final byte[] data1 = (byte[]) state1.data;
+      final byte[] data2 = (byte[]) state2.data;
+      if (data1.length == data2.length) {
+        for (int idx = 0; idx < data1.length; ++idx) {
+          if (data1[idx] != data2[idx]) {
+            return 1;
+          }
+        }
+        return 0;
+      }
+      return 1;
+    }
+    return 1;
   }
 
   public static final class BinaryState extends State<byte[]> {
