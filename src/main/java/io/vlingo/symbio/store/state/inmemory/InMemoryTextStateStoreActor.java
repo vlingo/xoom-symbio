@@ -40,6 +40,6 @@ public class InMemoryTextStateStoreActor extends InMemoryStateStoreActor<String>
   }
 
   protected void dispatch(final String dispatchId, final State<String> state) {
-    dispatcher.dispatch(dispatchId, state);
+    dispatcher.dispatchText(dispatchId, state);
   }
 }

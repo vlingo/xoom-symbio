@@ -41,6 +41,6 @@ public class InMemoryBinaryStateStoreActor extends InMemoryStateStoreActor<byte[
 
   @Override
   protected void dispatch(final String dispatchId, final State<byte[]> state) {
-    dispatcher.dispatch(dispatchId, state);
+    dispatcher.dispatchBinary(dispatchId, state);
   }
 }

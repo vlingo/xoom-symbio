@@ -41,6 +41,14 @@ public abstract class State<T> implements Comparable<State<T>> {
     this(id, type, typeVersion, data, dataVersion, Metadata.nullMetadata());
   }
 
+  public BinaryState asBinaryState() {
+    return (BinaryState) this;
+  }
+
+  public TextState asTextState() {
+    return (TextState) this;
+  }
+
   public boolean hasMetadata() {
     return !metadata.isEmpty();
   }

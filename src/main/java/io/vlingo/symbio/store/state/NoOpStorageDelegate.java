@@ -7,10 +7,15 @@
 
 package io.vlingo.symbio.store.state;
 
+import java.util.Collection;
+
 import io.vlingo.symbio.State;
+import io.vlingo.symbio.store.state.StateStore.Dispatchable;
 import io.vlingo.symbio.store.state.StateStore.StorageDelegate;
 
 public class NoOpStorageDelegate implements StorageDelegate {
+  @Override public <S> Collection<Dispatchable<S>> allUnconfirmedDispatchableStates() { return null; }
+
   @Override public void beginRead() {  }
 
   @Override public void beginWrite() {  }
@@ -19,13 +24,19 @@ public class NoOpStorageDelegate implements StorageDelegate {
 
   @Override public void complete() { }
 
+  @Override public void confirmDispatched(final String dispatchId) { }
+
   @Override public <C> C connection() { return null; }
+
+  @Override public <W, S> W dispatchableWriteExpressionFor(final String dispatchId, final State<S> state) { return null; }
 
   @Override public void drop(final String storeName) { }
 
   @Override public void dropAll() { }
 
   @Override public void fail() { }
+
+  @Override public String originatorId() { return null; }
 
   @Override public <R> R readExpressionFor(final String storeName, final String id) { return null; }
 

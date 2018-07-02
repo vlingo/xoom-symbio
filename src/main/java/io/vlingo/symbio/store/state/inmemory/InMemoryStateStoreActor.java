@@ -14,13 +14,14 @@ import java.util.Map;
 
 import io.vlingo.actors.Actor;
 import io.vlingo.symbio.State;
+import io.vlingo.symbio.store.state.StateStore.Dispatchable;
 import io.vlingo.symbio.store.state.StateStore.DispatcherControl;
 import io.vlingo.symbio.store.state.StateStore.Result;
 import io.vlingo.symbio.store.state.StateStore.ResultInterest;
 import io.vlingo.symbio.store.state.StateTypeStateStoreMap;
 
 public abstract class InMemoryStateStoreActor<T> extends Actor implements DispatcherControl {
-  private final List<Dispatchable> dispatchables;
+  private final List<Dispatchable<T>> dispatchables;
   private final State<T> emptyState;
   private final Map<String, Map<String, State<T>>> store;
 
@@ -28,20 +29,19 @@ public abstract class InMemoryStateStoreActor<T> extends Actor implements Dispat
     this.emptyState = emptyState;
     this.store = new HashMap<>();
     this.dispatchables = new ArrayList<>();
-    
-    final DispatcherControl control = selfAs(DispatcherControl.class);
-    control.dispatchUnconfirmed();
+
+    selfAs(DispatcherControl.class).dispatchUnconfirmed();
   }
 
   @Override
   public void confirmDispatched(final String dispatchId) {
-    dispatchables.remove(new Dispatchable(dispatchId, null));
+    dispatchables.remove(new Dispatchable<T>(dispatchId, null));
   }
 
   @Override
   public void dispatchUnconfirmed() {
     for (int idx = 0; idx < dispatchables.size(); ++idx) {
-      final Dispatchable dispatchable = dispatchables.get(idx);
+      final Dispatchable<T> dispatchable = dispatchables.get(idx);
       dispatch(dispatchable.id, dispatchable.state);
     }
   }
@@ -109,7 +109,7 @@ public abstract class InMemoryStateStoreActor<T> extends Actor implements Dispat
 
           typeStore.put(state.id, state);
           final String dispatchId = storeName + ":" + state.id;
-          dispatchables.add(new Dispatchable(dispatchId, state));
+          dispatchables.add(new Dispatchable<T>(dispatchId, state));
           dispatch(dispatchId, state);
 
           interest.writeResultedIn(Result.Success, state.id, state);
@@ -120,22 +120,6 @@ public abstract class InMemoryStateStoreActor<T> extends Actor implements Dispat
       }
     } else {
       logger().log("InMemoryTextStateStore writeText() missing ResultInterest for: " + (state == null ? "unknown id" : state.id));
-    }
-  }
-
-  private class Dispatchable {
-    private final String id;
-    private final State<T> state;
-
-    Dispatchable(final String id, final State<T> state) {
-      this.id = id;
-      this.state = state;
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public boolean equals(final Object other) {
-      return this.id.equals(((Dispatchable) other).id);
     }
   }
 }

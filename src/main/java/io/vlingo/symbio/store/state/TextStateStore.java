@@ -14,6 +14,6 @@ public interface TextStateStore extends StateStore {
   void write(final State<String> state, final ResultInterest<String> interest);
 
   public static interface TextDispatcher extends Dispatcher {
-    void dispatch(final String dispatchId, final State<String> state);
+    void dispatchText(final String dispatchId, final State<String> state);
   }
 }

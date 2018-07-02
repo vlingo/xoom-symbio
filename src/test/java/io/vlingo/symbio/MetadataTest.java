@@ -58,25 +58,4 @@ public class MetadataTest {
     assertTrue(metadata.hasOperation());
     assertEquals("op", metadata.operation);
   }
-
-  @Test(expected = IllegalArgumentException.class)
-  public void testMetadataIllegalObject() {
-    Metadata.with(null, "", "");
-  }
-
-  @Test(expected = IllegalArgumentException.class)
-  public void testMetadataIllegalValue() {
-    Metadata.with(null, "op");
-  }
-
-  @Test(expected = IllegalArgumentException.class)
-  public void testMetadataIllegalOperation() {
-    Metadata.with("value", null);
-  }
-
-  @Test(expected = IllegalArgumentException.class)
-  public void testMetadataIllegalValueOperation() {
-    // this actually fails on value test as already tested above
-    Metadata.with(null, null, null);
-  }
 }

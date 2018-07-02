@@ -41,14 +41,11 @@ public class Metadata implements Comparable<Metadata> {
   }
 
   public Metadata(final Object object, final String value, final String operation) {
-    if (object == null) throw new IllegalArgumentException("Metadata object must not be null.");
-    this.object = object;
+    if (object == null) this.object = EmptyObject; else this.object = object;
 
-    if (value == null) throw new IllegalArgumentException("Metadata value must not be null.");
-    this.value = value;
+    if (value == null) this.value = ""; else this.value = value;
 
-    if (operation == null) throw new IllegalArgumentException("Metadata operation must not be null.");
-    this.operation = operation;
+    if (operation == null) this.operation = ""; else this.operation = operation;
   }
 
   public Metadata(final String value, final String operation) {

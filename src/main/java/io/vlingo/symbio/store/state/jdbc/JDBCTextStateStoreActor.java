@@ -9,20 +9,45 @@ package io.vlingo.symbio.store.state.jdbc;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.Collection;
 
 import io.vlingo.actors.Actor;
 import io.vlingo.symbio.State;
 import io.vlingo.symbio.State.TextState;
+import io.vlingo.symbio.store.state.StateStore.DispatcherControl;
 import io.vlingo.symbio.store.state.StateTypeStateStoreMap;
 import io.vlingo.symbio.store.state.TextStateStore;
 
-public class JDBCTextStateStoreActor extends Actor implements TextStateStore {
+public class JDBCTextStateStoreActor extends Actor implements TextStateStore, DispatcherControl {
   private final static TextState EmptyState = new TextState();
 
-  final StorageDelegate delegate;
+  private final StorageDelegate delegate;
+  private final Dispatcher dispatcher;
 
-  public JDBCTextStateStoreActor(final StorageDelegate delegate) {
+  public JDBCTextStateStoreActor(final Dispatcher dispatcher, final StorageDelegate delegate) {
+    this.dispatcher = dispatcher;
     this.delegate = delegate;
+
+    final DispatcherControl control = selfAs(DispatcherControl.class);
+    dispatcher.controlWith(control);
+    control.dispatchUnconfirmed();
+  }
+
+  @Override
+  public void confirmDispatched(final String dispatchId) {
+    delegate.confirmDispatched(dispatchId);
+  }
+
+  @Override
+  public void dispatchUnconfirmed() {
+    try {
+      Collection<Dispatchable<String>> all = delegate.allUnconfirmedDispatchableStates();
+      for (final Dispatchable<String> dispatchable : all) {
+        dispatch(dispatchable.id, dispatchable.state);
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
   }
 
   @Override
@@ -43,12 +68,13 @@ public class JDBCTextStateStoreActor extends Actor implements TextStateStore {
       try {
         delegate.beginRead();
         final PreparedStatement readStatement = delegate.readExpressionFor(storeName, id);
-        final ResultSet result = readStatement.executeQuery();
-        if (result.first()) {
-          final TextState state = delegate.stateFrom(result, id);
-          interest.readResultedIn(Result.Success, id, state);
-        } else {
-          interest.readResultedIn(Result.NotFound, id, EmptyState);
+        try (final ResultSet result = readStatement.executeQuery()) {
+          if (result.first()) {
+            final TextState state = delegate.stateFrom(result, id);
+            interest.readResultedIn(Result.Success, id, state);
+          } else {
+            interest.readResultedIn(Result.NotFound, id, EmptyState);
+          }
         }
         delegate.complete();
       } catch (Exception e) {
@@ -85,10 +111,15 @@ public class JDBCTextStateStoreActor extends Actor implements TextStateStore {
           delegate.beginWrite();
           final PreparedStatement writeStatement = delegate.writeExpressionFor(storeName, state);
           writeStatement.execute();
+          final String dispatchId = storeName + ":" + state.id;
+          final PreparedStatement dispatchableStatement = delegate.dispatchableWriteExpressionFor(dispatchId, state);
+          dispatchableStatement.execute();
           delegate.complete();
+          dispatch(dispatchId, state);
 
           interest.writeResultedIn(Result.Success, state.id, state);
         } catch (Exception e) {
+          e.printStackTrace();
           delegate.fail();
           interest.readResultedIn(Result.Failure, state.id, state);
         }
@@ -99,5 +130,9 @@ public class JDBCTextStateStoreActor extends Actor implements TextStateStore {
               " writeText() missing ResultInterest for: " +
               (state == null ? "unknown id" : state.id));
     }
+  }
+
+  private void dispatch(final String dispatchId, final State<String> state) {
+    dispatcher.dispatch(dispatchId, state.asTextState());
   }
 }

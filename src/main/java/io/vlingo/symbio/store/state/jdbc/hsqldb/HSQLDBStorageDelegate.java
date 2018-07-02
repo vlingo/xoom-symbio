@@ -5,107 +5,54 @@
 // was not distributed with this file, You can obtain
 // one at https://mozilla.org/MPL/2.0/.
 
-package io.vlingo.symbio.store.state.jdbc;
+package io.vlingo.symbio.store.state.jdbc.hsqldb;
 
 import java.sql.Blob;
-import java.sql.Clob;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.Statement;
 import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.hsqldb.server.Server;
+import org.hsqldb.server.ServerConstants;
 
 import io.vlingo.actors.Logger;
+import io.vlingo.common.fn.Tuple2;
+import io.vlingo.common.serialization.JsonSerialization;
 import io.vlingo.symbio.Metadata;
 import io.vlingo.symbio.State;
 import io.vlingo.symbio.State.BinaryState;
 import io.vlingo.symbio.State.TextState;
 import io.vlingo.symbio.store.state.StateStore.DataFormat;
+import io.vlingo.symbio.store.state.StateStore.Dispatchable;
 import io.vlingo.symbio.store.state.StateStore.StorageDelegate;
 import io.vlingo.symbio.store.state.StateTypeStateStoreMap;
 
-public class HSQLDBStorageDelegate implements StorageDelegate {
+public class HSQLDBStorageDelegate extends HSQLDBStore implements StorageDelegate {
   private enum Mode { None, Reading, Writing };
-
-  private final static String SQL_READ =
-          "SELECT {0}.S_TYPE, {0}.S_TYPE_VERSION, {0}.S_DATA, {0}.S_DATA_VERSION, {0}.S_METADATA_OP, {0}.S_METADATA_VALUE " +
-          "FROM {0} " +
-          "WHERE {0}.S_ID = ?";
-
-  private final static String SQL_WRITE =
-          "MERGE INTO {0} \n" +
-          "USING (VALUES ?, ?, ?, {1}, ?, ?, ?) \n" +
-          "S (S_ID, S_TYPE, S_TYPE_VERSION, S_DATA, S_DATA_VERSION, S_METADATA_OP, S_METADATA_VALUE) \n" +
-          "ON ({0}.S_ID = S.S_ID) \n" +
-          "WHEN MATCHED THEN UPDATE \n" +
-                  "SET {0}.S_TYPE = S.S_TYPE, \n" +
-                  "    {0}.S_TYPE_VERSION = S.S_TYPE_VERSION, \n" +
-                  "    {0}.S_DATA = S.S_DATA, \n" +
-                  "    {0}.S_DATA_VERSION = S.S_DATA_VERSION, \n" +
-                  "    {0}.S_METADATA_OP = S.S_METADATA_OP, \n" +
-                  "    {0}.S_METADATA_VALUE = S.S_METADATA_VALUE \n" +
-          "WHEN NOT MATCHED THEN INSERT \n" +
-                  "(S_ID, S_TYPE, S_TYPE_VERSION, S_DATA, S_DATA_VERSION, S_METADATA_OP, S_METADATA_VALUE) \n" +
-                  "VALUES (S.S_ID, S.S_TYPE, S.S_TYPE_VERSION, S.S_DATA, S.S_DATA_VERSION, S.S_METADATA_OP, S.S_METADATA_VALUE)";
-
-  private final static String SQL_BINARY = "VARBINARY(63000)";
-  private final static String SQL_BINARY_CAST = "CAST(? AS VARBINARY(63000))";
-  private final static String SQL_TEXT = "TEXT(63000)";
-  private final static String SQL_TEXT_CAST = "CAST(? AS TEXT(63000))";
-  private final static String SQL_CREATE =
-          "CREATE TABLE {0} (\n" +
-          "   S_ID VARCHAR(64) NOT NULL,\n" +
-          "   S_TYPE VARCHAR(256) NOT NULL,\n" +
-          "   S_TYPE_VERSION INT NOT NULL,\n" +
-          "   S_DATA {1} NOT NULL,\n" +
-          "   S_DATA_VERSION INT NOT NULL,\n" +
-          "   S_METADATA_VALUE VARCHAR(2048) NOT NULL,\n" +
-          "   S_METADATA_OP VARCHAR(128) NOT NULL,\n" +
-          "   PRIMARY KEY (S_ID) \n" +
-          ");";
 
   private final Connection connection;
   private Server databaseSever;   // unused other than to prevent GC
+  private final DispatchableCachedStatements dispatchable;
   private final DataFormat format;
   private final Logger logger;
   private Mode mode;
+  private final String originatorId;
   private final Map<String, CachedStatement> readStatements;
   private final Map<String, CachedStatement> writeStatements;
-
-  private static void createTables(final Connection connection, final DataFormat format) {
-    for (final String storeName : StateTypeStateStoreMap.allStoreNames()) {
-      try {
-        createTable(connection, storeName, format);
-      } catch (Exception e) {
-        // assume table exists; could look at metadata
-      }
-    }
-  }
-
-  private static void createTable(Connection connection, String tableName, DataFormat format) throws Exception {
-    final String sql = MessageFormat.format(SQL_CREATE, tableName, format.isBinary() ? SQL_BINARY : SQL_TEXT);
-    Statement statement = null;
-    try {
-      statement = connection.createStatement();
-      statement.executeUpdate(sql);
-      connection.commit();
-    } catch (Exception e) {
-      if (statement != null) {
-        statement.close();
-      }
-    }
-  }
 
   public HSQLDBStorageDelegate(
           final DataFormat format,
           final String url,
           final String username,
           final String password,
+          final String originatorId,
           final boolean createTables,
           final Logger logger) {
 
@@ -113,16 +60,33 @@ public class HSQLDBStorageDelegate implements StorageDelegate {
     this.connection = connect(url, username, password, logger);
     this.logger = logger;
     this.mode = Mode.None;
+    this.originatorId = originatorId;
     this.readStatements = new HashMap<>();
     this.writeStatements = new HashMap<>();
 
     if (createTables) {
-      createTables(connection, format);
+      createTables(connection, format, logger);
     }
+
+    this.dispatchable = new DispatchableCachedStatements(originatorId, connection, format, logger);
   }
 
   public HSQLDBStorageDelegate(final DataFormat format, final Logger logger) {
-    this(format, "jdbc:hsqldb:mem:testdb;sql.syntax_mys=true", "SA", "", true, logger);
+    this(format, "jdbc:hsqldb:mem:testdb", "SA", "", "TEST", true, logger);
+  }
+
+  @Override
+  public <S> Collection<Dispatchable<S>> allUnconfirmedDispatchableStates() throws Exception {
+    final List<Dispatchable<S>> dispatchables = new ArrayList<>();
+
+    try (final ResultSet result = dispatchable.queryAll.preparedStatement.executeQuery()) {
+      while (result.next()) {
+        final Dispatchable<S> dispatchable = stateFrom(result);
+        dispatchables.add(dispatchable);
+      }
+    }
+
+    return dispatchables;
   }
 
   @Override
@@ -151,6 +115,9 @@ public class HSQLDBStorageDelegate implements StorageDelegate {
       if (connection != null) {
         connection.close();
       }
+      if (databaseSever != null && databaseSever.getState() == ServerConstants.SERVER_STATE_ONLINE) {
+        databaseSever.stop();
+      }
     } catch (Exception e) {
       logger.log(getClass().getSimpleName() + ": Could not close because: " + mode.name(), e);
     }
@@ -163,17 +130,56 @@ public class HSQLDBStorageDelegate implements StorageDelegate {
   }
 
   @Override
+  public void confirmDispatched(final String dispatchId) {
+    try {
+      beginWrite();
+      dispatchable.delete.preparedStatement.clearParameters();
+      dispatchable.delete.preparedStatement.setString(1, dispatchId);
+      dispatchable.delete.preparedStatement.executeUpdate();
+      complete();
+    } catch (Exception e) {
+      fail();
+      logger.log(getClass().getSimpleName() +
+              ": Confirm dispatched for: " + dispatchId +
+              " failed because: " + e.getMessage(), e);
+    }
+  }
+
+  @Override
   @SuppressWarnings("unchecked")
   public <C> C connection() throws Exception {
     return (C) connection;
   }
 
   @Override
-  public void drop(final String storeName) throws Exception {
-    try (Statement statement = connection.createStatement()) {
-      statement.executeUpdate("DROP TABLE " + storeName);
-      connection.commit();
+  @SuppressWarnings("unchecked")
+  public <W, S> W dispatchableWriteExpressionFor(final String dispatchId, final State<S> state) throws Exception {
+    dispatchable.append.preparedStatement.clearParameters();
+    dispatchable.append.preparedStatement.setString(1, originatorId);
+    dispatchable.append.preparedStatement.setString(2, dispatchId);
+    dispatchable.append.preparedStatement.setString(3, state.id);
+    dispatchable.append.preparedStatement.setString(4, state.type);
+    dispatchable.append.preparedStatement.setInt(5, state.typeVersion);
+    if (format.isBinary()) {
+      final byte[] data = (byte[]) state.data;
+      dispatchable.append.blob.setBytes(1, data);
+      dispatchable.append.preparedStatement.setBlob(6, dispatchable.append.blob);
+    } else if (state.isText()) {
+      dispatchable.append.preparedStatement.setString(6, (String) state.data);
     }
+    dispatchable.append.preparedStatement.setInt(7, state.dataVersion);
+    dispatchable.append.preparedStatement.setString(8, state.metadata.value);
+    dispatchable.append.preparedStatement.setString(9, state.metadata.operation);
+    final Tuple2<String, String> metadataObject = serialized(state.metadata.object);
+    dispatchable.append.preparedStatement.setString(10, metadataObject._1);
+    dispatchable.append.preparedStatement.setString(11, metadataObject._2);
+    return (W) dispatchable.append.preparedStatement;
+  }
+
+  @Override
+  public void drop(final String storeName) throws Exception {
+    dropTable(connection, tableNameFor(storeName));
+    connection.commit();
   }
 
   @Override
@@ -184,6 +190,12 @@ public class HSQLDBStorageDelegate implements StorageDelegate {
       } catch (Exception e) {
         // assume table already dropped; could look at metadata
       }
+    }
+
+    try {
+      dropAllInternalResouces(connection);
+    } catch (Exception e) {
+      // assume table already dropped; could look at metadata
     }
   }
 
@@ -198,12 +210,17 @@ public class HSQLDBStorageDelegate implements StorageDelegate {
   }
 
   @Override
+  public String originatorId() {
+    return originatorId;
+  }
+
+  @Override
   @SuppressWarnings("unchecked")
   public <E> E readExpressionFor(final String storeName, final String id) throws Exception {
     final CachedStatement maybeCached = readStatements.get(storeName);
 
     if (maybeCached == null) {
-      final String select = MessageFormat.format(SQL_READ, storeName.toUpperCase());
+      final String select = MessageFormat.format(SQL_STATE_READ, storeName.toUpperCase());
       final PreparedStatement preparedStatement = connection.prepareStatement(select);
       final Blob blob = format.isBinary() ? connection.createBlob() : null;
       final CachedStatement cached = new CachedStatement(preparedStatement, blob);
@@ -231,9 +248,10 @@ public class HSQLDBStorageDelegate implements StorageDelegate {
     }
     final Class<?> type = Class.forName(resultSet.getString(1));
     final int typeVersion = resultSet.getInt(2);
+    // 3 below
     final int dataVersion = resultSet.getInt(4);
-    final String metadataOperation = resultSet.getString(5);
-    final String metadataValue = resultSet.getString(6);
+    final String metadataValue = resultSet.getString(5);
+    final String metadataOperation = resultSet.getString(6);
 
     final Metadata metadata = Metadata.with(metadataValue, metadataOperation);
 
@@ -245,8 +263,7 @@ public class HSQLDBStorageDelegate implements StorageDelegate {
       final byte[] data = new byte[(int) blob.length()];
       return (S) new BinaryState(id, type, typeVersion, data, dataVersion, metadata);
     } else {
-      final Clob clob = resultSet.getClob(3);
-      final String data = clob.getSubString(1, (int) clob.length());
+      final String data = resultSet.getString(3);
       return (S) new TextState(id, type, typeVersion, data, dataVersion, metadata);
     }
   }
@@ -257,8 +274,8 @@ public class HSQLDBStorageDelegate implements StorageDelegate {
     final CachedStatement maybeCached = writeStatements.get(storeName);
 
     if (maybeCached == null) {
-      final String upsert = MessageFormat.format(SQL_WRITE, storeName.toUpperCase(),
-              format.isBinary() ? SQL_BINARY_CAST : SQL_TEXT_CAST);
+      final String upsert = MessageFormat.format(SQL_STATE_WRITE, storeName.toUpperCase(),
+              format.isBinary() ? SQL_FORMAT_BINARY_CAST : SQL_FORMAT_TEXT_CAST);
       final PreparedStatement preparedStatement = connection.prepareStatement(upsert);
       final Blob blob = format.isBinary() ? connection.createBlob() : null;
       final CachedStatement cached = new CachedStatement(preparedStatement, blob);
@@ -294,10 +311,6 @@ public class HSQLDBStorageDelegate implements StorageDelegate {
           final String username,
           final String password,
           final Logger logger) {
-
-    if (!url.contains("sql.syntax_mys=true")) {
-      throw new IllegalArgumentException(getClass().getSimpleName() + ": Must emulate MySQL: " + url);
-    }
 
     final Connection connection1 = attemptConnect(url, username, password, logger);
     if (connection1 != null) {
@@ -335,17 +348,45 @@ public class HSQLDBStorageDelegate implements StorageDelegate {
       cached.preparedStatement.setString(4, (String) state.data);
     }
     cached.preparedStatement.setInt(5, state.dataVersion);
-    cached.preparedStatement.setString(6, state.metadata.operation);
-    cached.preparedStatement.setString(7, state.metadata.value);
+    cached.preparedStatement.setString(6, state.metadata.value);
+    cached.preparedStatement.setString(7, state.metadata.operation);
   }
 
-  private static class CachedStatement {
-    private final Blob blob;
-    private final PreparedStatement preparedStatement;
+  private Tuple2<String, String> serialized(final Object object) {
+    if (object != null) {
+      return Tuple2.from(JsonSerialization.serialized(object), object.getClass().getName());
+    }
+    return Tuple2.from(null, null);
+  }
 
-    CachedStatement(final PreparedStatement preparedStatement, final Blob blob) {
-      this.preparedStatement = preparedStatement;
-      this.blob = blob;
+  @SuppressWarnings({ "unchecked", "rawtypes" })
+  private <S> Dispatchable<S> stateFrom(final ResultSet resultSet) throws Exception {
+    final String dispatchId = resultSet.getString(1);
+    final String id = resultSet.getString(2);
+    final Class<?> type = Class.forName(resultSet.getString(3));
+    final int typeVersion = resultSet.getInt(4);
+    // 5 below
+    final int dataVersion = resultSet.getInt(6);
+    final String metadataValue = resultSet.getString(7);
+    final String metadataOperation = resultSet.getString(8);
+    final String metadataObject = resultSet.getString(9);
+    final String metadataObjectType = resultSet.getString(10);
+
+    final Object object = metadataObject != null ?
+            JsonSerialization.deserialized(metadataObject, Class.forName(metadataObjectType)) : null;
+
+    final Metadata metadata = Metadata.with(object, metadataValue, metadataOperation);
+
+    // note possible truncation with long cast to in, but
+    // hopefully no objects are larger than int max value
+
+    if (format.isBinary()) {
+      final Blob blob = resultSet.getBlob(5);
+      final byte[] data = new byte[(int) blob.length()];
+      return new Dispatchable(dispatchId, new BinaryState(id, type, typeVersion, data, dataVersion, metadata));
+    } else {
+      final String data = resultSet.getString(5);
+      return new Dispatchable(dispatchId, new TextState(id, type, typeVersion, data, dataVersion, metadata));
     }
   }
 }

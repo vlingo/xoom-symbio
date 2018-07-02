@@ -19,7 +19,7 @@ public class TextStateProjectionDispatcherActor extends StateProjectionDispatche
   }
 
   @Override
-  public void dispatch(final String dispatchId, final State<String> state) {
+  public void dispatchText(final String dispatchId, final State<String> state) {
     if (hasProjectionsFor(state.metadata.operation)) {
       dispatch(dispatchId, new ProjectableTextState(state, dispatchId));
     }

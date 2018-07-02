@@ -19,7 +19,7 @@ public class BinaryStateProjectionDispatcherActor extends StateProjectionDispatc
   }
 
   @Override
-  public void dispatch(final String dispatchId, final State<byte[]> state) {
+  public void dispatchBinary(final String dispatchId, final State<byte[]> state) {
     if (hasProjectionsFor(state.metadata.operation)) {
       dispatch(dispatchId, new ProjectableBinaryState(state, dispatchId));
     }

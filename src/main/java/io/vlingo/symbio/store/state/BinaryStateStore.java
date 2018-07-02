@@ -14,6 +14,6 @@ public interface BinaryStateStore extends StateStore {
   void write(final State<byte[]> state, final ResultInterest<byte[]> interest);
 
   public static interface BinaryDispatcher extends Dispatcher {
-    void dispatch(final String dispatchId, final State<byte[]> state);
+    void dispatchBinary(final String dispatchId, final State<byte[]> state);
   }
 }

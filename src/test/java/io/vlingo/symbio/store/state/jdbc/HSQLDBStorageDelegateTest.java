@@ -25,6 +25,7 @@ import io.vlingo.symbio.State.TextState;
 import io.vlingo.symbio.store.state.Entity1;
 import io.vlingo.symbio.store.state.StateStore;
 import io.vlingo.symbio.store.state.StateTypeStateStoreMap;
+import io.vlingo.symbio.store.state.jdbc.hsqldb.HSQLDBStorageDelegate;
 
 public class HSQLDBStorageDelegateTest {
   private HSQLDBStorageDelegate delegate;
@@ -133,5 +134,6 @@ public class HSQLDBStorageDelegateTest {
   public void tearDown() throws Exception {
     delegate.dropAll();
     delegate.close();
+    world.terminate();
   }
 }
