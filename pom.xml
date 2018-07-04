@@ -92,7 +92,7 @@
     <dependency>
       <groupId>io.vlingo</groupId>
       <artifactId>vlingo-actors</artifactId>
-      <version>0.4.7</version>
+      <version>0.4.8</version>
     </dependency>
     <dependency>
       <groupId>org.hsqldb</groupId>
