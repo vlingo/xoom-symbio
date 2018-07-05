@@ -61,7 +61,7 @@ public class PostgresStorageDelegate extends PostgresStore implements StorageDel
   }
 
   public PostgresStorageDelegate(final DataFormat format, final Logger logger) {
-    this(new Configuration(format, "jdbc:postgresql://localhost/vlingo-test-state-store", "vlingo-user", "vlingo123", false, "TEST", true), logger);
+    this(new Configuration(format, "jdbc:postgresql://localhost/vlingo_test", "vlingo_user", "vlingo123", false, "TEST", true), logger);
   }
 
   @Override
