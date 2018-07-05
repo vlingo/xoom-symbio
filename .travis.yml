@@ -10,7 +10,7 @@ before_install:
 services:
   - postgresql
 addons:
-  postgresql: "10.4"
+  postgresql: "9.6"
 before_script:
   - psql -U postgres -c "create database 'vlingo-test-state-store';"
   - psql -U postgres -c "create user vlingo-user with password 'vlingo123';"
