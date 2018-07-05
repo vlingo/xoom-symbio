@@ -13,7 +13,7 @@ addons:
   postgresql: "9.6"
 before_script:
   - psql -U postgres -c 'create database vlingo_test;'
-  - psql -U postgres -c 'create user vlingo_user with password "vlingo123";'
+  - psql -U postgres -c 'create user vlingo_user with password ''vlingo123'';'
 script:
 - mvn install
 deploy:
