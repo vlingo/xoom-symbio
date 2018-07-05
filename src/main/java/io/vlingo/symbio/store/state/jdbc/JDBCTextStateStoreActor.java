@@ -46,7 +46,7 @@ public class JDBCTextStateStoreActor extends Actor implements TextStateStore, Di
         dispatch(dispatchable.id, dispatchable.state);
       }
     } catch (Exception e) {
-      e.printStackTrace();
+      logger().log(getClass().getSimpleName() + " dispatchUnconfirmed() failed because: " + e.getMessage(), e);
     }
   }
 
