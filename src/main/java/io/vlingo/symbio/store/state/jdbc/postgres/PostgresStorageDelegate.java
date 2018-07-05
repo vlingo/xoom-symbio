@@ -19,6 +19,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import org.postgresql.util.PGobject;
+
 import io.vlingo.actors.Logger;
 import io.vlingo.common.fn.Tuple2;
 import io.vlingo.common.serialization.JsonSerialization;
@@ -149,7 +151,10 @@ public class PostgresStorageDelegate extends PostgresStore implements StorageDel
     if (configuration.format.isBinary()) {
       dispatchable.append.preparedStatement.setBytes(6, (byte[]) state.data);
     } else if (state.isText()) {
-      dispatchable.append.preparedStatement.setString(6, (String) state.data);
+      final PGobject jsonObject = new PGobject();
+      jsonObject.setType("json");
+      jsonObject.setValue((String) state.data);
+      dispatchable.append.preparedStatement.setObject(6, jsonObject);
     }
     dispatchable.append.preparedStatement.setInt(7, state.dataVersion);
     dispatchable.append.preparedStatement.setString(8, state.metadata.value);
@@ -303,7 +308,10 @@ public class PostgresStorageDelegate extends PostgresStore implements StorageDel
     if (configuration.format.isBinary()) {
       cached.preparedStatement.setBytes(4, (byte[]) state.data);
     } else if (state.isText()) {
-      cached.preparedStatement.setString(4, (String) state.data);
+      final PGobject jsonObject = new PGobject();
+      jsonObject.setType("json");
+      jsonObject.setValue((String) state.data);
+      cached.preparedStatement.setObject(4, jsonObject);
     }
     cached.preparedStatement.setInt(5, state.dataVersion);
     cached.preparedStatement.setString(6, state.metadata.value);

@@ -20,7 +20,7 @@ import io.vlingo.symbio.store.state.jdbc.CachedStatement;
 class DispatchableCachedStatements {
   final static String SQL_DISPATCHABLE_APPEND =
           "INSERT INTO {0} \n" +
-               "(d_id, d_originaltor_id, d_dispatch_id, \n" +
+               "(d_id, d_originator_id, d_dispatch_id, \n" +
                " d_state_id, d_state_type, d_state_type_version, \n" +
                " d_state_data, d_state_data_version, \n" +
                " d_state_metadata_value, d_state_metadata_op, d_state_metadata_object, d_state_metadata_object_type) \n" +
@@ -33,7 +33,7 @@ class DispatchableCachedStatements {
           "SELECT d_dispatch_id, d_state_id, d_state_type, d_state_type_version, d_state_data, d_state_data_version, \n" +
           "       d_state_metadata_value, d_state_metadata_op, d_state_metadata_object, d_state_metadata_object_type \n" +
           "FROM {0} \n" +
-          "WHERE d_originaltor_id = ? ORDER BY D_ID";
+          "WHERE d_originator_id = ? ORDER BY D_ID";
 
   final CachedStatement append;
   final CachedStatement delete;

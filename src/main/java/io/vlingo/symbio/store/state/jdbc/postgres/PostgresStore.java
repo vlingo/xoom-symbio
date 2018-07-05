@@ -24,7 +24,7 @@ class PostgresStore {
           "   d_state_data {1} NOT NULL,\n" +
           "   d_state_data_version INT NOT NULL,\n" +
           "   d_state_metadata_value TEXT NOT NULL,\n" +
-          "   d_state_metadata_opt VARCHAR(128) NOT NULL,\n" +
+          "   d_state_metadata_op VARCHAR(128) NOT NULL,\n" +
           "   d_state_metadata_object TEXT,\n" +
           "   d_state_metadata_object_type VARCHAR(256)\n" +
           ");";
