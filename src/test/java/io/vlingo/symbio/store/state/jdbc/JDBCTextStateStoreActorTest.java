@@ -14,17 +14,18 @@ import io.vlingo.symbio.State.TextState;
 import io.vlingo.symbio.store.state.Entity1;
 import io.vlingo.symbio.store.state.MockResultInterest;
 import io.vlingo.symbio.store.state.MockTextDispatcher;
+import io.vlingo.symbio.store.state.StateStore.DataFormat;
+import io.vlingo.symbio.store.state.StateStore.StorageDelegate;
 import io.vlingo.symbio.store.state.StateTypeStateStoreMap;
 import io.vlingo.symbio.store.state.TextStateStore;
-import io.vlingo.symbio.store.state.StateStore.DataFormat;
 import io.vlingo.symbio.store.state.jdbc.hsqldb.HSQLDBStorageDelegate;
 
-public class JDBCTextStateStoreActorTest {
-  private HSQLDBStorageDelegate delegate;
-  private MockTextDispatcher dispatcher;
-  private String entity1StoreName;
-  private TextStateStore store;
-  private World world;
+public abstract class JDBCTextStateStoreActorTest {
+  protected StorageDelegate delegate;
+  protected MockTextDispatcher dispatcher;
+  protected String entity1StoreName;
+  protected TextStateStore store;
+  protected World world;
 
   @Test
   public void testThatStateStoreDispatches() {
@@ -87,6 +88,8 @@ public class JDBCTextStateStoreActorTest {
     delegate.close();
     world.terminate();
   }
+
+  protected abstract StorageDelegate delegate();
 
   private String dispatchId(final String entityId) {
     return entity1StoreName + ":" + entityId;

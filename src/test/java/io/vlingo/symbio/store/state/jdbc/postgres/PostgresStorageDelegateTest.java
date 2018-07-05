@@ -5,7 +5,7 @@
 // was not distributed with this file, You can obtain
 // one at https://mozilla.org/MPL/2.0/.
 
-package io.vlingo.symbio.store.state.jdbc;
+package io.vlingo.symbio.store.state.jdbc.postgres;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
@@ -25,27 +25,27 @@ import io.vlingo.symbio.State.TextState;
 import io.vlingo.symbio.store.state.Entity1;
 import io.vlingo.symbio.store.state.StateStore;
 import io.vlingo.symbio.store.state.StateTypeStateStoreMap;
-import io.vlingo.symbio.store.state.jdbc.hsqldb.HSQLDBStorageDelegate;
+import io.vlingo.symbio.store.state.jdbc.postgres.PostgresStorageDelegate;
 
-public class HSQLDBStorageDelegateTest {
-  private HSQLDBStorageDelegate delegate;
+public class PostgresStorageDelegateTest {
+  private PostgresStorageDelegate delegate;
   private String entity1StoreName;
   private World world;
 
   @Test
   public void testThatDatabaseOpensTablesCreated() {
-    delegate = new HSQLDBStorageDelegate(StateStore.DataFormat.Text, world.defaultLogger());
+    delegate = new PostgresStorageDelegate(StateStore.DataFormat.Text, world.defaultLogger());
 
     assertNotNull(delegate);
   }
 
   @Test
   public void testThatTextWritesRead() throws Exception {
-    delegate = new HSQLDBStorageDelegate(StateStore.DataFormat.Text, world.defaultLogger());
+    delegate = new PostgresStorageDelegate(StateStore.DataFormat.Text, world.defaultLogger());
 
     assertNotNull(delegate);
 
-    final TextState writeState = new TextState("123", Entity1.class, 1, "data", 1, Metadata.with("metadata", "op"));
+    final TextState writeState = new TextState("123", Entity1.class, 1, "{ \"data\" : \"data1\" }", 1, Metadata.with("metadata", "op"));
     
     delegate.beginWrite();
     final PreparedStatement writeStatement = delegate.writeExpressionFor(entity1StoreName, writeState);
@@ -63,11 +63,11 @@ public class HSQLDBStorageDelegateTest {
 
   @Test
   public void testThatTextStatesUpdate() throws Exception {
-    delegate = new HSQLDBStorageDelegate(StateStore.DataFormat.Text, world.defaultLogger());
+    delegate = new PostgresStorageDelegate(StateStore.DataFormat.Text, world.defaultLogger());
 
     assertNotNull(delegate);
 
-    final TextState writeState1 = new TextState("123", Entity1.class, 1, "data1", 1, Metadata.with("metadata1", "op1"));
+    final TextState writeState1 = new TextState("123", Entity1.class, 1, "{ \"data\" : \"data1\" }", 1, Metadata.with("metadata1", "op1"));
     
     delegate.beginWrite();
     final PreparedStatement writeStatement1 = delegate.writeExpressionFor(entity1StoreName, writeState1);
@@ -82,7 +82,7 @@ public class HSQLDBStorageDelegateTest {
 
     assertEquals(writeState1, readState1);
 
-    final TextState writeState2 = new TextState("123", Entity1.class, 1, "data2", 1, Metadata.with("metadata2", "op2"));
+    final TextState writeState2 = new TextState("123", Entity1.class, 1, "{ \"data\" : \"data1\" }", 1, Metadata.with("metadata2", "op2"));
 
     delegate.beginWrite();
     final PreparedStatement writeStatement2 = delegate.writeExpressionFor(entity1StoreName, writeState2);
@@ -102,11 +102,11 @@ public class HSQLDBStorageDelegateTest {
 
   @Test
   public void testThatBinaryWritesRead() throws Exception {
-    delegate = new HSQLDBStorageDelegate(StateStore.DataFormat.Binary, world.defaultLogger());
+    delegate = new PostgresStorageDelegate(StateStore.DataFormat.Binary, world.defaultLogger());
 
     assertNotNull(delegate);
 
-    final BinaryState writeState = new BinaryState("123", Entity1.class, 1, "data".getBytes(), 1, Metadata.with("metadata", "op"));
+    final BinaryState writeState = new BinaryState("123", Entity1.class, 1, "{ \"data\" : \"data1\" }".getBytes(), 1, Metadata.with("metadata", "op"));
     
     delegate.beginWrite();
     final PreparedStatement writeStatement = delegate.writeExpressionFor(entity1StoreName, writeState);
