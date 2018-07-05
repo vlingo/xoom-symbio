@@ -22,9 +22,10 @@ These are the available storage implementations:
    - In-memory text: `InMemoryTextStateStoreActor`
    - General-purpose JDBC: `JDBCTextStateStoreActor`
 
-The `JDBCTextStateStoreActor` has a single database delegate implementation:
+The `JDBCTextStateStoreActor` has these database delegate implementations:
 
    - HSQLDB: `HSQLDBStorageDelegate`
+   - PostgresSQL: `PostgresStorageDelegate`
 
 Adding additional JDBC storage delegates is a straightforward process requiring a few hours of work.
 
