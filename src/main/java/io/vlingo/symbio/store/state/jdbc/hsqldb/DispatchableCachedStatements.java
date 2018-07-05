@@ -20,9 +20,9 @@ import io.vlingo.actors.Logger;
 import io.vlingo.symbio.store.state.StateStore.DataFormat;
 
 class DispatchableCachedStatements {
-  final CachedStatement append;
-  final CachedStatement delete;
-  final CachedStatement queryAll;
+  final CachedBlobCapableStatement append;
+  final CachedBlobCapableStatement delete;
+  final CachedBlobCapableStatement queryAll;
 
   DispatchableCachedStatements(final String originatorId, final Connection connection, final DataFormat format, final Logger logger) {
     this.append = createStatement(SQL_DISPATCHABLE_APPEND, blobIfBinary(connection, format, logger), connection, logger);
@@ -42,10 +42,10 @@ class DispatchableCachedStatements {
     }
   }
 
-  private CachedStatement createStatement(final String sql, final Blob blob, final Connection connection, final Logger logger) {
+  private CachedBlobCapableStatement createStatement(final String sql, final Blob blob, final Connection connection, final Logger logger) {
     try {
       final PreparedStatement preparedStatement = connection.prepareStatement(sql);
-      return new CachedStatement(preparedStatement, blob);
+      return new CachedBlobCapableStatement(preparedStatement, blob);
     } catch (Exception e) {
       final String message =
               getClass().getSimpleName() + ": Failed to create dispatchable statement: \n" +
