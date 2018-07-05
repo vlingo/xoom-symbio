@@ -10,12 +10,13 @@ package io.vlingo.symbio.store.state.jdbc.hsqldb;
 import java.sql.Blob;
 import java.sql.PreparedStatement;
 
-class CachedStatement {
-  final Blob blob;
-  final PreparedStatement preparedStatement;
+import io.vlingo.symbio.store.state.jdbc.CachedStatement;
 
-  CachedStatement(final PreparedStatement preparedStatement, final Blob blob) {
-    this.preparedStatement = preparedStatement;
+class CachedBlobCapableStatement extends CachedStatement {
+  final Blob blob;
+
+  CachedBlobCapableStatement(final PreparedStatement preparedStatement, final Blob blob) {
+    super(preparedStatement);
     this.blob = blob;
   }
 }
