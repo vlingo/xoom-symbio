@@ -127,14 +127,14 @@ class HSQLDBStore {
     }
 
     for (final String storeName : StateTypeStateStoreMap.allStoreNames()) {
-      final String tableName = storeName.toUpperCase();
+      final String postfixTableName = storeName.toUpperCase();
       try {
-        if (!tableExists(connection, tableName)) {
-          createStateStoreTable(connection, tableName, format);
+        if (!tableExists(connection, tableNameFor(postfixTableName))) {
+          createStateStoreTable(connection, postfixTableName, format);
         }
       } catch (Exception e) {
         // assume table exists; could look at metadata
-        logger.log("Could not create " + tableName + " table because: " + e.getMessage(), e);
+        logger.log("Could not create " + postfixTableName + " table because: " + e.getMessage(), e);
       }
     }
   }
