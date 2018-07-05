@@ -75,7 +75,7 @@ public abstract class JDBCTextStateStoreActorTest {
 
     dispatcher = new MockTextDispatcher();
 
-    delegate = new HSQLDBStorageDelegate(DataFormat.Text, world.defaultLogger());
+    delegate = delegate();
 
     store = world.actorFor(
             Definition.has(JDBCTextStateStoreActor.class, Definition.parameters(dispatcher, delegate)),
