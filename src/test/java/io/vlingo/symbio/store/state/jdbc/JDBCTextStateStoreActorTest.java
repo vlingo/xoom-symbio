@@ -14,11 +14,9 @@ import io.vlingo.symbio.State.TextState;
 import io.vlingo.symbio.store.state.Entity1;
 import io.vlingo.symbio.store.state.MockResultInterest;
 import io.vlingo.symbio.store.state.MockTextDispatcher;
-import io.vlingo.symbio.store.state.StateStore.DataFormat;
 import io.vlingo.symbio.store.state.StateStore.StorageDelegate;
 import io.vlingo.symbio.store.state.StateTypeStateStoreMap;
 import io.vlingo.symbio.store.state.TextStateStore;
-import io.vlingo.symbio.store.state.jdbc.hsqldb.HSQLDBStorageDelegate;
 
 public abstract class JDBCTextStateStoreActorTest {
   protected StorageDelegate delegate;
