@@ -7,13 +7,13 @@ before_install:
 - git clone --depth=50 --branch=master https://github.com/vlingo/vlingo-actors.git
 - cd vlingo-actors && mvn install -DskipTests=true
 - cd ${TRAVIS_BUILD_DIR}
+services:
+  - postgresql
 addons:
   postgresql: "10.4"
 before_script:
-  - psql -c 'create database vlingo-test-state-store;' -U postgres
-  - psql -c 'create user vlingo-user with password 'vlingo123';
-services:
-  - postgresql
+  - psql -c "create database vlingo-test-state-store;" -U postgres
+  - psql -c "create user vlingo-user with password 'vlingo123'"; -U postgres
 script:
 - mvn install
 deploy:
