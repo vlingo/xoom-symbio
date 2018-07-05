@@ -108,6 +108,7 @@ public class HSQLDBStorageDelegate extends HSQLDBStore implements StorageDelegat
 
   @Override
   public void close() {
+    logger.log("HSQLDB CLOSING", new Exception("Checking Stack"));
     try {
       mode = Mode.None;
 
@@ -115,6 +116,7 @@ public class HSQLDBStorageDelegate extends HSQLDBStore implements StorageDelegat
         connection.close();
       }
       if (databaseSever != null && databaseSever.getState() == ServerConstants.SERVER_STATE_ONLINE) {
+        logger.log("HSQLDB STOPPING", new Exception("Checking Stack"));
         databaseSever.stop();
       }
     } catch (Exception e) {
