@@ -26,7 +26,9 @@ import io.vlingo.symbio.store.state.Entity1;
 import io.vlingo.symbio.store.state.StateStore;
 import io.vlingo.symbio.store.state.StateTypeStateStoreMap;
 import io.vlingo.symbio.store.state.jdbc.postgres.PostgresStorageDelegate;
+import net.jcip.annotations.NotThreadSafe;
 
+@NotThreadSafe
 public class PostgresStorageDelegateTest {
   private PostgresStorageDelegate delegate;
   private String entity1StoreName;

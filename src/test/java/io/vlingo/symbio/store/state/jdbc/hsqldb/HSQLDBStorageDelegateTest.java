@@ -26,7 +26,9 @@ import io.vlingo.symbio.store.state.Entity1;
 import io.vlingo.symbio.store.state.StateStore;
 import io.vlingo.symbio.store.state.StateTypeStateStoreMap;
 import io.vlingo.symbio.store.state.jdbc.hsqldb.HSQLDBStorageDelegate;
+import net.jcip.annotations.NotThreadSafe;
 
+@NotThreadSafe
 public class HSQLDBStorageDelegateTest {
   private HSQLDBStorageDelegate delegate;
   private String entity1StoreName;

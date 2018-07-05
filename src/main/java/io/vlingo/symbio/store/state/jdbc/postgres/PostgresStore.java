@@ -71,7 +71,7 @@ class PostgresStore {
 
   private final static String SQL_FORMAT_BINARY = "bytea";
   private final static String SQL_FORMAT_TEXT1 = "json";
-  private final static String SQL_FORMAT_TEXT2 = "jsonb";
+  // private final static String SQL_FORMAT_TEXT2 = "jsonb";
 
   static String namedDispatchable(final String sql) {
     return MessageFormat.format(sql, PostgresStore.TBL_VLINGO_SYMBIO_DISPATCHABLES);

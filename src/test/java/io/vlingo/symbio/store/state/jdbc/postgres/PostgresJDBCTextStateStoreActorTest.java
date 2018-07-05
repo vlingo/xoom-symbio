@@ -10,7 +10,9 @@ package io.vlingo.symbio.store.state.jdbc.postgres;
 import io.vlingo.symbio.store.state.StateStore.DataFormat;
 import io.vlingo.symbio.store.state.StateStore.StorageDelegate;
 import io.vlingo.symbio.store.state.jdbc.JDBCTextStateStoreActorTest;
+import net.jcip.annotations.NotThreadSafe;
 
+@NotThreadSafe
 public class PostgresJDBCTextStateStoreActorTest extends JDBCTextStateStoreActorTest {
   @Override
   protected StorageDelegate delegate() {
