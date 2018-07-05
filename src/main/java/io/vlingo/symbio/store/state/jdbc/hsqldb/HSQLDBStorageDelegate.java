@@ -33,10 +33,9 @@ import io.vlingo.symbio.store.state.StateStore.DataFormat;
 import io.vlingo.symbio.store.state.StateStore.Dispatchable;
 import io.vlingo.symbio.store.state.StateStore.StorageDelegate;
 import io.vlingo.symbio.store.state.StateTypeStateStoreMap;
+import io.vlingo.symbio.store.state.jdbc.Mode;
 
 public class HSQLDBStorageDelegate extends HSQLDBStore implements StorageDelegate {
-  private enum Mode { None, Reading, Writing };
-
   private final Connection connection;
   private Server databaseSever;   // unused other than to prevent GC
   private final DispatchableCachedStatements dispatchable;
@@ -44,8 +43,8 @@ public class HSQLDBStorageDelegate extends HSQLDBStore implements StorageDelegat
   private final Logger logger;
   private Mode mode;
   private final String originatorId;
-  private final Map<String, CachedStatement> readStatements;
-  private final Map<String, CachedStatement> writeStatements;
+  private final Map<String, CachedBlobCapableStatement> readStatements;
+  private final Map<String, CachedBlobCapableStatement> writeStatements;
 
   public HSQLDBStorageDelegate(
           final DataFormat format,
@@ -119,7 +118,7 @@ public class HSQLDBStorageDelegate extends HSQLDBStore implements StorageDelegat
         databaseSever.stop();
       }
     } catch (Exception e) {
-      logger.log(getClass().getSimpleName() + ": Could not close because: " + mode.name(), e);
+      logger.log(getClass().getSimpleName() + ": Could not close because: " + e.getMessage(), e);
     }
   }
 
@@ -217,13 +216,13 @@ public class HSQLDBStorageDelegate extends HSQLDBStore implements StorageDelegat
   @Override
   @SuppressWarnings("unchecked")
   public <E> E readExpressionFor(final String storeName, final String id) throws Exception {
-    final CachedStatement maybeCached = readStatements.get(storeName);
+    final CachedBlobCapableStatement maybeCached = readStatements.get(storeName);
 
     if (maybeCached == null) {
       final String select = MessageFormat.format(SQL_STATE_READ, storeName.toUpperCase());
       final PreparedStatement preparedStatement = connection.prepareStatement(select);
       final Blob blob = format.isBinary() ? connection.createBlob() : null;
-      final CachedStatement cached = new CachedStatement(preparedStatement, blob);
+      final CachedBlobCapableStatement cached = new CachedBlobCapableStatement(preparedStatement, blob);
       readStatements.put(storeName, cached);
       prepareForRead(cached, id);
       return (E) preparedStatement;
@@ -271,14 +270,14 @@ public class HSQLDBStorageDelegate extends HSQLDBStore implements StorageDelegat
   @Override
   @SuppressWarnings("unchecked")
   public <W, S> W writeExpressionFor(final String storeName, final State<S> state) throws Exception {
-    final CachedStatement maybeCached = writeStatements.get(storeName);
+    final CachedBlobCapableStatement maybeCached = writeStatements.get(storeName);
 
     if (maybeCached == null) {
       final String upsert = MessageFormat.format(SQL_STATE_WRITE, storeName.toUpperCase(),
               format.isBinary() ? SQL_FORMAT_BINARY_CAST : SQL_FORMAT_TEXT_CAST);
       final PreparedStatement preparedStatement = connection.prepareStatement(upsert);
       final Blob blob = format.isBinary() ? connection.createBlob() : null;
-      final CachedStatement cached = new CachedStatement(preparedStatement, blob);
+      final CachedBlobCapableStatement cached = new CachedBlobCapableStatement(preparedStatement, blob);
       writeStatements.put(storeName, cached);
       prepareForWrite(cached, state);
       return (W) cached.preparedStatement;
@@ -329,12 +328,12 @@ public class HSQLDBStorageDelegate extends HSQLDBStore implements StorageDelegat
     throw new IllegalStateException(getClass().getSimpleName() + ": Cannot start server and/or connect to: " + url);
   }
 
-  private void prepareForRead(final CachedStatement cached, final String id) throws Exception {
+  private void prepareForRead(final CachedBlobCapableStatement cached, final String id) throws Exception {
     cached.preparedStatement.clearParameters();
     cached.preparedStatement.setString(1, id);
   }
 
-  private <S> void prepareForWrite(final CachedStatement cached, final State<S> state) throws Exception {
+  private <S> void prepareForWrite(final CachedBlobCapableStatement cached, final State<S> state) throws Exception {
     cached.preparedStatement.clearParameters();
 
     cached.preparedStatement.setString(1, state.id);
@@ -382,7 +381,7 @@ public class HSQLDBStorageDelegate extends HSQLDBStore implements StorageDelegat
 
     if (format.isBinary()) {
       final Blob blob = resultSet.getBlob(5);
-      final byte[] data = new byte[(int) blob.length()];
+      final byte[] data = blob.getBytes(0, (int) blob.length());
       return new Dispatchable(dispatchId, new BinaryState(id, type, typeVersion, data, dataVersion, metadata));
     } else {
       final String data = resultSet.getString(5);
