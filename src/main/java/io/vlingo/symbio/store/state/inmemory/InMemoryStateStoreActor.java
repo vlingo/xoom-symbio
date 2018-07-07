@@ -14,10 +14,12 @@ import java.util.Map;
 
 import io.vlingo.actors.Actor;
 import io.vlingo.symbio.State;
+import io.vlingo.symbio.store.state.StateStore.ConfirmDispatchedResultInterest;
 import io.vlingo.symbio.store.state.StateStore.Dispatchable;
 import io.vlingo.symbio.store.state.StateStore.DispatcherControl;
+import io.vlingo.symbio.store.state.StateStore.ReadResultInterest;
 import io.vlingo.symbio.store.state.StateStore.Result;
-import io.vlingo.symbio.store.state.StateStore.ResultInterest;
+import io.vlingo.symbio.store.state.StateStore.WriteResultInterest;
 import io.vlingo.symbio.store.state.StateTypeStateStoreMap;
 
 public abstract class InMemoryStateStoreActor<T> extends Actor implements DispatcherControl {
@@ -34,8 +36,9 @@ public abstract class InMemoryStateStoreActor<T> extends Actor implements Dispat
   }
 
   @Override
-  public void confirmDispatched(final String dispatchId) {
+  public void confirmDispatched(final String dispatchId, final ConfirmDispatchedResultInterest interest) {
     dispatchables.remove(new Dispatchable<T>(dispatchId, null));
+    interest.confirmDispatchedResultedIn(Result.Success, dispatchId);
   }
 
   @Override
@@ -48,7 +51,7 @@ public abstract class InMemoryStateStoreActor<T> extends Actor implements Dispat
 
   protected abstract void dispatch(final String dispatchId, final State<T> state);
   
-  protected void readFor(final String id, final Class<?> type, final ResultInterest<T> interest) {
+  protected void readFor(final String id, final Class<?> type, final ReadResultInterest<T> interest) {
     if (interest != null) {
       if (id == null || type == null) {
         interest.readResultedIn(Result.Failure, id, emptyState);
@@ -84,7 +87,7 @@ public abstract class InMemoryStateStoreActor<T> extends Actor implements Dispat
     }
   }
 
-  protected void writeWith(final State<T> state, final ResultInterest<T> interest) {
+  protected void writeWith(final State<T> state, final WriteResultInterest<T> interest) {
     if (interest != null) {
       if (state == null) {
         interest.writeResultedIn(Result.Failure, null, emptyState);

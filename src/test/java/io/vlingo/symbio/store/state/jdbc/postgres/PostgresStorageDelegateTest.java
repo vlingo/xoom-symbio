@@ -7,6 +7,7 @@
 
 package io.vlingo.symbio.store.state.jdbc.postgres;
 
+import static io.vlingo.symbio.store.state.jdbc.postgres.PostgresConfigurationProvider.testConfiguration;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
@@ -23,27 +24,28 @@ import io.vlingo.symbio.Metadata;
 import io.vlingo.symbio.State.BinaryState;
 import io.vlingo.symbio.State.TextState;
 import io.vlingo.symbio.store.state.Entity1;
-import io.vlingo.symbio.store.state.StateStore;
+import io.vlingo.symbio.store.state.StateStore.DataFormat;
 import io.vlingo.symbio.store.state.StateTypeStateStoreMap;
-import io.vlingo.symbio.store.state.jdbc.postgres.PostgresStorageDelegate;
-import net.jcip.annotations.NotThreadSafe;
+import io.vlingo.symbio.store.state.jdbc.Configuration.TestConfiguration;
 
-@NotThreadSafe
 public class PostgresStorageDelegateTest {
+  private TestConfiguration configuration;
   private PostgresStorageDelegate delegate;
   private String entity1StoreName;
   private World world;
 
   @Test
-  public void testThatDatabaseOpensTablesCreated() {
-    delegate = new PostgresStorageDelegate(StateStore.DataFormat.Text, world.defaultLogger());
+  public void testThatDatabaseOpensTablesCreated() throws Exception {
+    configuration = testConfiguration(DataFormat.Text);
+    delegate = new PostgresStorageDelegate(configuration, world.defaultLogger());
 
     assertNotNull(delegate);
   }
 
   @Test
   public void testThatTextWritesRead() throws Exception {
-    delegate = new PostgresStorageDelegate(StateStore.DataFormat.Text, world.defaultLogger());
+    configuration = testConfiguration(DataFormat.Text);
+    delegate = new PostgresStorageDelegate(configuration, world.defaultLogger());
 
     assertNotNull(delegate);
 
@@ -65,7 +67,8 @@ public class PostgresStorageDelegateTest {
 
   @Test
   public void testThatTextStatesUpdate() throws Exception {
-    delegate = new PostgresStorageDelegate(StateStore.DataFormat.Text, world.defaultLogger());
+    configuration = testConfiguration(DataFormat.Text);
+    delegate = new PostgresStorageDelegate(configuration, world.defaultLogger());
 
     assertNotNull(delegate);
 
@@ -104,7 +107,8 @@ public class PostgresStorageDelegateTest {
 
   @Test
   public void testThatBinaryWritesRead() throws Exception {
-    delegate = new PostgresStorageDelegate(StateStore.DataFormat.Binary, world.defaultLogger());
+    configuration = testConfiguration(DataFormat.Binary);
+    delegate = new PostgresStorageDelegate(configuration, world.defaultLogger());
 
     assertNotNull(delegate);
 
@@ -134,7 +138,7 @@ public class PostgresStorageDelegateTest {
 
   @After
   public void tearDown() throws Exception {
-    delegate.dropAll();
+    configuration.cleanUp();
     delegate.close();
     world.terminate();
   }

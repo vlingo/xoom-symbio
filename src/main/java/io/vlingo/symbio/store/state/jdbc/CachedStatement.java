@@ -9,10 +9,12 @@ package io.vlingo.symbio.store.state.jdbc;
 
 import java.sql.PreparedStatement;
 
-public class CachedStatement {
+public class CachedStatement<T> {
+  public final T data;
   public final PreparedStatement preparedStatement;
 
-  public CachedStatement(final PreparedStatement preparedStatement) {
+  public CachedStatement(final PreparedStatement preparedStatement, final T data) {
     this.preparedStatement = preparedStatement;
+    this.data = data;
   }
 }

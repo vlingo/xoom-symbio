@@ -34,8 +34,9 @@ public class JDBCTextStateStoreActor extends Actor implements TextStateStore, Di
   }
 
   @Override
-  public void confirmDispatched(final String dispatchId) {
+  public void confirmDispatched(final String dispatchId, final ConfirmDispatchedResultInterest interest) {
     delegate.confirmDispatched(dispatchId);
+    interest.confirmDispatchedResultedIn(Result.Success, dispatchId);
   }
 
   @Override
@@ -51,7 +52,7 @@ public class JDBCTextStateStoreActor extends Actor implements TextStateStore, Di
   }
 
   @Override
-  public void read(final String id, Class<?> type, final ResultInterest<String> interest) {
+  public void read(final String id, Class<?> type, final ReadResultInterest<String> interest) {
     if (interest != null) {
       if (id == null || type == null) {
         interest.readResultedIn(Result.Failure, id, EmptyState);
@@ -95,7 +96,7 @@ public class JDBCTextStateStoreActor extends Actor implements TextStateStore, Di
   }
 
   @Override
-  public void write(final State<String> state, final ResultInterest<String> interest) {
+  public void write(final State<String> state, final WriteResultInterest<String> interest) {
     if (interest != null) {
       if (state == null) {
         interest.writeResultedIn(Result.Failure, null, EmptyState);
@@ -121,7 +122,7 @@ public class JDBCTextStateStoreActor extends Actor implements TextStateStore, Di
         } catch (Exception e) {
           e.printStackTrace();
           delegate.fail();
-          interest.readResultedIn(Result.Failure, state.id, state);
+          interest.writeResultedIn(Result.Failure, state.id, state);
         }
       }
     } else {

@@ -24,13 +24,13 @@ public class TextStateStore__Proxy implements TextStateStore {
   }
 
   @Override
-  public void read(final String id, final Class<?> type, final ResultInterest<String> interest) {
+  public void read(final String id, final Class<?> type, final ReadResultInterest<String> interest) {
     final Consumer<TextStateStore> consumer = (actor) -> actor.read(id, type, interest);
     mailbox.send(new LocalMessage<TextStateStore>(actor, TextStateStore.class, consumer, "readBinary()"));
   }
 
   @Override
-  public void write(final State<String> data, final ResultInterest<String> interest) {
+  public void write(final State<String> data, final WriteResultInterest<String> interest) {
     final Consumer<TextStateStore> consumer = (actor) -> actor.write(data, interest);
     mailbox.send(new LocalMessage<TextStateStore>(actor, TextStateStore.class, consumer, "writeText()"));
   }

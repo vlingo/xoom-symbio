@@ -1,0 +1,3 @@
+http://cli23.blogspot.com/2013/12/resetting-postgresql-postgres-user.html
+
+https://stackoverflow.com/questions/13921380/how-do-i-reset-the-postgresql-9-2-default-user-usually-postgres-password-on

@@ -30,12 +30,12 @@ public class InMemoryTextStateStoreActor extends InMemoryStateStoreActor<String>
   }
 
   @Override
-  public void read(final String id, final Class<?> type, final ResultInterest<String> interest) {
+  public void read(final String id, final Class<?> type, final ReadResultInterest<String> interest) {
     readFor(id, type, interest);
   }
 
   @Override
-  public void write(final State<String> state, final ResultInterest<String> interest) {
+  public void write(final State<String> state, final WriteResultInterest<String> interest) {
     writeWith(state, interest);
   }
 

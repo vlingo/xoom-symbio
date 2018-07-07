@@ -50,8 +50,12 @@ public interface StateStore {
     public boolean isSuccess() { return false; }
   }
 
+  public static interface ConfirmDispatchedResultInterest {
+    void confirmDispatchedResultedIn(final Result result, final String dispatchId);
+  }
+
   public static interface DispatcherControl {
-    void confirmDispatched(final String dispatchId);
+    void confirmDispatched(final String dispatchId, final ConfirmDispatchedResultInterest interest);
     void dispatchUnconfirmed();
   }
 
@@ -82,8 +86,11 @@ public interface StateStore {
     default <T> void dispatch(final String dispatchId, final TextState state) { }
   }
 
-  public static interface ResultInterest<T> {
+  public static interface ReadResultInterest<T> {
     void readResultedIn(final Result result, final String id, final State<T> state);
+  }
+
+  public static interface WriteResultInterest<T> {
     void writeResultedIn(final Result result, final String id, final State<T> state);
   }
 
@@ -93,11 +100,9 @@ public interface StateStore {
     void beginWrite() throws Exception;
     void close();
     void complete() throws Exception;
-    void confirmDispatched(String dispatchId);
-    <C> C connection() throws Exception;
+    void confirmDispatched(final String dispatchId);
+    <C> C connection();
     <W,S> W dispatchableWriteExpressionFor(final String dispatchId, final State<S> state) throws Exception;
-    void drop(final String storeName) throws Exception;  // for test
-    void dropAll() throws Exception;  // for test
     void fail();
     String originatorId();
     <R> R readExpressionFor(final String storeName, final String id) throws Exception;

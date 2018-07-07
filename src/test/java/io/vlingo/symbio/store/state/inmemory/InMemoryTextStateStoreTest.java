@@ -32,6 +32,7 @@ public class InMemoryTextStateStoreTest {
   private final static String StoreName = Entity1.class.getSimpleName();
 
   private MockTextDispatcher dispatcher;
+  private MockResultInterest interest;
   private TextStateStore store;
   private World world;
 
@@ -39,7 +40,7 @@ public class InMemoryTextStateStoreTest {
   public void testThatStateStoreWritesText() {
     final Entity1 entity = new Entity1("123", 5);
     final String serializedState = JsonSerialization.serialized(entity);
-    final MockResultInterest interest = new MockResultInterest(1);
+    interest.until = TestUntil.happenings(1);
 
     store.write(new TextState(entity.id, Entity1.class, 1, serializedState, 1), interest);
 
@@ -55,7 +56,7 @@ public class InMemoryTextStateStoreTest {
   public void testThatStateStoreWritesAndReadsText() {
     final Entity1 entity = new Entity1("123", 5);
     final String serializedState = JsonSerialization.serialized(entity);
-    final MockResultInterest interest = new MockResultInterest(2);
+    interest.until = TestUntil.happenings(3);
 
     store.write(new TextState(entity.id, Entity1.class, 1, serializedState, 1), interest);
     store.read(entity.id, Entity1.class, interest);
@@ -79,7 +80,7 @@ public class InMemoryTextStateStoreTest {
   public void testThatStateStoreWritesAndReadsMetadataValue() {
     final Entity1 entity = new Entity1("123", 5);
     final String serializedState = JsonSerialization.serialized(entity);
-    final MockResultInterest interest = new MockResultInterest(2);
+    interest.until = TestUntil.happenings(2);
 
     store.write(new TextState(entity.id, Entity1.class, 1, serializedState, 1, Metadata.withValue("value")), interest);
     store.read(entity.id, Entity1.class, interest);
@@ -106,7 +107,7 @@ public class InMemoryTextStateStoreTest {
   public void testThatStateStoreWritesAndReadsMetadataOperation() {
     final Entity1 entity = new Entity1("123", 5);
     final String serializedState = JsonSerialization.serialized(entity);
-    final MockResultInterest interest = new MockResultInterest(2);
+    interest.until = TestUntil.happenings(2);
 
     store.write(new TextState(entity.id, Entity1.class, 1, serializedState, 1, Metadata.withOperation("op")), interest);
     store.read(entity.id, Entity1.class, interest);
@@ -133,7 +134,7 @@ public class InMemoryTextStateStoreTest {
   public void testThatStateStoreWritesAndReadsMetadata() {
     final Entity1 entity = new Entity1("123", 5);
     final String serializedState = JsonSerialization.serialized(entity);
-    final MockResultInterest interest = new MockResultInterest(2);
+    interest.until = TestUntil.happenings(2);
 
     store.write(new TextState(entity.id, Entity1.class, 1, serializedState, 1, Metadata.withOperation("op")), interest);
     store.read(entity.id, Entity1.class, interest);
@@ -158,7 +159,7 @@ public class InMemoryTextStateStoreTest {
 
   @Test
   public void testThatStateStoreDispatches() {
-    final MockResultInterest interest = new MockResultInterest(3);
+    interest.until = TestUntil.happenings(3);
 
     dispatcher.until = TestUntil.happenings(3);
 
@@ -169,6 +170,7 @@ public class InMemoryTextStateStoreTest {
     final Entity1 entity3 = new Entity1("345", 3);
     store.write(new TextState(entity3.id, Entity1.class, 1, JsonSerialization.serialized(entity3), 1), interest);
 
+    interest.until.completes();
     dispatcher.until.completes();
 
     assertEquals(3, dispatcher.dispatched.size());
@@ -176,6 +178,7 @@ public class InMemoryTextStateStoreTest {
     assertEquals("234", dispatcher.dispatched.get(dispatchId("234")).id);
     assertEquals("345", dispatcher.dispatched.get(dispatchId("345")).id);
 
+    interest.until = TestUntil.happenings(5);
     dispatcher.until = TestUntil.happenings(2);
 
     dispatcher.processDispatch.set(false);
@@ -187,6 +190,7 @@ public class InMemoryTextStateStoreTest {
     dispatcher.control.dispatchUnconfirmed();
 
     dispatcher.until.completes();
+    interest.until.completes();
 
     assertEquals(5, dispatcher.dispatched.size());
     assertEquals("456", dispatcher.dispatched.get(dispatchId("456")).id);
@@ -197,7 +201,8 @@ public class InMemoryTextStateStoreTest {
   public void setUp() {
     world = World.start("test-store", true);
 
-    dispatcher = new MockTextDispatcher();
+    interest = new MockResultInterest(0);
+    dispatcher = new MockTextDispatcher(0, interest);
 
     store = world.actorFor(Definition.has(InMemoryTextStateStoreActor.class, Definition.parameters(dispatcher)), TextStateStore.class);
 

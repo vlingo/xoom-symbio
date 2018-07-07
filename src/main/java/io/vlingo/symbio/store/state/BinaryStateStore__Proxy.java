@@ -24,13 +24,13 @@ public class BinaryStateStore__Proxy implements BinaryStateStore {
   }
 
   @Override
-  public void read(final String id, final Class<?> type, final ResultInterest<byte[]> interest) {
+  public void read(final String id, final Class<?> type, final ReadResultInterest<byte[]> interest) {
     final Consumer<BinaryStateStore> consumer = (actor) -> actor.read(id, type, interest);
     mailbox.send(new LocalMessage<BinaryStateStore>(actor, BinaryStateStore.class, consumer, "readText()"));
   }
 
   @Override
-  public void write(final State<byte[]> data, final ResultInterest<byte[]> interest) {
+  public void write(final State<byte[]> data, final WriteResultInterest<byte[]> interest) {
     final Consumer<BinaryStateStore> consumer = (actor) -> actor.write(data, interest);
     mailbox.send(new LocalMessage<BinaryStateStore>(actor, BinaryStateStore.class, consumer, "writeText()"));
   }

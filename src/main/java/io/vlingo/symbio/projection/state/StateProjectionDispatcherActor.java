@@ -12,21 +12,25 @@ import io.vlingo.symbio.projection.Projectable;
 import io.vlingo.symbio.projection.Projection;
 import io.vlingo.symbio.projection.ProjectionControl;
 import io.vlingo.symbio.projection.ProjectionDispatcher;
+import io.vlingo.symbio.store.state.StateStore.ConfirmDispatchedResultInterest;
 import io.vlingo.symbio.store.state.StateStore.Dispatcher;
 import io.vlingo.symbio.store.state.StateStore.DispatcherControl;
+import io.vlingo.symbio.store.state.StateStore.Result;
 
 public abstract class StateProjectionDispatcherActor extends AbstractProjectionDispatcherActor
-    implements Dispatcher, ProjectionDispatcher {
+    implements Dispatcher, ProjectionDispatcher, ConfirmDispatchedResultInterest {
 
+  private ConfirmDispatchedResultInterest interest;
   private DispatcherControl control;
   private final ProjectionControl projectionControl;
 
   protected StateProjectionDispatcherActor() {
+    this.interest = selfAs(ConfirmDispatchedResultInterest.class);
     this.projectionControl = new ProjectionControl() {
       @Override
       public void confirmProjected(String projectionId) {
         if (control != null) {
-          control.confirmDispatched(projectionId);
+          control.confirmDispatched(projectionId, interest);
         } else if (requiresDispatchedConfirmation()) {
           logger().log("WARNING: ProjectionDispatcher control is not set; unconfirmed: " + projectionId);
         }
@@ -42,6 +46,13 @@ public abstract class StateProjectionDispatcherActor extends AbstractProjectionD
   public void controlWith(final DispatcherControl control) {
     this.control = control;
   }
+
+  //=====================================
+  // ConfirmDispatchedResultInterest
+  //=====================================
+
+  @Override
+  public void confirmDispatchedResultedIn(final Result result, final String dispatchId) { }
 
   //=====================================
   // internal implementation

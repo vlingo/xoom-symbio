@@ -30,10 +30,6 @@ public class NoOpStorageDelegate implements StorageDelegate {
 
   @Override public <W, S> W dispatchableWriteExpressionFor(final String dispatchId, final State<S> state) { return null; }
 
-  @Override public void drop(final String storeName) { }
-
-  @Override public void dropAll() { }
-
   @Override public void fail() { }
 
   @Override public String originatorId() { return null; }

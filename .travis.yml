@@ -12,8 +12,8 @@ services:
 addons:
   postgresql: "9.6"
 before_script:
-  - psql -c "CREATE DATABASE vlingo_test;" -U postgres
-  - psql -c "CREATE USER vlingo_user WITH PASSWORD 'vlingo123';" -U postgres
+  - psql -c "CREATE USER vlingo_test WITH PASSWORD 'vlingo123';" -U postgres
+  - psql -c "CREATE DATABASE vlingo_test WITH OWNER vlingo_test;" -U postgres
 script:
 - mvn install
 deploy:

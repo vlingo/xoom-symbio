@@ -10,8 +10,8 @@ package io.vlingo.symbio.store.state;
 import io.vlingo.symbio.State;
 
 public interface BinaryStateStore extends StateStore {
-  void read(final String id, final Class<?> type, final ResultInterest<byte[]> interest);
-  void write(final State<byte[]> state, final ResultInterest<byte[]> interest);
+  void read(final String id, final Class<?> type, final ReadResultInterest<byte[]> interest);
+  void write(final State<byte[]> state, final WriteResultInterest<byte[]> interest);
 
   public static interface BinaryDispatcher extends Dispatcher {
     void dispatchBinary(final String dispatchId, final State<byte[]> state);

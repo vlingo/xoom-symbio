@@ -14,14 +14,21 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import io.vlingo.actors.testkit.TestUntil;
 import io.vlingo.symbio.State;
 import io.vlingo.symbio.State.TextState;
+import io.vlingo.symbio.store.state.StateStore.ConfirmDispatchedResultInterest;
 import io.vlingo.symbio.store.state.StateStore.DispatcherControl;
 import io.vlingo.symbio.store.state.TextStateStore.TextDispatcher;
 
 public class MockTextDispatcher implements TextDispatcher {
+  public final ConfirmDispatchedResultInterest confirmDispatchedResultInterest;
   public DispatcherControl control;
   public final Map<String,State<String>> dispatched = new HashMap<>();
   public final AtomicBoolean processDispatch = new AtomicBoolean(true);
   public TestUntil until = TestUntil.happenings(0);
+
+  public MockTextDispatcher(final int testUntilHappenings, final ConfirmDispatchedResultInterest confirmDispatchedResultInterest) {
+    this.until = TestUntil.happenings(testUntilHappenings);
+    this.confirmDispatchedResultInterest = confirmDispatchedResultInterest;
+  }
 
   @Override
   public void controlWith(final DispatcherControl control) {
@@ -32,7 +39,7 @@ public class MockTextDispatcher implements TextDispatcher {
   public void dispatch(final String dispatchId, final TextState state) {
     if (processDispatch.get()) {
       dispatched.put(dispatchId, state);
-      control.confirmDispatched(dispatchId);
+      control.confirmDispatched(dispatchId, confirmDispatchedResultInterest);
       until.happened();
     }
   }
@@ -41,7 +48,7 @@ public class MockTextDispatcher implements TextDispatcher {
   public void dispatchText(final String dispatchId, final State<String> state) {
     if (processDispatch.get()) {
       dispatched.put(dispatchId, state);
-      control.confirmDispatched(dispatchId);
+      control.confirmDispatched(dispatchId, confirmDispatchedResultInterest);
       until.happened();
     }
   }

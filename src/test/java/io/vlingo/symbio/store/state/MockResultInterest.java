@@ -12,13 +12,20 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import io.vlingo.actors.testkit.TestUntil;
 import io.vlingo.symbio.State;
+import io.vlingo.symbio.store.state.StateStore.ConfirmDispatchedResultInterest;
+import io.vlingo.symbio.store.state.StateStore.ReadResultInterest;
 import io.vlingo.symbio.store.state.StateStore.Result;
-import io.vlingo.symbio.store.state.StateStore.ResultInterest;
+import io.vlingo.symbio.store.state.StateStore.WriteResultInterest;
 
-public class MockResultInterest implements ResultInterest<String> {
+public class MockResultInterest
+    implements ReadResultInterest<String>,
+               WriteResultInterest<String>,
+               ConfirmDispatchedResultInterest {
+
+  public AtomicInteger confirmDispatchedResultedIn = new AtomicInteger(0);
   public AtomicInteger readTextResultedIn = new AtomicInteger(0);
   public AtomicInteger writeTextResultedIn = new AtomicInteger(0);
-  public final TestUntil until;
+  public TestUntil until;
 
   public AtomicReference<Result> textReadResult = new AtomicReference<>();
   public AtomicReference<Result> textWriteResult = new AtomicReference<>();
@@ -26,6 +33,12 @@ public class MockResultInterest implements ResultInterest<String> {
 
   public MockResultInterest(final int testUntilHappenings) {
     until = TestUntil.happenings(testUntilHappenings);
+  }
+
+  @Override
+  public void confirmDispatchedResultedIn(final Result result, final String dispatchId) {
+    confirmDispatchedResultedIn.incrementAndGet();
+    until.happened();
   }
 
   @Override
