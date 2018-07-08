@@ -1,14 +1,12 @@
 package io.vlingo.symbio.store.state.dynamodb;
 
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
-import com.amazonaws.auth.AnonymousAWSCredentials;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsyncClient;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
-import com.amazonaws.services.dynamodbv2.document.Table;
 import com.amazonaws.services.dynamodbv2.local.main.ServerRunner;
 import com.amazonaws.services.dynamodbv2.local.server.DynamoDBProxyServer;
 import com.amazonaws.services.dynamodbv2.model.*;
@@ -19,11 +17,9 @@ import io.vlingo.symbio.store.state.StateStore;
 import org.junit.*;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import static java.util.Arrays.asList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
@@ -34,6 +30,7 @@ public class DynamoDBTextStateActorTest {
     private static final AWSStaticCredentialsProvider DYNAMODB_CREDENTIALS = new AWSStaticCredentialsProvider(new BasicAWSCredentials("1", "2"));
     private static final AwsClientBuilder.EndpointConfiguration DYNAMODB_ENDPOINT_CONFIGURATION = new AwsClientBuilder.EndpointConfiguration(DYNAMODB_HOST, DYNAMODB_REGION);
     private static final String TABLE_NAME = "vlingo_io_vlingo_symbio_store_state_Entity1";
+    private static final int DEFAULT_TIMEOUT = 1000;
 
     private AmazonDynamoDBAsync dynamodb;
     private static DynamoDBProxyServer dynamodbServer;
@@ -73,23 +70,43 @@ public class DynamoDBTextStateActorTest {
     }
 
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() {
         dropTable();
-    }
-
-    @Test
-    public void testThatInterestIsCalledForCreatingATable() {
-        verify(createTableInterest).createTable(dynamodb);
     }
 
     @Test
     public void testThatWritingAndReadingTransactionReturnsCurrentState() throws Exception {
         State<String> currentState = randomState();
         actor.write(currentState, writeResultInterest);
-        actor.read(currentState.id, currentState.typed(), readResultInterest);
+        verify(writeResultInterest, timeout(DEFAULT_TIMEOUT)).writeResultedIn(StateStore.Result.Success, currentState.id, currentState);
 
-        verify(writeResultInterest, timeout(50)).writeResultedIn(StateStore.Result.Success, currentState.id, currentState);
-        verify(readResultInterest, timeout(50)).readResultedIn(StateStore.Result.Success, currentState.id, currentState);
+        actor.read(currentState.id, currentState.typed(), readResultInterest);
+        verify(readResultInterest, timeout(DEFAULT_TIMEOUT)).readResultedIn(StateStore.Result.Success, currentState.id, currentState);
+    }
+
+    @Test
+    public void testThatWritingToATableCallsCreateTableInterest() throws Exception {
+        dropTable();
+
+        actor.write(randomState(), writeResultInterest);
+        verify(createTableInterest).createTable(dynamodb, TABLE_NAME);
+    }
+
+    @Test
+    public void testThatWritingToATableThatDoesntExistFails() throws Exception {
+        dropTable();
+        State<String> state = randomState();
+
+        actor.write(state, writeResultInterest);
+        verify(writeResultInterest, timeout(DEFAULT_TIMEOUT)).writeResultedIn(StateStore.Result.NoTypeStore, state.id, null);
+    }
+
+    @Test
+    public void testThatReadingAnUnknownStateFailsWithNotFound() throws Exception {
+        State<String> state = randomState();
+
+        actor.read(state.id, Entity1.class, readResultInterest);
+        verify(readResultInterest, timeout(DEFAULT_TIMEOUT)).readResultedIn(StateStore.Result.NotFound, state.id, null);
     }
 
     private State<String> randomState() {
@@ -130,6 +147,10 @@ public class DynamoDBTextStateActorTest {
                 .withCredentials(DYNAMODB_CREDENTIALS)
                 .build();
 
-        syncDynamoDb.deleteTable(TABLE_NAME);
+        try {
+            syncDynamoDb.deleteTable(TABLE_NAME);
+        } catch (Exception ex) {
+
+        }
     }
 }
