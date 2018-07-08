@@ -1,34 +1,29 @@
 package io.vlingo.symbio.store.state.dynamodb;
 
-import com.amazonaws.handlers.AsyncHandler;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync;
 import com.amazonaws.services.dynamodbv2.model.*;
-import io.vlingo.common.serialization.JsonSerialization;
 import io.vlingo.symbio.State;
 import io.vlingo.symbio.store.state.TextStateStore;
 import io.vlingo.symbio.store.state.dynamodb.handlers.BatchWriteItemAsyncHandler;
 import io.vlingo.symbio.store.state.dynamodb.handlers.GetItemAsyncHandler;
 
 import java.util.*;
-import java.util.concurrent.ExecutionException;
 
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 
 public class DynamoDBTextStateActor implements TextStateStore {
     private final AmazonDynamoDBAsync dynamodb;
-    private final CreateTableInterest interest;
+    private final CreateTableInterest createTableInterest;
 
-    public DynamoDBTextStateActor(AmazonDynamoDBAsync dynamodb, CreateTableInterest interest) {
+    public DynamoDBTextStateActor(AmazonDynamoDBAsync dynamodb, CreateTableInterest createTableInterest) {
         this.dynamodb = dynamodb;
-        this.interest = interest;
-
-        interest.createTable(dynamodb);
+        this.createTableInterest = createTableInterest;
     }
 
     @Override
     public void read(String id, Class<?> type, ReadResultInterest<String> interest) {
-        dynamodb.getItemAsync(readRequestFor(id, type), new GetItemAsyncHandler(interest));
+        dynamodb.getItemAsync(readRequestFor(id, type), new GetItemAsyncHandler(id, interest));
     }
 
     @Override
@@ -36,14 +31,10 @@ public class DynamoDBTextStateActor implements TextStateStore {
         WriteRequest stateForActor = writeRequestFor(state);
         String tableName = tableFor(state.typed());
 
+        createTableInterest.createTable(dynamodb, tableName);
+
         BatchWriteItemRequest request = new BatchWriteItemRequest(singletonMap(tableName, singletonList(stateForActor)));
-        try {
-            dynamodb.batchWriteItemAsync(request, new BatchWriteItemAsyncHandler(state, interest)).get();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        }
+        dynamodb.batchWriteItemAsync(request, new BatchWriteItemAsyncHandler(state, interest));
     }
 
     private GetItemRequest readRequestFor(String id, Class<?> type) {

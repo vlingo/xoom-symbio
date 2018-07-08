@@ -11,28 +11,32 @@ import io.vlingo.symbio.store.state.dynamodb.StateRecordAdapter;
 import java.util.Map;
 
 public class GetItemAsyncHandler implements AsyncHandler<GetItemRequest, GetItemResult> {
+    private static final State NO_STATE = null;
+    private final String id;
     private final StateStore.ReadResultInterest<String> interest;
 
-    public GetItemAsyncHandler(StateStore.ReadResultInterest<String> interest) {
+    public GetItemAsyncHandler(String id, StateStore.ReadResultInterest<String> interest) {
+        this.id = id;
         this.interest = interest;
     }
 
     @Override
     public void onError(Exception e) {
-
     }
 
     @Override
     public void onSuccess(GetItemRequest request, GetItemResult getItemResult) {
         Map<String, AttributeValue> item = getItemResult.getItem();
+        if (item == null) {
+            interest.readResultedIn(StateStore.Result.NotFound, id, NO_STATE);
+            return;
+        }
+
         try {
             State<String> state = StateRecordAdapter.unmarshall(item);
-            interest.readResultedIn(StateStore.Result.Success, state.id, state);
+            interest.readResultedIn(StateStore.Result.Success, id, state);
         } catch (ClassNotFoundException e) {
-            interest.readResultedIn(StateStore.Result.Failure,
-                    StateRecordAdapter.unmarshallForId(item),
-                    (State) new State.NullState()
-            );
+            interest.readResultedIn(StateStore.Result.Failure, id, NO_STATE);
         }
     }
 }
