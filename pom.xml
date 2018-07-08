@@ -140,12 +140,17 @@
     <dependency>
       <groupId>com.amazonaws</groupId>
       <artifactId>DynamoDBLocal</artifactId>
-      <version>[1.11.86,2.0)</version>
+      <version>[1.11,2.0)</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>com.amazonaws</groupId>
       <artifactId>aws-java-sdk-dynamodb</artifactId>
+      <version>1.11.362</version>
+    </dependency>
+    <dependency>
+      <groupId>com.amazonaws</groupId>
+      <artifactId>aws-java-sdk-core</artifactId>
       <version>1.11.362</version>
     </dependency>
     <dependency>
