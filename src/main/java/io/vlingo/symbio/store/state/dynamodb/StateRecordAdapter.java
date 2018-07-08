@@ -9,39 +9,42 @@ import java.util.HashMap;
 import java.util.Map;
 
 public final class StateRecordAdapter {
+    public static final String ID_FIELD = "Id";
+    public static final String DATA_FIELD = "Data";
+    public static final String TYPE_FIELD = "Type";
+    public static final String METADATA_FIELD = "Metadata";
+    public static final String TYPE_VERSION_FIELD = "TypeVersion";
+    public static final String DATA_VERSION_FIELD = "DataVersion";
+
     public static Map<String, AttributeValue> marshall(State<String> state) {
         String metadataAsJson = JsonSerialization.serialized(state.metadata);
 
         Map<String, AttributeValue> stateItem = new HashMap<>();
-        stateItem.put("Id", new AttributeValue().withS(state.id));
-        stateItem.put("Data", new AttributeValue().withS(state.data));
-        stateItem.put("Type", new AttributeValue().withS(state.type));
-        stateItem.put("Metadata", new AttributeValue().withS(metadataAsJson));
-        stateItem.put("TypeVersion", new AttributeValue().withN(String.valueOf(state.typeVersion)));
-        stateItem.put("DataVersion", new AttributeValue().withN(String.valueOf(state.dataVersion)));
+        stateItem.put(ID_FIELD, new AttributeValue().withS(state.id));
+        stateItem.put(DATA_FIELD, new AttributeValue().withS(state.data));
+        stateItem.put(TYPE_FIELD, new AttributeValue().withS(state.type));
+        stateItem.put(METADATA_FIELD, new AttributeValue().withS(metadataAsJson));
+        stateItem.put(TYPE_VERSION_FIELD, new AttributeValue().withN(String.valueOf(state.typeVersion)));
+        stateItem.put(DATA_VERSION_FIELD, new AttributeValue().withN(String.valueOf(state.dataVersion)));
 
         return stateItem;
     }
 
     public static Map<String, AttributeValue> marshallForQuery(String id) {
         Map<String, AttributeValue> stateItem = new HashMap<>();
-        stateItem.put("Id", new AttributeValue().withS(id));
+        stateItem.put(ID_FIELD, new AttributeValue().withS(id));
 
         return stateItem;
     }
 
-    public static String unmarshallForId(Map<String, AttributeValue> state) {
-        return state.get("Id").getS();
-    }
-
     public static State<String> unmarshall(Map<String, AttributeValue> record) throws ClassNotFoundException {
         return new State.TextState(
-                record.get("Id").getS(),
-                Class.forName(record.get("Type").getS()),
-                Integer.valueOf(record.get("TypeVersion").getN()),
-                record.get("Data").getS(),
-                Integer.valueOf(record.get("DataVersion").getN()),
-                JsonSerialization.deserialized(record.get("Metadata").getS(), Metadata.class)
+                record.get(ID_FIELD).getS(),
+                Class.forName(record.get(TYPE_FIELD).getS()),
+                Integer.valueOf(record.get(TYPE_VERSION_FIELD).getN()),
+                record.get(DATA_FIELD).getS(),
+                Integer.valueOf(record.get(DATA_VERSION_FIELD).getN()),
+                JsonSerialization.deserialized(record.get(METADATA_FIELD).getS(), Metadata.class)
         );
     }
 }
