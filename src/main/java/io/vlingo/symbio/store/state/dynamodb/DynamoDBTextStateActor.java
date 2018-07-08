@@ -33,6 +33,24 @@ public class DynamoDBTextStateActor implements TextStateStore {
 
         createTableInterest.createTable(dynamodb, tableName);
 
+        try {
+            Map<String, AttributeValue> foundItem = dynamodb.getItem(readRequestFor(state.id, state.typed())).getItem();
+            if (foundItem != null) {
+                try {
+                    State<String> savedState = StateRecordAdapter.unmarshall(foundItem);
+                    if (savedState.dataVersion > state.dataVersion) {
+                        interest.writeResultedIn(Result.ConcurrentyViolation, state.id, savedState);
+                        return;
+                    }
+                } catch (ClassNotFoundException e) {
+                    interest.writeResultedIn(Result.Failure, state.id, state);
+                    return;
+                }
+            }
+        } catch (Exception e) {
+            // in case of error (for now) just try to write the record
+        }
+
         BatchWriteItemRequest request = new BatchWriteItemRequest(singletonMap(tableName, singletonList(stateForActor)));
         dynamodb.batchWriteItemAsync(request, new BatchWriteItemAsyncHandler(state, interest));
     }

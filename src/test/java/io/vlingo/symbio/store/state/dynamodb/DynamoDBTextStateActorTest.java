@@ -118,6 +118,18 @@ public class DynamoDBTextStateActorTest {
         verify(readResultInterest, timeout(DEFAULT_TIMEOUT)).readResultedIn(StateStore.Result.NoTypeStore, state.id, null);
     }
 
+    @Test
+    public void testThatShouldNotAcceptWritingAnOldDataVersion() throws Exception {
+        State<String> oldState = randomState();
+        State<String> newState = newFor(oldState);
+
+        actor.write(newState, writeResultInterest);
+        verify(writeResultInterest, timeout(DEFAULT_TIMEOUT)).writeResultedIn(StateStore.Result.Success, newState.id, newState);
+
+        actor.write(oldState, writeResultInterest);
+        verify(writeResultInterest, timeout(DEFAULT_TIMEOUT)).writeResultedIn(StateStore.Result.ConcurrentyViolation, newState.id, newState);
+    }
+
     private State<String> randomState() {
         return new State.TextState(
                 UUID.randomUUID().toString(),
@@ -126,6 +138,17 @@ public class DynamoDBTextStateActorTest {
                 UUID.randomUUID().toString(),
                 1,
                 new Metadata(UUID.randomUUID().toString(), UUID.randomUUID().toString())
+        );
+    }
+
+    private State<String> newFor(State<String> oldState) {
+        return new State.TextState(
+                oldState.id,
+                oldState.typed(),
+                oldState.typeVersion,
+                oldState.data,
+                oldState.dataVersion + 1,
+                oldState.metadata
         );
     }
 
