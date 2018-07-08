@@ -109,6 +109,15 @@ public class DynamoDBTextStateActorTest {
         verify(readResultInterest, timeout(DEFAULT_TIMEOUT)).readResultedIn(StateStore.Result.NotFound, state.id, null);
     }
 
+    @Test
+    public void testThatReadingOnAnUnknownTableFails() throws Exception {
+        dropTable();
+        State<String> state = randomState();
+
+        actor.read(state.id, Entity1.class, readResultInterest);
+        verify(readResultInterest, timeout(DEFAULT_TIMEOUT)).readResultedIn(StateStore.Result.NoTypeStore, state.id, null);
+    }
+
     private State<String> randomState() {
         return new State.TextState(
                 UUID.randomUUID().toString(),
