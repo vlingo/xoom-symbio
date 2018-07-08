@@ -33,18 +33,26 @@ public class HSQLDBConfigurationProvider {
     }
   };
 
-  public static Configuration configuration(final DataFormat format) throws Exception {
+  public static Configuration configuration(
+          final DataFormat format,
+          final String url,
+          final String databaseName,
+          final String username,
+          final String password,
+          final String originatorId,
+          final boolean createTables)
+  throws Exception {
     return new Configuration(
             interest,
             "org.hsqldb.jdbc.JDBCDriver",
             format,
-            "jdbc:hsqldb:mem:",
-            "testdb",       // database name
-            "SA",           // username
-            "",             // password
+            url,
+            databaseName,
+            username,
+            password,
             false,          // useSSL
-            "TEST",         // originatorId
-            true);          // create tables
+            originatorId,
+            createTables);
   }
 
   public static TestConfiguration testConfiguration(final DataFormat format) throws Exception {

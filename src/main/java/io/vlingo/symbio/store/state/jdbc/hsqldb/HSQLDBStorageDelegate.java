@@ -9,15 +9,12 @@ package io.vlingo.symbio.store.state.jdbc.hsqldb;
 
 import java.sql.Blob;
 import java.sql.Connection;
-import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.text.MessageFormat;
 
 import io.vlingo.actors.Logger;
 import io.vlingo.symbio.State;
-import io.vlingo.symbio.store.state.StateTypeStateStoreMap;
 import io.vlingo.symbio.store.state.StateStore.DataFormat;
 import io.vlingo.symbio.store.state.StateStore.StorageDelegate;
 import io.vlingo.symbio.store.state.jdbc.CachedStatement;
@@ -44,19 +41,35 @@ public class HSQLDBStorageDelegate extends JDBCStorageDelegate<Blob> implements 
   }
 
   @Override
-  protected void createTables() {
-    createTables(connection, format, logger);
-  }
-
-  @Override
   @SuppressWarnings("unchecked")
-  protected <D> D dataTypeObject() throws Exception {
+  protected <D> D binaryDataTypeObject() throws Exception {
     return (D) connection.createBlob();
   }
 
   @Override
   protected JDBCDispatchableCachedStatements<Blob> dispatchableCachedStatements() {
     return new HSQLDBDispatchableCachedStatements(originatorId, connection, format, logger);
+  }
+
+  @Override
+  protected String dispatchableIdIndexCreateExpression() {
+    return namedDispatchable(SQL_DISPATCH_ID_INDEX);
+  }
+
+  @Override
+  protected String dispatchableOriginatorIdIndexCreateExpression() {
+    return namedDispatchable(SQL_ORIGINATOR_ID_INDEX);
+  }
+
+  @Override
+  protected String dispatchableTableCreateExpression() {
+    return MessageFormat.format(SQL_CREATE_DISPATCHABLES_STORE, dispatchableTableName(),
+            format.isBinary() ? SQL_FORMAT_BINARY : SQL_FORMAT_TEXT);
+  }
+
+  @Override
+  protected String dispatchableTableName() {
+    return TBL_VLINGO_SYMBIO_DISPATCHABLES;
   }
 
   @Override
@@ -77,6 +90,17 @@ public class HSQLDBStorageDelegate extends JDBCStorageDelegate<Blob> implements 
   }
 
   @Override
+  protected String stateStoreTableCreateExpression(final String storeName) {
+    return MessageFormat.format(SQL_CREATE_STATE_STORE, storeName,
+            format.isBinary() ? SQL_FORMAT_BINARY : SQL_FORMAT_TEXT);
+  }
+
+  @Override
+  protected String tableNameFor(String storeName) {
+    return "TBL_" + storeName.toUpperCase();
+  }
+
+  @Override
   protected String textDataFrom(final ResultSet resultSet, final int columnIndex) throws Exception {
     final String data = resultSet.getString(columnIndex);
     return data;
@@ -88,71 +112,8 @@ public class HSQLDBStorageDelegate extends JDBCStorageDelegate<Blob> implements 
             format.isBinary() ? SQL_FORMAT_BINARY_CAST : SQL_FORMAT_TEXT_CAST);
   }
 
-  private void createDispatchablesTable(final Connection connection, final DataFormat format) throws Exception {
-    if (!tableExists(connection, TBL_VLINGO_SYMBIO_DISPATCHABLES)) {
-      Statement statement = null;
-      try {
-        final String createDispatchablesStore = MessageFormat.format(SQL_CREATE_DISPATCHABLES_STORE,
-                format.isBinary() ? SQL_FORMAT_BINARY : SQL_FORMAT_TEXT);
-        statement = connection.createStatement();
-        statement.executeUpdate(createDispatchablesStore);
-        statement.executeUpdate(SQL_DISPATCH_ID_INDEX);
-        statement.executeUpdate(SQL_ORIGINATOR_ID_INDEX);
-        connection.commit();
-      } finally {
-        if (statement != null) {
-          statement.close();
-        }
-      }
-    }
-  }
-
-  private void createTables(final Connection connection, final DataFormat format, final Logger logger) {
-    try {
-      createDispatchablesTable(connection, format);
-    } catch (Exception e) {
-      // assume table exists; could look at metadata
-      logger.log("Could not create dispatchables table because: " + e.getMessage(), e);
-    }
-
-    for (final String storeName : StateTypeStateStoreMap.allStoreNames()) {
-      final String postfixTableName = storeName.toUpperCase();
-      try {
-        if (!tableExists(connection, tableNameFor(postfixTableName))) {
-          createStateStoreTable(connection, postfixTableName, format);
-        }
-      } catch (Exception e) {
-        // assume table exists; could look at metadata
-        logger.log("Could not create " + postfixTableName + " table because: " + e.getMessage(), e);
-      }
-    }
-  }
-
-  private void createStateStoreTable(final Connection connection, final String tableName, final DataFormat format) throws Exception {
-    final String sql = MessageFormat.format(SQL_CREATE_STATE_STORE, tableName,
-            format.isBinary() ? SQL_FORMAT_BINARY : SQL_FORMAT_TEXT);
-
-    Statement statement = null;
-    try {
-      statement = connection.createStatement();
-      statement.executeUpdate(sql);
-      connection.commit();
-    } finally {
-      if (statement != null) {
-        statement.close();
-      }
-    }
-  }
-
-  private boolean tableExists(final Connection connection, String tableName) throws Exception {
-    DatabaseMetaData metadata = connection.getMetaData();
-    try (final ResultSet resultSet = metadata.getTables(null, null, tableName, null)) {
-      return resultSet.next();
-    }
-  }
-
-  private String tableNameFor(final String storeName) {
-    return "TBL_" + storeName;
+  private String namedDispatchable(final String sql) {
+    return MessageFormat.format(sql, dispatchableTableName());
   }
 
   private static Blob blobIfBinary(final Connection connection, DataFormat format, final Logger logger) {
@@ -178,17 +139,17 @@ public class HSQLDBStorageDelegate extends JDBCStorageDelegate<Blob> implements 
 
     @Override
     protected String appendExpression() {
-      return SQL_DISPATCHABLE_APPEND;
+      return namedDispatchable(SQL_DISPATCHABLE_APPEND);
     }
 
     @Override
     protected String deleteExpression() {
-      return SQL_DISPATCHABLE_DELETE;
+      return namedDispatchable(SQL_DISPATCHABLE_DELETE);
     }
 
     @Override
     protected String selectExpression() {
-      return SQL_DISPATCHABLE_SELECT;
+      return namedDispatchable(SQL_DISPATCHABLE_SELECT);
     }
   }
 }

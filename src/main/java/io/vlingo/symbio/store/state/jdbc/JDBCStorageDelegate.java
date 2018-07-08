@@ -8,8 +8,10 @@
 package io.vlingo.symbio.store.state.jdbc;
 
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -26,6 +28,7 @@ import io.vlingo.symbio.State.TextState;
 import io.vlingo.symbio.store.state.StateStore.DataFormat;
 import io.vlingo.symbio.store.state.StateStore.Dispatchable;
 import io.vlingo.symbio.store.state.StateStore.StorageDelegate;
+import io.vlingo.symbio.store.state.StateTypeStateStoreMap;
 
 public abstract class JDBCStorageDelegate<T> implements StorageDelegate {
   protected final Connection connection;
@@ -228,7 +231,7 @@ public abstract class JDBCStorageDelegate<T> implements StorageDelegate {
     if (maybeCached == null) {
       final String upsert = writeExpression(storeName);
       final PreparedStatement preparedStatement = connection.prepareStatement(upsert);
-      final CachedStatement<T> cached = new CachedStatement<>(preparedStatement, dataTypeObject());
+      final CachedStatement<T> cached = new CachedStatement<>(preparedStatement, binaryDataTypeObject());
       writeStatements.put(storeName, cached);
       prepareForWrite(cached, state);
       return (W) cached.preparedStatement;
@@ -240,14 +243,62 @@ public abstract class JDBCStorageDelegate<T> implements StorageDelegate {
   }
 
   protected abstract byte[] binaryDataFrom(final ResultSet resultSet, final int columnIndex) throws Exception;
-  protected abstract void createTables();
-  protected abstract <D> D dataTypeObject() throws Exception;
+  protected abstract <D> D binaryDataTypeObject() throws Exception;
   protected abstract JDBCDispatchableCachedStatements<T> dispatchableCachedStatements();
+  protected abstract String dispatchableIdIndexCreateExpression();
+  protected abstract String dispatchableOriginatorIdIndexCreateExpression();
+  protected abstract String dispatchableTableCreateExpression();
+  protected abstract String dispatchableTableName();
   protected abstract String readExpression(final String storeName, final String id);
   protected abstract <S> void setBinaryObject(final CachedStatement<T> cached, int columnIndex, final State<S> state) throws Exception;
   protected abstract <S> void setTextObject(final CachedStatement<T> cached, int columnIndex, final State<S> state) throws Exception;
+  protected abstract String stateStoreTableCreateExpression(final String storeName);
+  protected abstract String tableNameFor(final String storeName);
   protected abstract String textDataFrom(final ResultSet resultSet, final int columnIndex) throws Exception;
   protected abstract String writeExpression(final String storeName);
+
+  private void createDispatchablesTable() throws Exception {
+    final String tableName = dispatchableTableName();
+    if (!tableExists(tableName)) {
+      try (final Statement statement = connection.createStatement()) {
+        statement.executeUpdate(dispatchableTableCreateExpression());
+        statement.executeUpdate(dispatchableIdIndexCreateExpression());
+        statement.executeUpdate(dispatchableOriginatorIdIndexCreateExpression());
+        connection.commit();
+      } catch (Exception e) {
+        throw new IllegalStateException("Cannot create table " + tableName + " because: " + e, e);
+      }
+    }
+  }
+  
+  private void createStateStoreTable(final String storeName) throws Exception {
+    final String sql = stateStoreTableCreateExpression(storeName);
+    try (final Statement statement = connection.createStatement()) {
+      statement.executeUpdate(sql);
+      connection.commit();
+    }
+  }
+
+  private void createTables() {
+    try {
+      createDispatchablesTable();
+    } catch (Exception e) {
+      // assume table exists; could look at metadata
+      logger.log("Could not create dispatchables table because: " + e.getMessage(), e);
+    }
+
+    for (final String storeName : StateTypeStateStoreMap.allStoreNames()) {
+      final String tableName = tableNameFor(storeName);
+      try {
+        if (!tableExists(tableName)) {
+          createStateStoreTable(storeName);
+        }
+      } catch (Exception e) {
+        // assume table exists; could look at metadata
+        logger.log("Could not create " + tableName + " table because: " + e.getMessage(), e);
+      }
+    }
+  }
 
   private void prepareForRead(final CachedStatement<T> cached, final String id) throws Exception {
     cached.preparedStatement.clearParameters();
@@ -301,6 +352,13 @@ public abstract class JDBCStorageDelegate<T> implements StorageDelegate {
     } else {
       final String data = textDataFrom(resultSet, 5);
       return new Dispatchable(dispatchId, new TextState(id, type, typeVersion, data, dataVersion, metadata));
+    }
+  }
+
+  private boolean tableExists(final String tableName) throws Exception {
+    final DatabaseMetaData metadata = connection.getMetaData();
+    try (final ResultSet resultSet = metadata.getTables(null, null, tableName, null)) {
+      return resultSet.next();
     }
   }
 }

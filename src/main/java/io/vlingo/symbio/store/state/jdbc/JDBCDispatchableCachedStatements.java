@@ -60,6 +60,7 @@ public abstract class JDBCDispatchableCachedStatements<T> {
               sql +
               "\nbecause: " + e.getMessage();
       logger.log(message, e);
+      System.out.println(message);
       throw new IllegalStateException(message);
     }
   }

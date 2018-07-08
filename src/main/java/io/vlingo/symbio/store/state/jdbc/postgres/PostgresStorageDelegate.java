@@ -8,16 +8,13 @@
 package io.vlingo.symbio.store.state.jdbc.postgres;
 
 import java.sql.Connection;
-import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
-import java.sql.Statement;
 import java.text.MessageFormat;
 
 import org.postgresql.util.PGobject;
 
 import io.vlingo.actors.Logger;
 import io.vlingo.symbio.State;
-import io.vlingo.symbio.store.state.StateTypeStateStoreMap;
 import io.vlingo.symbio.store.state.StateStore.DataFormat;
 import io.vlingo.symbio.store.state.StateStore.StorageDelegate;
 import io.vlingo.symbio.store.state.jdbc.CachedStatement;
@@ -37,23 +34,37 @@ public class PostgresStorageDelegate extends JDBCStorageDelegate<Object> impleme
 
   @Override
   protected byte[] binaryDataFrom(final ResultSet resultSet, final int columnIndex) throws Exception {
-    final byte[] data = resultSet.getBytes(5);
+    final byte[] data = resultSet.getBytes(columnIndex);
     return data;
   }
 
   @Override
-  protected void createTables() {
-    createTables(connection, format, logger);
-  }
-
-  @Override
-  protected <D> D dataTypeObject() {
+  protected <D> D binaryDataTypeObject() {
     return null;
   }
 
   @Override
   protected JDBCDispatchableCachedStatements<Object> dispatchableCachedStatements() {
     return new PostgresDispatchableCachedStatements<Object>(originatorId, connection, format, logger);
+  }
+
+  protected String dispatchableIdIndexCreateExpression() {
+    return namedDispatchable(SQL_DISPATCH_ID_INDEX);
+  }
+
+  protected String dispatchableOriginatorIdIndexCreateExpression() {
+    return namedDispatchable(SQL_ORIGINATOR_ID_INDEX);
+  }
+
+  @Override
+  protected String dispatchableTableCreateExpression() {
+    return MessageFormat.format(SQL_CREATE_DISPATCHABLES_STORE, dispatchableTableName(),
+            format.isBinary() ? SQL_FORMAT_BINARY : SQL_FORMAT_TEXT1); // TODO: SQL_FORMAT_TEXT2
+  }
+
+  @Override
+  protected String dispatchableTableName() {
+    return TBL_VLINGO_SYMBIO_DISPATCHABLES;
   }
 
   @Override
@@ -75,6 +86,17 @@ public class PostgresStorageDelegate extends JDBCStorageDelegate<Object> impleme
   }
 
   @Override
+  protected String stateStoreTableCreateExpression(final String storeName) {
+    return MessageFormat.format(SQL_CREATE_STATE_STORE, storeName,
+            format.isBinary() ? SQL_FORMAT_BINARY : SQL_FORMAT_TEXT1); // TODO: SQL_FORMAT_TEXT2
+  }
+
+  @Override
+  protected String tableNameFor(final String storeName) {
+    return "tbl_" + storeName.toLowerCase();
+  }
+
+  @Override
   protected String textDataFrom(final ResultSet resultSet, final int columnIndex) throws Exception {
     final String text = resultSet.getObject(columnIndex).toString();
     return text;
@@ -87,76 +109,7 @@ public class PostgresStorageDelegate extends JDBCStorageDelegate<Object> impleme
   }
 
   private String namedDispatchable(final String sql) {
-    return MessageFormat.format(sql, TBL_VLINGO_SYMBIO_DISPATCHABLES);
-  }
-
-  private void createDispatchablesTable(final Connection connection, final DataFormat format) throws Exception {
-    if (!tableExists(connection, TBL_VLINGO_SYMBIO_DISPATCHABLES)) {
-      Statement statement = null;
-      try {
-        final String createDispatchablesStore = MessageFormat.format(SQL_CREATE_DISPATCHABLES_STORE,
-                TBL_VLINGO_SYMBIO_DISPATCHABLES,
-                format.isBinary() ? SQL_FORMAT_BINARY : SQL_FORMAT_TEXT1); // TODO: SQL_FORMAT_TEXT2
-
-        statement = connection.createStatement();
-        statement.executeUpdate(createDispatchablesStore);
-        statement.executeUpdate(namedDispatchable(SQL_DISPATCH_ID_INDEX));
-        statement.executeUpdate(namedDispatchable(SQL_ORIGINATOR_ID_INDEX));
-        connection.commit();
-      } finally {
-        if (statement != null) {
-          statement.close();
-        }
-      }
-    }
-  }
-
-  private void createTables(final Connection connection, final DataFormat format, final Logger logger) {
-    try {
-      createDispatchablesTable(connection, format);
-    } catch (Exception e) {
-      // assume table exists; could look at metadata
-      logger.log("Could not create dispatchables table because: " + e.getMessage(), e);
-    }
-
-    for (final String storeName : StateTypeStateStoreMap.allStoreNames()) {
-      final String tableName = tableNameFor(storeName.toLowerCase());
-      try {
-        if (!tableExists(connection, tableName)) {
-          createStateStoreTable(connection, tableName, format);
-        }
-      } catch (Exception e) {
-        // assume table exists; could look at metadata
-        logger.log("Could not create " + tableName + " table because: " + e.getMessage(), e);
-      }
-    }
-  }
-
-  private void createStateStoreTable(final Connection connection, final String tableName, final DataFormat format) throws Exception {
-    final String sql = MessageFormat.format(SQL_CREATE_STATE_STORE, tableName,
-            format.isBinary() ? SQL_FORMAT_BINARY : SQL_FORMAT_TEXT1); // TODO: SQL_FORMAT_TEXT2
-
-    Statement statement = null;
-    try {
-      statement = connection.createStatement();
-      statement.executeUpdate(sql);
-      connection.commit();
-    } finally {
-      if (statement != null) {
-        statement.close();
-      }
-    }
-  }
-
-  private boolean tableExists(final Connection connection, String tableName) throws Exception {
-    final DatabaseMetaData metadata = connection.getMetaData();
-    try (final ResultSet resultSet = metadata.getTables(null, null, tableName, null)) {
-      return resultSet.next();
-    }
-  }
-
-  private String tableNameFor(final String storeName) {
-    return "tbl_" + storeName.toLowerCase();
+    return MessageFormat.format(sql, dispatchableTableName());
   }
 
   class PostgresDispatchableCachedStatements<T> extends JDBCDispatchableCachedStatements<T> {

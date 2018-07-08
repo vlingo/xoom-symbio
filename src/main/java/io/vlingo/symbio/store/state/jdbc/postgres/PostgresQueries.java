@@ -8,6 +8,42 @@
 package io.vlingo.symbio.store.state.jdbc.postgres;
 
 public interface PostgresQueries {
+  final static String SQL_STATE_READ =
+          "SELECT tbl_{0}.S_TYPE, TBL_{0}.S_TYPE_VERSION, TBL_{0}.S_DATA, TBL_{0}.S_DATA_VERSION, TBL_{0}.S_METADATA_VALUE, TBL_{0}.S_METADATA_OP " +
+          "FROM tbl_{0} " +
+          "WHERE tbl_{0}.S_ID = ?";
+
+  final static String SQL_STATE_WRITE =
+          "INSERT INTO tbl_{0} \n" +
+          "(s_id, s_type, s_type_version, s_data, s_data_version, s_metadata_value, s_metadata_op) \n" +
+          "VALUES (?, ?, ?, {1}, ?, ?, ?) \n" +
+          "ON CONFLICT (s_id) DO UPDATE SET \n" + 
+              "s_type = EXCLUDED.s_type, \n" +
+              "s_type_version = EXCLUDED.s_type_version, \n" +
+              "s_data = EXCLUDED.s_data, \n" +
+              "s_data_version = EXCLUDED.s_data_version, \n" +
+              "s_metadata_value = EXCLUDED.s_metadata_value, \n" +
+              "s_metadata_op = EXCLUDED.s_metadata_op \n";
+
+  final static String SQL_FORMAT_BINARY_CAST = "?";
+  final static String SQL_FORMAT_TEXT_CAST = "?::JSON";
+
+  final static String SQL_CREATE_STATE_STORE =
+          "CREATE TABLE tbl_{0} (\n" +
+          "   s_id VARCHAR(128) NOT NULL,\n" +
+          "   s_type VARCHAR(256) NOT NULL,\n" +
+          "   s_type_version INT NOT NULL,\n" +
+          "   s_data {1} NOT NULL,\n" +
+          "   s_data_version INT NOT NULL,\n" +
+          "   s_metadata_value TEXT NOT NULL,\n" +
+          "   s_metadata_op VARCHAR(128) NOT NULL,\n" +
+          "   PRIMARY KEY (s_id) \n" +
+          ");";
+
+  final static String SQL_FORMAT_BINARY = "bytea";
+  final static String SQL_FORMAT_TEXT1 = "json";
+  // private final static String SQL_FORMAT_TEXT2 = "jsonb";
+
   final static String TBL_VLINGO_SYMBIO_DISPATCHABLES = "tbl_vlingo_symbio_dispatchables";
 
   final static String SQL_CREATE_DISPATCHABLES_STORE =
@@ -33,42 +69,6 @@ public interface PostgresQueries {
   final static String SQL_ORIGINATOR_ID_INDEX =
           "CREATE INDEX idx_dispatchables_originator_id \n" + 
           "ON {0} (d_originator_id);";
-
-  final static String SQL_STATE_READ =
-          "SELECT TBL_{0}.S_TYPE, TBL_{0}.S_TYPE_VERSION, TBL_{0}.S_DATA, TBL_{0}.S_DATA_VERSION, TBL_{0}.S_METADATA_VALUE, TBL_{0}.S_METADATA_OP " +
-          "FROM TBL_{0} " +
-          "WHERE TBL_{0}.S_ID = ?";
-
-  final static String SQL_STATE_WRITE =
-          "INSERT INTO tbl_{0} \n" +
-          "(s_id, s_type, s_type_version, s_data, s_data_version, s_metadata_value, s_metadata_op) \n" +
-          "VALUES (?, ?, ?, {1}, ?, ?, ?) \n" +
-          "ON CONFLICT (s_id) DO UPDATE SET \n" + 
-              "s_type = EXCLUDED.s_type, \n" +
-              "s_type_version = EXCLUDED.s_type_version, \n" +
-              "s_data = EXCLUDED.s_data, \n" +
-              "s_data_version = EXCLUDED.s_data_version, \n" +
-              "s_metadata_value = EXCLUDED.s_metadata_value, \n" +
-              "s_metadata_op = EXCLUDED.s_metadata_op \n";
-
-  final static String SQL_FORMAT_BINARY_CAST = "?";
-  final static String SQL_FORMAT_TEXT_CAST = "?::JSON";
-
-  final static String SQL_CREATE_STATE_STORE =
-          "CREATE TABLE {0} (\n" +
-          "   s_id VARCHAR(128) NOT NULL,\n" +
-          "   s_type VARCHAR(256) NOT NULL,\n" +
-          "   s_type_version INT NOT NULL,\n" +
-          "   s_data {1} NOT NULL,\n" +
-          "   s_data_version INT NOT NULL,\n" +
-          "   s_metadata_value TEXT NOT NULL,\n" +
-          "   s_metadata_op VARCHAR(128) NOT NULL,\n" +
-          "   PRIMARY KEY (s_id) \n" +
-          ");";
-
-  final static String SQL_FORMAT_BINARY = "bytea";
-  final static String SQL_FORMAT_TEXT1 = "json";
-  // private final static String SQL_FORMAT_TEXT2 = "jsonb";
 
   final static String SQL_DISPATCHABLE_APPEND =
           "INSERT INTO {0} \n" +
