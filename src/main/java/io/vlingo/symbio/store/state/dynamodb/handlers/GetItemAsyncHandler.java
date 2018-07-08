@@ -22,6 +22,7 @@ public class GetItemAsyncHandler implements AsyncHandler<GetItemRequest, GetItem
 
     @Override
     public void onError(Exception e) {
+        interest.readResultedIn(StateStore.Result.NoTypeStore, id, NO_STATE);
     }
 
     @Override
