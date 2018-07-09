@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
@@ -49,6 +50,7 @@ public class DynamoDBTextStateActorTest {
     private StateStore.WriteResultInterest<String> writeResultInterest;
     private StateStore.ReadResultInterest<String> readResultInterest;
     private StateStore.Dispatcher dispatcher;
+    private StateStore.ConfirmDispatchedResultInterest confirmDispatchedResultInterest;
 
     @BeforeClass
     public static void setUpDynamoDB() throws Exception {
@@ -79,6 +81,8 @@ public class DynamoDBTextStateActorTest {
         createTableInterest = mock(CreateTableInterest.class);
         writeResultInterest = mock(StateStore.WriteResultInterest.class);
         readResultInterest = mock(StateStore.ReadResultInterest.class);
+        confirmDispatchedResultInterest = mock(StateStore.ConfirmDispatchedResultInterest.class);
+
         dispatcher = mock(StateStore.Dispatcher.class);
 
         Protocols protocols = world.actorFor(
@@ -191,6 +195,20 @@ public class DynamoDBTextStateActorTest {
         verify(dispatcher).dispatch(dispatchable.id, dispatchable.state.asTextState());
     }
 
+    @Test
+    public void testThatConfirmDispatchRemovesRecordFromDynamoDB() throws Exception {
+        State<String> state = randomState();
+
+        stateStore.write(state, writeResultInterest);
+        verify(writeResultInterest, timeout(DEFAULT_TIMEOUT)).writeResultedIn(StateStore.Result.Success, state.id, state);
+
+        StateStore.Dispatchable<String> dispatchable = dispatchableByState(state);
+        dispatcherControl.confirmDispatched(dispatchable.id, confirmDispatchedResultInterest);
+
+        verify(confirmDispatchedResultInterest, timeout(DEFAULT_TIMEOUT)).confirmDispatchedResultedIn(StateStore.Result.Success, dispatchable.id);
+        assertNull(dispatchableByState(state));
+    }
+
     private State<String> randomState() {
         return new State.TextState(
                 UUID.randomUUID().toString(),
@@ -246,6 +264,10 @@ public class DynamoDBTextStateActorTest {
         GetItemResult item = dynamoDBSyncClient().getItem(DISPATCHABLE_TABLE_NAME, StateRecordAdapter.marshallForQuery(dispatchableId));
 
         Map<String, AttributeValue> dispatchableSerializedItem = item.getItem();
+        if (dispatchableSerializedItem == null) {
+            return null;
+        }
+
         String stateAsJson = dispatchableSerializedItem.get("State").getS();
         return new StateStore.Dispatchable<>(dispatchableId, JsonSerialization.deserialized(stateAsJson, State.TextState.class));
     }
