@@ -18,6 +18,7 @@ import io.vlingo.symbio.Metadata;
 import io.vlingo.symbio.State;
 import io.vlingo.symbio.store.state.Entity1;
 import io.vlingo.symbio.store.state.StateStore;
+import io.vlingo.symbio.store.state.StateTypeStateStoreMap;
 import io.vlingo.symbio.store.state.TextStateStore;
 import io.vlingo.symbio.store.state.dynamodb.interests.CreateTableInterest;
 import org.junit.*;
@@ -64,6 +65,7 @@ public class DynamoDBTextStateActorTest {
     @AfterClass
     public static void tearDownDynamoDb() throws Exception {
         dynamodbServer.stop();
+        StateTypeStateStoreMap.reset();
     }
 
     @Before
