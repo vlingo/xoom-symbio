@@ -2,6 +2,7 @@ package io.vlingo.symbio.store.state.dynamodb;
 
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync;
 import com.amazonaws.services.dynamodbv2.model.*;
+import io.vlingo.actors.Actor;
 import io.vlingo.symbio.State;
 import io.vlingo.symbio.store.state.TextStateStore;
 import io.vlingo.symbio.store.state.dynamodb.handlers.BatchWriteItemAsyncHandler;
@@ -12,7 +13,7 @@ import java.util.*;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 
-public class DynamoDBTextStateActor implements TextStateStore {
+public class DynamoDBTextStateActor extends Actor implements TextStateStore {
     private final AmazonDynamoDBAsync dynamodb;
     private final CreateTableInterest createTableInterest;
 
