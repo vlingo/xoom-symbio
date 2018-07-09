@@ -38,7 +38,7 @@ public class DynamoDBTextStateActorTest {
     private static final AwsClientBuilder.EndpointConfiguration DYNAMODB_ENDPOINT_CONFIGURATION = new AwsClientBuilder.EndpointConfiguration(DYNAMODB_HOST, DYNAMODB_REGION);
     private static final String TABLE_NAME = "vlingo_io_vlingo_symbio_store_state_Entity1";
     private static final String DISPATCHABLE_TABLE_NAME = "vlingo_dispatchables";
-    private static final int DEFAULT_TIMEOUT = 1000;
+    private static final int DEFAULT_TIMEOUT = 6000;
     private static DynamoDBProxyServer dynamodbServer;
 
     private World world;

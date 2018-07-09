@@ -10,13 +10,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 public final class StateRecordAdapter {
-    public static final String ID_FIELD = "Id";
-    public static final String STATE_FIELD = "State";
-    public static final String DATA_FIELD = "Data";
-    public static final String TYPE_FIELD = "Type";
-    public static final String METADATA_FIELD = "Metadata";
-    public static final String TYPE_VERSION_FIELD = "TypeVersion";
-    public static final String DATA_VERSION_FIELD = "DataVersion";
+    private static final String ID_FIELD = "Id";
+    private static final String STATE_FIELD = "State";
+    private static final String DATA_FIELD = "Data";
+    private static final String TYPE_FIELD = "Type";
+    private static final String METADATA_FIELD = "Metadata";
+    private static final String TYPE_VERSION_FIELD = "TypeVersion";
+    private static final String DATA_VERSION_FIELD = "DataVersion";
 
     public static Map<String, AttributeValue> marshall(State<String> state) {
         String metadataAsJson = JsonSerialization.serialized(state.metadata);
