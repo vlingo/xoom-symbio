@@ -10,10 +10,14 @@ import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.amazonaws.services.dynamodbv2.local.main.ServerRunner;
 import com.amazonaws.services.dynamodbv2.local.server.DynamoDBProxyServer;
 import com.amazonaws.services.dynamodbv2.model.*;
+import io.vlingo.actors.Definition;
+import io.vlingo.actors.Protocols;
+import io.vlingo.actors.World;
 import io.vlingo.symbio.Metadata;
 import io.vlingo.symbio.State;
 import io.vlingo.symbio.store.state.Entity1;
 import io.vlingo.symbio.store.state.StateStore;
+import io.vlingo.symbio.store.state.TextStateStore;
 import org.junit.*;
 
 import java.util.ArrayList;
@@ -31,11 +35,12 @@ public class DynamoDBTextStateActorTest {
     private static final AwsClientBuilder.EndpointConfiguration DYNAMODB_ENDPOINT_CONFIGURATION = new AwsClientBuilder.EndpointConfiguration(DYNAMODB_HOST, DYNAMODB_REGION);
     private static final String TABLE_NAME = "vlingo_io_vlingo_symbio_store_state_Entity1";
     private static final int DEFAULT_TIMEOUT = 1000;
-
-    private AmazonDynamoDBAsync dynamodb;
     private static DynamoDBProxyServer dynamodbServer;
+
+    private World world;
+    private AmazonDynamoDBAsync dynamodb;
     private CreateTableInterest createTableInterest;
-    private DynamoDBTextStateActor actor;
+    private TextStateStore actor;
     private StateStore.WriteResultInterest<String> writeResultInterest;
     private StateStore.ReadResultInterest<String> readResultInterest;
 
@@ -56,6 +61,7 @@ public class DynamoDBTextStateActorTest {
     @Before
     public void setUp() {
         createTable();
+        world = World.start(UUID.randomUUID().toString(), true);
 
         dynamodb = AmazonDynamoDBAsyncClient.asyncBuilder()
                 .withCredentials(DYNAMODB_CREDENTIALS)
@@ -66,7 +72,12 @@ public class DynamoDBTextStateActorTest {
         writeResultInterest = mock(StateStore.WriteResultInterest.class);
         readResultInterest = mock(StateStore.ReadResultInterest.class);
 
-        actor = new DynamoDBTextStateActor(dynamodb, createTableInterest);
+        Protocols protocols = world.actorFor(
+                Definition.has(DynamoDBTextStateActor.class, Definition.parameters(dynamodb, createTableInterest)),
+                new Class[] {TextStateStore.class }
+        );
+
+        actor = protocols.get(0);
     }
 
     @After
@@ -89,7 +100,7 @@ public class DynamoDBTextStateActorTest {
         dropTable();
 
         actor.write(randomState(), writeResultInterest);
-        verify(createTableInterest).createTable(dynamodb, TABLE_NAME);
+        verify(createTableInterest, timeout(DEFAULT_TIMEOUT)).createTable(dynamodb, TABLE_NAME);
     }
 
     @Test
