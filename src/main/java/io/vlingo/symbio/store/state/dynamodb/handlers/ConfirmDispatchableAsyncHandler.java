@@ -16,7 +16,7 @@ public class ConfirmDispatchableAsyncHandler implements AsyncHandler<DeleteItemR
 
     @Override
     public void onError(Exception e) {
-
+        interest.confirmDispatchedResultedIn(StateStore.Result.Failure, dispatchId);
     }
 
     @Override
