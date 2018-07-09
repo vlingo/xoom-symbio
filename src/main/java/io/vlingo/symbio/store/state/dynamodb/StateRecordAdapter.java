@@ -57,4 +57,11 @@ public final class StateRecordAdapter {
                 JsonSerialization.deserialized(record.get(METADATA_FIELD).getS(), Metadata.class)
         );
     }
+
+    public static StateStore.Dispatchable<String> unmarshallDispatchable(Map<String, AttributeValue> item) {
+        String id = item.get(ID_FIELD).getS();
+        String json = item.get(STATE_FIELD).getS();
+
+        return new StateStore.Dispatchable<>(id, JsonSerialization.deserialized(json, State.TextState.class));
+    }
 }

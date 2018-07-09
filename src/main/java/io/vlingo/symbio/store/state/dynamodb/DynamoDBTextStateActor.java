@@ -5,15 +5,16 @@ import com.amazonaws.services.dynamodbv2.model.*;
 import io.vlingo.actors.Actor;
 import io.vlingo.symbio.State;
 import io.vlingo.symbio.store.state.StateStore;
+import io.vlingo.symbio.store.state.StateTypeStateStoreMap;
 import io.vlingo.symbio.store.state.TextStateStore;
 import io.vlingo.symbio.store.state.dynamodb.handlers.BatchWriteItemAsyncHandler;
-import io.vlingo.symbio.store.state.dynamodb.handlers.GetItemAsyncHandler;
+import io.vlingo.symbio.store.state.dynamodb.handlers.DispatchAsyncHandler;
+import io.vlingo.symbio.store.state.dynamodb.handlers.GetEntityAsyncHandler;
 import io.vlingo.symbio.store.state.dynamodb.interests.CreateTableInterest;
 
 import java.util.*;
 
 import static java.util.Collections.singletonList;
-import static java.util.Collections.singletonMap;
 
 public class DynamoDBTextStateActor extends Actor implements TextStateStore, StateStore.DispatcherControl  {
     public static final String DISPATCHABLE_TABLE_NAME = "vlingo_dispatchables";
@@ -37,12 +38,12 @@ public class DynamoDBTextStateActor extends Actor implements TextStateStore, Sta
 
     @Override
     public void dispatchUnconfirmed() {
-
+        dynamodb.scanAsync(new ScanRequest(DISPATCHABLE_TABLE_NAME).withLimit(100), new DispatchAsyncHandler(dispatcher));
     }
 
     @Override
     public void read(String id, Class<?> type, ReadResultInterest<String> interest) {
-        dynamodb.getItemAsync(readRequestFor(id, type), new GetItemAsyncHandler(id, interest));
+        dynamodb.getItemAsync(readRequestFor(id, type), new GetEntityAsyncHandler(id, interest));
     }
 
     @Override
@@ -95,6 +96,8 @@ public class DynamoDBTextStateActor extends Actor implements TextStateStore, Sta
     }
 
     private String tableFor(Class<?> type) {
-        return "vlingo_" + type.getCanonicalName().replace(".", "_");
+        String tableName = "vlingo_" + type.getCanonicalName().replace(".", "_");
+        StateTypeStateStoreMap.stateTypeToStoreName(type, tableName);
+        return tableName;
     }
 }

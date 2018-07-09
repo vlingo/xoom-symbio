@@ -10,12 +10,12 @@ import io.vlingo.symbio.store.state.dynamodb.StateRecordAdapter;
 
 import java.util.Map;
 
-public class GetItemAsyncHandler implements AsyncHandler<GetItemRequest, GetItemResult> {
+public class GetEntityAsyncHandler implements AsyncHandler<GetItemRequest, GetItemResult> {
     private static final State NO_STATE = null;
     private final String id;
     private final StateStore.ReadResultInterest<String> interest;
 
-    public GetItemAsyncHandler(String id, StateStore.ReadResultInterest<String> interest) {
+    public GetEntityAsyncHandler(String id, StateStore.ReadResultInterest<String> interest) {
         this.id = id;
         this.interest = interest;
     }
