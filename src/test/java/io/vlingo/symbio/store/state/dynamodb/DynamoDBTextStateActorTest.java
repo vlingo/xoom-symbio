@@ -205,8 +205,21 @@ public class DynamoDBTextStateActorTest {
         StateStore.Dispatchable<String> dispatchable = dispatchableByState(state);
         dispatcherControl.confirmDispatched(dispatchable.id, confirmDispatchedResultInterest);
 
-        verify(confirmDispatchedResultInterest, timeout(DEFAULT_TIMEOUT)).confirmDispatchedResultedIn(StateStore.Result.Success, dispatchable.id);
+        verify(confirmDispatchedResultInterest, timeout(DEFAULT_TIMEOUT))
+                .confirmDispatchedResultedIn(StateStore.Result.Success, dispatchable.id);
+
         assertNull(dispatchableByState(state));
+    }
+
+    @Test
+    public void testThatConfirmDispatchFailsWithFailureIfTableDoesNotExist() throws Exception {
+        dropTable(DISPATCHABLE_TABLE_NAME);
+
+        String dispatchableId = UUID.randomUUID().toString();
+        dispatcherControl.confirmDispatched(dispatchableId, confirmDispatchedResultInterest);
+
+        verify(confirmDispatchedResultInterest, timeout(DEFAULT_TIMEOUT))
+                .confirmDispatchedResultedIn(StateStore.Result.Failure, dispatchableId);
     }
 
     private State<String> randomState() {
