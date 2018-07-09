@@ -170,7 +170,7 @@ public class DynamoDBTextStateActorTest {
         stateStore.write(state, writeResultInterest);
         verify(writeResultInterest, timeout(DEFAULT_TIMEOUT)).writeResultedIn(StateStore.Result.Success, state.id, state);
 
-        verify(dispatcher, timeout(DEFAULT_TIMEOUT)).dispatch(DISPATCHABLE_TABLE_NAME + ":" + state.id, state.asTextState());
+        verify(dispatcher, timeout(DEFAULT_TIMEOUT)).dispatch(state.type + ":" + state.id, state.asTextState());
     }
 
     @Test
@@ -275,7 +275,7 @@ public class DynamoDBTextStateActorTest {
     }
 
     private StateStore.Dispatchable<String> dispatchableByState(State<String> state) {
-        String dispatchableId = DISPATCHABLE_TABLE_NAME + ":" + state.id;
+        String dispatchableId = state.type + ":" + state.id;
         GetItemResult item = dynamoDBSyncClient().getItem(DISPATCHABLE_TABLE_NAME, StateRecordAdapter.marshallForQuery(dispatchableId));
 
         Map<String, AttributeValue> dispatchableSerializedItem = item.getItem();
