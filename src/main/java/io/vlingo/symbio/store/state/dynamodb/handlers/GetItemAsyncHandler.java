@@ -34,7 +34,7 @@ public class GetItemAsyncHandler implements AsyncHandler<GetItemRequest, GetItem
         }
 
         try {
-            State<String> state = StateRecordAdapter.unmarshall(item);
+            State<String> state = StateRecordAdapter.unmarshallState(item);
             interest.readResultedIn(StateStore.Result.Success, id, state);
         } catch (ClassNotFoundException e) {
             interest.readResultedIn(StateStore.Result.Failure, id, NO_STATE);

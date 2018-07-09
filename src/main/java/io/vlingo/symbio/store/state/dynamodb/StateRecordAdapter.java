@@ -4,12 +4,14 @@ import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import io.vlingo.common.serialization.JsonSerialization;
 import io.vlingo.symbio.Metadata;
 import io.vlingo.symbio.State;
+import io.vlingo.symbio.store.state.StateStore;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public final class StateRecordAdapter {
     public static final String ID_FIELD = "Id";
+    public static final String STATE_FIELD = "State";
     public static final String DATA_FIELD = "Data";
     public static final String TYPE_FIELD = "Type";
     public static final String METADATA_FIELD = "Metadata";
@@ -30,6 +32,14 @@ public final class StateRecordAdapter {
         return stateItem;
     }
 
+    public static Map<String, AttributeValue> marshall(StateStore.Dispatchable<String> dispatchable) {
+        Map<String, AttributeValue> stateItem = new HashMap<>();
+        stateItem.put(ID_FIELD, new AttributeValue().withS(dispatchable.id));
+        stateItem.put(STATE_FIELD, new AttributeValue().withS(JsonSerialization.serialized(dispatchable.state)));
+
+        return stateItem;
+    }
+
     public static Map<String, AttributeValue> marshallForQuery(String id) {
         Map<String, AttributeValue> stateItem = new HashMap<>();
         stateItem.put(ID_FIELD, new AttributeValue().withS(id));
@@ -37,7 +47,7 @@ public final class StateRecordAdapter {
         return stateItem;
     }
 
-    public static State<String> unmarshall(Map<String, AttributeValue> record) throws ClassNotFoundException {
+    public static State<String> unmarshallState(Map<String, AttributeValue> record) throws ClassNotFoundException {
         return new State.TextState(
                 record.get(ID_FIELD).getS(),
                 Class.forName(record.get(TYPE_FIELD).getS()),

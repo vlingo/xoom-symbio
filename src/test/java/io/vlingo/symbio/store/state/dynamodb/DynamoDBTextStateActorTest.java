@@ -13,15 +13,18 @@ import com.amazonaws.services.dynamodbv2.model.*;
 import io.vlingo.actors.Definition;
 import io.vlingo.actors.Protocols;
 import io.vlingo.actors.World;
+import io.vlingo.common.serialization.JsonSerialization;
 import io.vlingo.symbio.Metadata;
 import io.vlingo.symbio.State;
 import io.vlingo.symbio.store.state.Entity1;
 import io.vlingo.symbio.store.state.StateStore;
 import io.vlingo.symbio.store.state.TextStateStore;
+import io.vlingo.symbio.store.state.dynamodb.interests.CreateTableInterest;
 import org.junit.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import static org.mockito.Mockito.mock;
@@ -34,15 +37,18 @@ public class DynamoDBTextStateActorTest {
     private static final AWSStaticCredentialsProvider DYNAMODB_CREDENTIALS = new AWSStaticCredentialsProvider(new BasicAWSCredentials("1", "2"));
     private static final AwsClientBuilder.EndpointConfiguration DYNAMODB_ENDPOINT_CONFIGURATION = new AwsClientBuilder.EndpointConfiguration(DYNAMODB_HOST, DYNAMODB_REGION);
     private static final String TABLE_NAME = "vlingo_io_vlingo_symbio_store_state_Entity1";
+    private static final String DISPATCHABLE_TABLE_NAME = "vlingo_dispatchables";
     private static final int DEFAULT_TIMEOUT = 1000;
     private static DynamoDBProxyServer dynamodbServer;
 
     private World world;
     private AmazonDynamoDBAsync dynamodb;
     private CreateTableInterest createTableInterest;
-    private TextStateStore actor;
+    private TextStateStore stateStore;
+    private StateStore.DispatcherControl dispatcherControl;
     private StateStore.WriteResultInterest<String> writeResultInterest;
     private StateStore.ReadResultInterest<String> readResultInterest;
+    private StateStore.Dispatcher dispatcher;
 
     @BeforeClass
     public static void setUpDynamoDB() throws Exception {
@@ -60,7 +66,9 @@ public class DynamoDBTextStateActorTest {
 
     @Before
     public void setUp() {
-        createTable();
+        createTable(TABLE_NAME);
+        createTable(DISPATCHABLE_TABLE_NAME);
+
         world = World.start(UUID.randomUUID().toString(), true);
 
         dynamodb = AmazonDynamoDBAsyncClient.asyncBuilder()
@@ -71,44 +79,52 @@ public class DynamoDBTextStateActorTest {
         createTableInterest = mock(CreateTableInterest.class);
         writeResultInterest = mock(StateStore.WriteResultInterest.class);
         readResultInterest = mock(StateStore.ReadResultInterest.class);
+        dispatcher = mock(StateStore.Dispatcher.class);
 
         Protocols protocols = world.actorFor(
-                Definition.has(DynamoDBTextStateActor.class, Definition.parameters(dynamodb, createTableInterest)),
-                new Class[] {TextStateStore.class }
+                Definition.has(DynamoDBTextStateActor.class, Definition.parameters(dispatcher, dynamodb, createTableInterest)),
+                new Class[] { TextStateStore.class, StateStore.DispatcherControl.class}
         );
 
-        actor = protocols.get(0);
+        stateStore = protocols.get(0);
+        dispatcherControl = protocols.get(1);
     }
 
     @After
     public void tearDown() {
-        dropTable();
+        dropTable(TABLE_NAME);
+        dropTable(DISPATCHABLE_TABLE_NAME);
+    }
+
+    @Test
+    public void testThatCreatingATextStateActorCreatesTheDispatchableTable() throws Exception {
+        verify(createTableInterest).createDispatchableTable(dynamodb, DISPATCHABLE_TABLE_NAME);
     }
 
     @Test
     public void testThatWritingAndReadingTransactionReturnsCurrentState() throws Exception {
         State<String> currentState = randomState();
-        actor.write(currentState, writeResultInterest);
+        stateStore.write(currentState, writeResultInterest);
         verify(writeResultInterest, timeout(DEFAULT_TIMEOUT)).writeResultedIn(StateStore.Result.Success, currentState.id, currentState);
 
-        actor.read(currentState.id, currentState.typed(), readResultInterest);
+        stateStore.read(currentState.id, currentState.typed(), readResultInterest);
         verify(readResultInterest, timeout(DEFAULT_TIMEOUT)).readResultedIn(StateStore.Result.Success, currentState.id, currentState);
     }
 
     @Test
     public void testThatWritingToATableCallsCreateTableInterest() throws Exception {
-        dropTable();
+        dropTable(TABLE_NAME);
 
-        actor.write(randomState(), writeResultInterest);
-        verify(createTableInterest, timeout(DEFAULT_TIMEOUT)).createTable(dynamodb, TABLE_NAME);
+        stateStore.write(randomState(), writeResultInterest);
+        verify(createTableInterest, timeout(DEFAULT_TIMEOUT)).createEntityTable(dynamodb, TABLE_NAME);
     }
 
     @Test
     public void testThatWritingToATableThatDoesntExistFails() throws Exception {
-        dropTable();
+        dropTable(TABLE_NAME);
         State<String> state = randomState();
 
-        actor.write(state, writeResultInterest);
+        stateStore.write(state, writeResultInterest);
         verify(writeResultInterest, timeout(DEFAULT_TIMEOUT)).writeResultedIn(StateStore.Result.NoTypeStore, state.id, null);
     }
 
@@ -116,16 +132,16 @@ public class DynamoDBTextStateActorTest {
     public void testThatReadingAnUnknownStateFailsWithNotFound() throws Exception {
         State<String> state = randomState();
 
-        actor.read(state.id, Entity1.class, readResultInterest);
+        stateStore.read(state.id, Entity1.class, readResultInterest);
         verify(readResultInterest, timeout(DEFAULT_TIMEOUT)).readResultedIn(StateStore.Result.NotFound, state.id, null);
     }
 
     @Test
     public void testThatReadingOnAnUnknownTableFails() throws Exception {
-        dropTable();
+        dropTable(TABLE_NAME);
         State<String> state = randomState();
 
-        actor.read(state.id, Entity1.class, readResultInterest);
+        stateStore.read(state.id, Entity1.class, readResultInterest);
         verify(readResultInterest, timeout(DEFAULT_TIMEOUT)).readResultedIn(StateStore.Result.NoTypeStore, state.id, null);
     }
 
@@ -134,11 +150,32 @@ public class DynamoDBTextStateActorTest {
         State<String> oldState = randomState();
         State<String> newState = newFor(oldState);
 
-        actor.write(newState, writeResultInterest);
+        stateStore.write(newState, writeResultInterest);
         verify(writeResultInterest, timeout(DEFAULT_TIMEOUT)).writeResultedIn(StateStore.Result.Success, newState.id, newState);
 
-        actor.write(oldState, writeResultInterest);
+        stateStore.write(oldState, writeResultInterest);
         verify(writeResultInterest, timeout(DEFAULT_TIMEOUT)).writeResultedIn(StateStore.Result.ConcurrentyViolation, newState.id, newState);
+    }
+
+    @Test
+    public void testThatDispatchesOnWrite() throws Exception {
+        State<String> state = randomState();
+
+        stateStore.write(state, writeResultInterest);
+        verify(writeResultInterest, timeout(DEFAULT_TIMEOUT)).writeResultedIn(StateStore.Result.Success, state.id, state);
+
+        verify(dispatcher, timeout(DEFAULT_TIMEOUT)).dispatch(DISPATCHABLE_TABLE_NAME + ":" + state.id, state.asTextState());
+    }
+
+    @Test
+    public void testThatWritingStoresTheDispatchableOnDynamoDB() throws Exception {
+        State<String> state = randomState();
+
+        stateStore.write(state, writeResultInterest);
+        verify(writeResultInterest, timeout(DEFAULT_TIMEOUT)).writeResultedIn(StateStore.Result.Success, state.id, state);
+
+        StateStore.Dispatchable<String> dispatchable = dispatchableByState(state);
+        Assert.assertEquals(state, dispatchable.state);
     }
 
     private State<String> randomState() {
@@ -163,20 +200,17 @@ public class DynamoDBTextStateActorTest {
         );
     }
 
-    private void createTable() {
-        AmazonDynamoDB syncDynamoDb = AmazonDynamoDBClientBuilder.standard()
-                .withEndpointConfiguration(DYNAMODB_ENDPOINT_CONFIGURATION)
-                .withCredentials(DYNAMODB_CREDENTIALS)
-                .build();
+    private void createTable(String tableName) {
+        AmazonDynamoDB syncDynamoDb = dynamoDBSyncClient();
 
-        List<AttributeDefinition> attributeDefinitions= new ArrayList<>();
+        List<AttributeDefinition> attributeDefinitions = new ArrayList<>();
         attributeDefinitions.add(new AttributeDefinition().withAttributeName("Id").withAttributeType("S"));
 
         List<KeySchemaElement> keySchema = new ArrayList<>();
         keySchema.add(new KeySchemaElement().withAttributeName("Id").withKeyType(KeyType.HASH));
 
         CreateTableRequest request = new CreateTableRequest()
-                .withTableName(TABLE_NAME)
+                .withTableName(tableName)
                 .withKeySchema(keySchema)
                 .withAttributeDefinitions(attributeDefinitions)
                 .withProvisionedThroughput(new ProvisionedThroughput(1L, 1L));
@@ -184,16 +218,29 @@ public class DynamoDBTextStateActorTest {
         syncDynamoDb.createTable(request);
     }
 
-    private void dropTable() {
-        AmazonDynamoDB syncDynamoDb = AmazonDynamoDBClientBuilder.standard()
-                .withEndpointConfiguration(DYNAMODB_ENDPOINT_CONFIGURATION)
-                .withCredentials(DYNAMODB_CREDENTIALS)
-                .build();
+    private void dropTable(String tableName) {
+        AmazonDynamoDB syncDynamoDb = dynamoDBSyncClient();
 
         try {
-            syncDynamoDb.deleteTable(TABLE_NAME);
+            syncDynamoDb.deleteTable(tableName);
         } catch (Exception ex) {
 
         }
+    }
+
+    private StateStore.Dispatchable<String> dispatchableByState(State<String> state) {
+        String dispatchableId = DISPATCHABLE_TABLE_NAME + ":" + state.id;
+        GetItemResult item = dynamoDBSyncClient().getItem(DISPATCHABLE_TABLE_NAME, StateRecordAdapter.marshallForQuery(dispatchableId));
+
+        Map<String, AttributeValue> dispatchableSerializedItem = item.getItem();
+        String stateAsJson = dispatchableSerializedItem.get("State").getS();
+        return new StateStore.Dispatchable<>(dispatchableId, JsonSerialization.deserialized(stateAsJson, State.TextState.class));
+    }
+
+    private AmazonDynamoDB dynamoDBSyncClient() {
+        return AmazonDynamoDBClientBuilder.standard()
+                .withEndpointConfiguration(DYNAMODB_ENDPOINT_CONFIGURATION)
+                .withCredentials(DYNAMODB_CREDENTIALS)
+                .build();
     }
 }
