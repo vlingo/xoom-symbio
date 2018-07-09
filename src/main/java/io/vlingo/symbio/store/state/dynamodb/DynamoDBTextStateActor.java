@@ -75,7 +75,7 @@ public class DynamoDBTextStateActor extends Actor implements TextStateStore, Sta
             // in case of error (for now) just try to write the record
         }
 
-        Dispatchable<String> dispatchable = new Dispatchable<>(DISPATCHABLE_TABLE_NAME + ":" + state.id, state);
+        Dispatchable<String> dispatchable = new Dispatchable<>(state.type + ":" + state.id, state);
 
         Map<String, List<WriteRequest>> transaction = writeRequestFor(state, dispatchable);
         BatchWriteItemRequest request = new BatchWriteItemRequest(transaction);
