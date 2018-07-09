@@ -178,6 +178,19 @@ public class DynamoDBTextStateActorTest {
         Assert.assertEquals(state, dispatchable.state);
     }
 
+    @Test
+    public void testThatDispatchUnconfirmedShouldDispatchAllOnDynamoDB() throws Exception {
+        State<String> state = randomState();
+
+        stateStore.write(state, writeResultInterest);
+        verify(writeResultInterest, timeout(DEFAULT_TIMEOUT)).writeResultedIn(StateStore.Result.Success, state.id, state);
+
+        StateStore.Dispatchable<String> dispatchable = dispatchableByState(state);
+
+        dispatcherControl.dispatchUnconfirmed();
+        verify(dispatcher).dispatch(dispatchable.id, dispatchable.state.asTextState());
+    }
+
     private State<String> randomState() {
         return new State.TextState(
                 UUID.randomUUID().toString(),
