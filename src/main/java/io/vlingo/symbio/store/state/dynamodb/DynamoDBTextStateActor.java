@@ -8,6 +8,7 @@ import io.vlingo.symbio.store.state.StateStore;
 import io.vlingo.symbio.store.state.StateTypeStateStoreMap;
 import io.vlingo.symbio.store.state.TextStateStore;
 import io.vlingo.symbio.store.state.dynamodb.handlers.BatchWriteItemAsyncHandler;
+import io.vlingo.symbio.store.state.dynamodb.handlers.ConfirmDispatchableAsyncHandler;
 import io.vlingo.symbio.store.state.dynamodb.handlers.DispatchAsyncHandler;
 import io.vlingo.symbio.store.state.dynamodb.handlers.GetEntityAsyncHandler;
 import io.vlingo.symbio.store.state.dynamodb.interests.CreateTableInterest;
@@ -33,7 +34,12 @@ public class DynamoDBTextStateActor extends Actor implements TextStateStore, Sta
 
     @Override
     public void confirmDispatched(String dispatchId, ConfirmDispatchedResultInterest interest) {
-
+        dynamodb.deleteItemAsync(
+                new DeleteItemRequest(
+                        DISPATCHABLE_TABLE_NAME,
+                        StateRecordAdapter.marshallForQuery(dispatchId)),
+                new ConfirmDispatchableAsyncHandler(dispatchId, interest)
+        );
     }
 
     @Override
