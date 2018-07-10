@@ -162,19 +162,21 @@ public class InMemoryTextStateStoreTest {
     final Entity1 entity = new Entity1("123", 5);
     final String serializedState = JsonSerialization.serialized(entity);
 
-    interest.until = TestUntil.happenings(2);
+    interest.until = TestUntil.happenings(4);
     store.write(new TextState(entity.id, Entity1.class, 1, serializedState, 1, Metadata.withOperation("op")), interest);
     store.write(new TextState(entity.id, Entity1.class, 1, serializedState, 2, Metadata.withOperation("op")), interest);
     interest.until.completes();
+
     assertEquals(2, interest.textWriteAccumulatedResults.size());
     assertEquals(Result.Success, interest.textWriteAccumulatedResults.poll());
     assertEquals(Result.Success, interest.textWriteAccumulatedResults.poll());
 
-    interest.until = TestUntil.happenings(3);
+    interest.until = TestUntil.happenings(4);
     store.write(new TextState(entity.id, Entity1.class, 1, serializedState, 1, Metadata.withOperation("op")), interest);
     store.write(new TextState(entity.id, Entity1.class, 1, serializedState, 2, Metadata.withOperation("op")), interest);
     store.write(new TextState(entity.id, Entity1.class, 1, serializedState, 3, Metadata.withOperation("op")), interest);
     interest.until.completes();
+
     assertEquals(3, interest.textWriteAccumulatedResults.size());
     assertEquals(Result.ConcurrentyViolation, interest.textWriteAccumulatedResults.poll());
     assertEquals(Result.ConcurrentyViolation, interest.textWriteAccumulatedResults.poll());
