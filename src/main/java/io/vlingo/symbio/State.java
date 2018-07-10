@@ -11,7 +11,6 @@ import java.util.Comparator;
 
 public abstract class State<T> implements Comparable<State<T>> {
   private final static byte[] EmptyBytesData = new byte[0];
-  private final static Object EmptyObjectData = new Object();
   private final static String EmptyTextData = "";
   private final static String NoOp = "";
 
@@ -180,11 +179,20 @@ public abstract class State<T> implements Comparable<State<T>> {
     }
   }
 
-  public static final class NullState extends State<Object> {
-    public NullState() {
-      super(NoOp, Object.class, 1, State.EmptyObjectData, 1, Metadata.nullMetadata());
+  public static final class NullState<T> extends State<T> {
+    public static NullState<byte[]> Binary = new NullState<>(EmptyBytesData);
+    public static NullState<String> Text = new NullState<>(EmptyTextData);
+
+    private NullState(final T data) {
+      super(NoOp, Object.class, 1, data, 1, Metadata.nullMetadata());
     }
 
+    @Override
+    public boolean isEmpty() {
+      return true;
+    }
+
+    @Override
     public boolean isNull() {
       return true;
     }
