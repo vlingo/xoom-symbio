@@ -1,6 +1,7 @@
 package io.vlingo.symbio.store.state.jdbc;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.After;
 import org.junit.Before;
@@ -70,6 +71,38 @@ public abstract class JDBCTextStateStoreActorTest {
     assertEquals("567", dispatcher.dispatched.get(dispatchId("567")).id);
   }
 
+  @Test
+  public void testThatReadErrorIsReported() {
+    interest.until = TestUntil.happenings(3); // includes write, confirmation, read (not necessarily in that order)
+    final Entity1 entity = new Entity1("123", 1);
+    store.write(new TextState(entity.id, Entity1.class, 1, JsonSerialization.serialized(entity), 1), interest);
+    store.read(null, Entity1.class, interest);
+    interest.until.completes();
+    assertEquals(1, interest.errorCauses.size());
+    assertEquals("The id is null.", interest.errorCauses.poll().getMessage());
+    assertTrue(interest.textReadResult.get().isError());
+    assertTrue(interest.textState.get().isNull());
+    
+    interest.until = TestUntil.happenings(1);
+    store.read(entity.id, null, interest);  // includes read
+    interest.until.completes();
+    assertEquals(1, interest.errorCauses.size());
+    assertEquals("The type is null.", interest.errorCauses.poll().getMessage());
+    assertTrue(interest.textReadResult.get().isError());
+    assertTrue(interest.textState.get().isNull());
+  }
+
+  @Test
+  public void testThatWriteErrorIsReported() {
+    interest.until = TestUntil.happenings(1);
+    store.write(null, interest);
+    interest.until.completes();
+    assertEquals(1, interest.errorCauses.size());
+    assertEquals("The state is null.", interest.errorCauses.poll().getMessage());
+    assertTrue(interest.textWriteAccumulatedResults.poll().isError());
+    assertTrue(interest.textState.get().isNull());
+  }
+
   @Before
   public void setUp() throws Exception {
     world = World.start("test-store", true);
@@ -81,8 +114,8 @@ public abstract class JDBCTextStateStoreActorTest {
 
     delegate = delegate();
 
-    interest = new MockResultInterest(3);
-    dispatcher = new MockTextDispatcher(3, interest);
+    interest = new MockResultInterest(0);
+    dispatcher = new MockTextDispatcher(0, interest);
 
     store = world.actorFor(
             Definition.has(JDBCTextStateStoreActor.class, Definition.parameters(dispatcher, delegate)),

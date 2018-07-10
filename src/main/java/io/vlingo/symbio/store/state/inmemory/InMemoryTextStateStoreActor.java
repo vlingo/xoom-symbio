@@ -8,7 +8,7 @@
 package io.vlingo.symbio.store.state.inmemory;
 
 import io.vlingo.symbio.State;
-import io.vlingo.symbio.State.TextState;
+import io.vlingo.symbio.State.NullState;
 import io.vlingo.symbio.store.state.StateStore.DispatcherControl;
 import io.vlingo.symbio.store.state.TextStateStore;
 
@@ -18,7 +18,7 @@ public class InMemoryTextStateStoreActor extends InMemoryStateStoreActor<String>
   private final TextDispatcher dispatcher;
 
   public InMemoryTextStateStoreActor(final TextDispatcher dispatcher) {
-    super(new TextState());
+    super(NullState.Text);
 
     if (dispatcher == null) {
       throw new IllegalArgumentException("Dispatcher must not be null.");

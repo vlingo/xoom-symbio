@@ -158,6 +158,30 @@ public class InMemoryTextStateStoreTest {
   }
 
   @Test
+  public void testThatConcurrencyViolationsDetected() {
+    final Entity1 entity = new Entity1("123", 5);
+    final String serializedState = JsonSerialization.serialized(entity);
+
+    interest.until = TestUntil.happenings(2);
+    store.write(new TextState(entity.id, Entity1.class, 1, serializedState, 1, Metadata.withOperation("op")), interest);
+    store.write(new TextState(entity.id, Entity1.class, 1, serializedState, 2, Metadata.withOperation("op")), interest);
+    interest.until.completes();
+    assertEquals(2, interest.textWriteAccumulatedResults.size());
+    assertEquals(Result.Success, interest.textWriteAccumulatedResults.poll());
+    assertEquals(Result.Success, interest.textWriteAccumulatedResults.poll());
+
+    interest.until = TestUntil.happenings(3);
+    store.write(new TextState(entity.id, Entity1.class, 1, serializedState, 1, Metadata.withOperation("op")), interest);
+    store.write(new TextState(entity.id, Entity1.class, 1, serializedState, 2, Metadata.withOperation("op")), interest);
+    store.write(new TextState(entity.id, Entity1.class, 1, serializedState, 3, Metadata.withOperation("op")), interest);
+    interest.until.completes();
+    assertEquals(3, interest.textWriteAccumulatedResults.size());
+    assertEquals(Result.ConcurrentyViolation, interest.textWriteAccumulatedResults.poll());
+    assertEquals(Result.ConcurrentyViolation, interest.textWriteAccumulatedResults.poll());
+    assertEquals(Result.Success, interest.textWriteAccumulatedResults.poll());
+  }
+
+  @Test
   public void testThatStateStoreDispatches() {
     interest.until = TestUntil.happenings(3);
 
@@ -195,6 +219,36 @@ public class InMemoryTextStateStoreTest {
     assertEquals(5, dispatcher.dispatched.size());
     assertEquals("456", dispatcher.dispatched.get(dispatchId("456")).id);
     assertEquals("567", dispatcher.dispatched.get(dispatchId("567")).id);
+  }
+
+  @Test
+  public void testThatReadErrorIsReported() {
+    interest.until = TestUntil.happenings(2);
+    final Entity1 entity = new Entity1("123", 1);
+    store.write(new TextState(entity.id, Entity1.class, 1, JsonSerialization.serialized(entity), 1), interest);
+    store.read(null, Entity1.class, interest);
+    interest.until.completes();
+    assertEquals(1, interest.errorCauses.size());
+    assertEquals("The id is null.", interest.errorCauses.poll().getMessage());
+    assertTrue(interest.textReadResult.get().isError());
+    
+    interest.until = TestUntil.happenings(1);
+    store.read(entity.id, null, interest);
+    interest.until.completes();
+    assertEquals("The type is null.", interest.errorCauses.poll().getMessage());
+    assertTrue(interest.textReadResult.get().isError());
+    assertTrue(interest.textState.get().isNull());
+  }
+
+  @Test
+  public void testThatWriteErrorIsReported() {
+    interest.until = TestUntil.happenings(1);
+    store.write(null, interest);
+    interest.until.completes();
+    assertEquals(1, interest.errorCauses.size());
+    assertEquals("The state is null.", interest.errorCauses.poll().getMessage());
+    assertTrue(interest.textWriteAccumulatedResults.poll().isError());
+    assertTrue(interest.textState.get().isNull());
   }
 
   @Before

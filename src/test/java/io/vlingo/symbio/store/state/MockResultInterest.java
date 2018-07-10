@@ -7,6 +7,7 @@
 
 package io.vlingo.symbio.store.state;
 
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -29,7 +30,9 @@ public class MockResultInterest
 
   public AtomicReference<Result> textReadResult = new AtomicReference<>();
   public AtomicReference<Result> textWriteResult = new AtomicReference<>();
+  public ConcurrentLinkedQueue<Result> textWriteAccumulatedResults = new ConcurrentLinkedQueue<>();
   public AtomicReference<State<String>> textState = new AtomicReference<>();
+  public ConcurrentLinkedQueue<Exception> errorCauses = new ConcurrentLinkedQueue<>();
 
   public MockResultInterest(final int testUntilHappenings) {
     until = TestUntil.happenings(testUntilHappenings);
@@ -50,10 +53,30 @@ public class MockResultInterest
   }
 
   @Override
+  public void readResultedIn(final Result result, final Exception cause, final String id, final State<String> state) {
+    readTextResultedIn.incrementAndGet();
+    textReadResult.set(result);
+    textState.set(state);
+    errorCauses.add(cause);
+    until.happened();
+  }
+
+  @Override
   public void writeResultedIn(final Result result, final String id, final State<String> state) {
     writeTextResultedIn.incrementAndGet();
     textWriteResult.set(result);
+    textWriteAccumulatedResults.add(result);
     textState.set(state);
+    until.happened();
+  }
+
+  @Override
+  public void writeResultedIn(final Result result, final Exception cause, final String id, final State<String> state) {
+    writeTextResultedIn.incrementAndGet();
+    textWriteResult.set(result);
+    textWriteAccumulatedResults.add(result);
+    textState.set(state);
+    errorCauses.add(cause);
     until.happened();
   }
 }

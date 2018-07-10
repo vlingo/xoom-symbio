@@ -13,13 +13,14 @@ import java.util.Collection;
 
 import io.vlingo.actors.Actor;
 import io.vlingo.symbio.State;
+import io.vlingo.symbio.State.NullState;
 import io.vlingo.symbio.State.TextState;
 import io.vlingo.symbio.store.state.StateStore.DispatcherControl;
 import io.vlingo.symbio.store.state.StateTypeStateStoreMap;
 import io.vlingo.symbio.store.state.TextStateStore;
 
 public class JDBCTextStateStoreActor extends Actor implements TextStateStore, DispatcherControl {
-  private final static TextState EmptyState = new TextState();
+  private final static NullState<String> EmptyState = NullState.Text;
 
   private final StorageDelegate delegate;
   private final Dispatcher dispatcher;
@@ -55,7 +56,7 @@ public class JDBCTextStateStoreActor extends Actor implements TextStateStore, Di
   public void read(final String id, Class<?> type, final ReadResultInterest<String> interest) {
     if (interest != null) {
       if (id == null || type == null) {
-        interest.readResultedIn(Result.Failure, id, EmptyState);
+        interest.readResultedIn(Result.Error, new IllegalArgumentException(id == null ? "The id is null." : "The type is null."), id, EmptyState);
         return;
       }
 
@@ -99,7 +100,7 @@ public class JDBCTextStateStoreActor extends Actor implements TextStateStore, Di
   public void write(final State<String> state, final WriteResultInterest<String> interest) {
     if (interest != null) {
       if (state == null) {
-        interest.writeResultedIn(Result.Failure, null, EmptyState);
+        interest.writeResultedIn(Result.Error, new IllegalArgumentException("The state is null."), null, EmptyState);
       } else {
         try {
           final String storeName = StateTypeStateStoreMap.storeNameFrom(state.type);
@@ -120,9 +121,9 @@ public class JDBCTextStateStoreActor extends Actor implements TextStateStore, Di
 
           interest.writeResultedIn(Result.Success, state.id, state);
         } catch (Exception e) {
-          e.printStackTrace();
+          logger().log(getClass().getSimpleName() + " writeText() error because: " + e.getMessage(), e);
           delegate.fail();
-          interest.writeResultedIn(Result.Failure, state.id, state);
+          interest.writeResultedIn(Result.Error, e, state.id, state);
         }
       }
     } else {

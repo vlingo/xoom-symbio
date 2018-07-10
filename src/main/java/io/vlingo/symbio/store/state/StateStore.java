@@ -30,6 +30,9 @@ public interface StateStore {
     ConcurrentyViolation {
       @Override public boolean isConcurrentyViolation() { return true; }
     },
+    Error {
+      @Override public boolean isError() { return true; }
+    },
     Failure {
       @Override public boolean isFailure() { return true; }
     },
@@ -44,6 +47,7 @@ public interface StateStore {
     };
 
     public boolean isConcurrentyViolation() { return false; }
+    public boolean isError() { return false; }
     public boolean isFailure() { return false; }
     public boolean isNotFound() { return false; }
     public boolean isNoTypeStore() { return false; }
@@ -88,10 +92,12 @@ public interface StateStore {
 
   public static interface ReadResultInterest<T> {
     void readResultedIn(final Result result, final String id, final State<T> state);
+    void readResultedIn(final Result result, final Exception cause, final String id, final State<T> state);
   }
 
   public static interface WriteResultInterest<T> {
     void writeResultedIn(final Result result, final String id, final State<T> state);
+    void writeResultedIn(final Result result, final Exception cause, final String id, final State<T> state);
   }
 
   public static interface StorageDelegate {

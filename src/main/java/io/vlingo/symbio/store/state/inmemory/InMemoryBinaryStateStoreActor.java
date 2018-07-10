@@ -8,7 +8,7 @@
 package io.vlingo.symbio.store.state.inmemory;
 
 import io.vlingo.symbio.State;
-import io.vlingo.symbio.State.BinaryState;
+import io.vlingo.symbio.State.NullState;
 import io.vlingo.symbio.store.state.BinaryStateStore;
 import io.vlingo.symbio.store.state.StateStore.DispatcherControl;
 
@@ -18,7 +18,7 @@ public class InMemoryBinaryStateStoreActor extends InMemoryStateStoreActor<byte[
   private final BinaryDispatcher dispatcher;
 
   protected InMemoryBinaryStateStoreActor(final BinaryDispatcher dispatcher) {
-    super(new BinaryState());
+    super(NullState.Binary);
 
     if (dispatcher == null) {
       throw new IllegalArgumentException("Dispatcher must not be null.");

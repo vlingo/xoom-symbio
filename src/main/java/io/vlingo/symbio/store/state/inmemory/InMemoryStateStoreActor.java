@@ -54,7 +54,7 @@ public abstract class InMemoryStateStoreActor<T> extends Actor implements Dispat
   protected void readFor(final String id, final Class<?> type, final ReadResultInterest<T> interest) {
     if (interest != null) {
       if (id == null || type == null) {
-        interest.readResultedIn(Result.Failure, id, emptyState);
+        interest.readResultedIn(Result.Error, new IllegalArgumentException(id == null ? "The id is null." : "The type is null."), id, emptyState);
         return;
       }
 
@@ -82,7 +82,7 @@ public abstract class InMemoryStateStoreActor<T> extends Actor implements Dispat
     } else {
       logger().log(
               getClass().getSimpleName() +
-              " readText() missing ResultInterest for: " +
+              " readText() missing ReadResultInterest for: " +
               (id == null ? "unknown id" : id));
     }
   }
@@ -90,7 +90,7 @@ public abstract class InMemoryStateStoreActor<T> extends Actor implements Dispat
   protected void writeWith(final State<T> state, final WriteResultInterest<T> interest) {
     if (interest != null) {
       if (state == null) {
-        interest.writeResultedIn(Result.Failure, null, emptyState);
+        interest.writeResultedIn(Result.Error, new IllegalArgumentException("The state is null."), null, emptyState);
       } else {
         try {
           final String storeName = StateTypeStateStoreMap.storeNameFrom(state.type);
@@ -110,19 +110,29 @@ public abstract class InMemoryStateStoreActor<T> extends Actor implements Dispat
             }
           }
 
-          typeStore.put(state.id, state);
+          final State<T> persistedState = typeStore.putIfAbsent(state.id, state);
+          if (persistedState != null) {
+            if (persistedState.dataVersion >= state.dataVersion) {
+              interest.writeResultedIn(Result.ConcurrentyViolation, state.id, state);
+              return;
+            }
+            typeStore.put(state.id, state);
+          }
           final String dispatchId = storeName + ":" + state.id;
           dispatchables.add(new Dispatchable<T>(dispatchId, state));
           dispatch(dispatchId, state);
 
           interest.writeResultedIn(Result.Success, state.id, state);
         } catch (Exception e) {
-          e.printStackTrace();
-          interest.writeResultedIn(Result.Failure, state.id, state);
+          logger().log(getClass().getSimpleName() + " writeText() error because: " + e.getMessage(), e);
+          interest.writeResultedIn(Result.Error, e, state.id, state);
         }
       }
     } else {
-      logger().log("InMemoryTextStateStore writeText() missing ResultInterest for: " + (state == null ? "unknown id" : state.id));
+      logger().log(
+              getClass().getSimpleName() +
+              " writeText() missing WriteResultInterest for: " +
+              (state == null ? "unknown id" : state.id));
     }
   }
 }
