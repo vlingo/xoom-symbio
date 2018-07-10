@@ -223,7 +223,7 @@ public class InMemoryTextStateStoreTest {
 
   @Test
   public void testThatReadErrorIsReported() {
-    interest.until = TestUntil.happenings(2);
+    interest.until = TestUntil.happenings(3);
     final Entity1 entity = new Entity1("123", 1);
     store.write(new TextState(entity.id, Entity1.class, 1, JsonSerialization.serialized(entity), 1), interest);
     store.read(null, Entity1.class, interest);
