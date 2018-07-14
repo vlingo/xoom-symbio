@@ -23,7 +23,7 @@ public class BatchWriteItemAsyncHandler implements AsyncHandler<BatchWriteItemRe
 
     @Override
     public void onError(Exception e) {
-        interest.writeResultedIn(StateStore.Result.NoTypeStore, state.id, null);
+        interest.writeResultedIn(StateStore.Result.NoTypeStore, new IllegalStateException(e), state.id, State.NullState.Text);
     }
 
     @Override

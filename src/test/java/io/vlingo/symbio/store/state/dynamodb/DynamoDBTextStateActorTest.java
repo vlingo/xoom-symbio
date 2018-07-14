@@ -23,15 +23,16 @@ import io.vlingo.symbio.store.state.TextStateStore;
 import io.vlingo.symbio.store.state.dynamodb.interests.CreateTableInterest;
 import org.junit.*;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 import static org.junit.Assert.assertNull;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.timeout;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.*;
 
 public class DynamoDBTextStateActorTest {
     private static final String DYNAMODB_HOST = "http://localhost:8000";
@@ -103,12 +104,12 @@ public class DynamoDBTextStateActorTest {
     }
 
     @Test
-    public void testThatCreatingATextStateActorCreatesTheDispatchableTable() throws Exception {
+    public void testThatCreatingATextStateActorCreatesTheDispatchableTable() {
         verify(createTableInterest).createDispatchableTable(dynamodb, DISPATCHABLE_TABLE_NAME);
     }
 
     @Test
-    public void testThatWritingAndReadingTransactionReturnsCurrentState() throws Exception {
+    public void testThatWritingAndReadingTransactionReturnsCurrentState() {
         State<String> currentState = randomState();
         stateStore.write(currentState, writeResultInterest);
         verify(writeResultInterest, timeout(DEFAULT_TIMEOUT)).writeResultedIn(StateStore.Result.Success, currentState.id, currentState);
@@ -118,7 +119,7 @@ public class DynamoDBTextStateActorTest {
     }
 
     @Test
-    public void testThatWritingToATableCallsCreateTableInterest() throws Exception {
+    public void testThatWritingToATableCallsCreateTableInterest() {
         dropTable(TABLE_NAME);
 
         stateStore.write(randomState(), writeResultInterest);
@@ -126,33 +127,47 @@ public class DynamoDBTextStateActorTest {
     }
 
     @Test
-    public void testThatWritingToATableThatDoesntExistFails() throws Exception {
+    public void testThatWritingToATableThatDoesntExistFails() {
         dropTable(TABLE_NAME);
         State<String> state = randomState();
 
         stateStore.write(state, writeResultInterest);
-        verify(writeResultInterest, timeout(DEFAULT_TIMEOUT)).writeResultedIn(StateStore.Result.NoTypeStore, state.id, null);
+        verify(writeResultInterest, timeout(DEFAULT_TIMEOUT)).writeResultedIn(
+                eq(StateStore.Result.NoTypeStore),
+                any(IllegalStateException.class),
+                eq(state.id),
+                eq(State.NullState.Text)
+        );
     }
 
     @Test
-    public void testThatReadingAnUnknownStateFailsWithNotFound() throws Exception {
+    public void testThatReadingAnUnknownStateFailsWithNotFound() {
         State<String> state = randomState();
 
         stateStore.read(state.id, Entity1.class, readResultInterest);
-        verify(readResultInterest, timeout(DEFAULT_TIMEOUT)).readResultedIn(StateStore.Result.NotFound, state.id, null);
+        verify(readResultInterest, timeout(DEFAULT_TIMEOUT)).readResultedIn(
+                StateStore.Result.NotFound,
+                state.id,
+                State.NullState.Text
+        );
     }
 
     @Test
-    public void testThatReadingOnAnUnknownTableFails() throws Exception {
+    public void testThatReadingOnAnUnknownTableFails() {
         dropTable(TABLE_NAME);
         State<String> state = randomState();
 
         stateStore.read(state.id, Entity1.class, readResultInterest);
-        verify(readResultInterest, timeout(DEFAULT_TIMEOUT)).readResultedIn(StateStore.Result.NoTypeStore, state.id, null);
+        verify(readResultInterest, timeout(DEFAULT_TIMEOUT)).readResultedIn(
+                eq(StateStore.Result.NoTypeStore),
+                any(IllegalStateException.class),
+                eq(state.id),
+                eq(State.NullState.Text)
+        );
     }
 
     @Test
-    public void testThatShouldNotAcceptWritingAnOldDataVersion() throws Exception {
+    public void testThatShouldNotAcceptWritingAnOldDataVersion() {
         State<String> oldState = randomState();
         State<String> newState = newFor(oldState);
 
@@ -164,7 +179,7 @@ public class DynamoDBTextStateActorTest {
     }
 
     @Test
-    public void testThatDispatchesOnWrite() throws Exception {
+    public void testThatDispatchesOnWrite() {
         State<String> state = randomState();
 
         stateStore.write(state, writeResultInterest);
@@ -174,7 +189,7 @@ public class DynamoDBTextStateActorTest {
     }
 
     @Test
-    public void testThatWritingStoresTheDispatchableOnDynamoDB() throws Exception {
+    public void testThatWritingStoresTheDispatchableOnDynamoDB() {
         State<String> state = randomState();
 
         stateStore.write(state, writeResultInterest);
@@ -185,7 +200,7 @@ public class DynamoDBTextStateActorTest {
     }
 
     @Test
-    public void testThatDispatchUnconfirmedShouldDispatchAllOnDynamoDB() throws Exception {
+    public void testThatDispatchUnconfirmedShouldDispatchAllOnDynamoDB() {
         State<String> state = randomState();
 
         stateStore.write(state, writeResultInterest);
@@ -198,7 +213,7 @@ public class DynamoDBTextStateActorTest {
     }
 
     @Test
-    public void testThatConfirmDispatchRemovesRecordFromDynamoDB() throws Exception {
+    public void testThatConfirmDispatchRemovesRecordFromDynamoDB() {
         State<String> state = randomState();
 
         stateStore.write(state, writeResultInterest);
@@ -214,7 +229,7 @@ public class DynamoDBTextStateActorTest {
     }
 
     @Test
-    public void testThatConfirmDispatchFailsWithFailureIfTableDoesNotExist() throws Exception {
+    public void testThatConfirmDispatchFailsWithFailureIfTableDoesNotExist() {
         dropTable(DISPATCHABLE_TABLE_NAME);
 
         String dispatchableId = UUID.randomUUID().toString();
@@ -292,5 +307,12 @@ public class DynamoDBTextStateActorTest {
                 .withEndpointConfiguration(DYNAMODB_ENDPOINT_CONFIGURATION)
                 .withCredentials(DYNAMODB_CREDENTIALS)
                 .build();
+    }
+
+    private void withRandomUnknownClass(State<String> state) throws Exception {
+        Field type = state.getClass().getField("type");
+        type.setAccessible(true);
+        type.set(state, "my.random.Class.that.doesnt.ExistClass");
+        type.setAccessible(false);
     }
 }

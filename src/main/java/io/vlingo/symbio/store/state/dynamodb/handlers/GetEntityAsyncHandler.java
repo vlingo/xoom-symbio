@@ -11,7 +11,7 @@ import io.vlingo.symbio.store.state.dynamodb.StateRecordAdapter;
 import java.util.Map;
 
 public class GetEntityAsyncHandler implements AsyncHandler<GetItemRequest, GetItemResult> {
-    private static final State NO_STATE = null;
+    private static final State<String> NO_STATE = State.NullState.Text;
     private final String id;
     private final StateStore.ReadResultInterest<String> interest;
 
@@ -22,7 +22,7 @@ public class GetEntityAsyncHandler implements AsyncHandler<GetItemRequest, GetIt
 
     @Override
     public void onError(Exception e) {
-        interest.readResultedIn(StateStore.Result.NoTypeStore, id, NO_STATE);
+        interest.readResultedIn(StateStore.Result.NoTypeStore, new IllegalStateException(e), id, NO_STATE);
     }
 
     @Override
@@ -37,7 +37,7 @@ public class GetEntityAsyncHandler implements AsyncHandler<GetItemRequest, GetIt
             State<String> state = StateRecordAdapter.unmarshallState(item);
             interest.readResultedIn(StateStore.Result.Success, id, state);
         } catch (ClassNotFoundException e) {
-            interest.readResultedIn(StateStore.Result.Failure, id, NO_STATE);
+            interest.readResultedIn(StateStore.Result.Failure, e, id, NO_STATE);
         }
     }
 }
