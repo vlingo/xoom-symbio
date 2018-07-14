@@ -18,34 +18,14 @@ import java.util.*;
 
 import static java.util.Collections.singletonList;
 
-public class DynamoDBTextStateActor extends Actor implements TextStateStore, StateStore.DispatcherControl  {
-    public static final String DISPATCHABLE_TABLE_NAME = "vlingo_dispatchables";
-
-    private final Dispatcher dispatcher;
-    private final AmazonDynamoDBAsync dynamodb;
+public class DynamoDBTextStateActor extends DynamoDBStateActor implements TextStateStore {
     private final CreateTableInterest createTableInterest;
 
     public DynamoDBTextStateActor(Dispatcher dispatcher, AmazonDynamoDBAsync dynamodb, CreateTableInterest createTableInterest) {
-        this.dispatcher = dispatcher;
-        this.dynamodb = dynamodb;
+        super(dispatcher, dynamodb);
         this.createTableInterest = createTableInterest;
 
         this.createTableInterest.createDispatchableTable(dynamodb, DISPATCHABLE_TABLE_NAME);
-    }
-
-    @Override
-    public void confirmDispatched(String dispatchId, ConfirmDispatchedResultInterest interest) {
-        dynamodb.deleteItemAsync(
-                new DeleteItemRequest(
-                        DISPATCHABLE_TABLE_NAME,
-                        TextStateRecordAdapter.marshallForQuery(dispatchId)),
-                new ConfirmDispatchableAsyncHandler(dispatchId, interest)
-        );
-    }
-
-    @Override
-    public void dispatchUnconfirmed() {
-        dynamodb.scanAsync(new ScanRequest(DISPATCHABLE_TABLE_NAME).withLimit(100), new DispatchAsyncHandler(dispatcher));
     }
 
     @Override
@@ -102,9 +82,4 @@ public class DynamoDBTextStateActor extends Actor implements TextStateStore, Sta
         return requests;
     }
 
-    private String tableFor(Class<?> type) {
-        String tableName = "vlingo_" + type.getCanonicalName().replace(".", "_");
-        StateTypeStateStoreMap.stateTypeToStoreName(type, tableName);
-        return tableName;
-    }
 }
