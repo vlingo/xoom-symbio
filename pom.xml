@@ -104,6 +104,12 @@
     </repository>
   </repositories>
   <dependencies>
+      <!-- Serialization libraries -->
+      <dependency>
+          <groupId>com.google.protobuf</groupId>
+          <artifactId>protobuf-java</artifactId>
+          <version>3.6.0</version>
+      </dependency>
       <!-- Basic Testing Dependencies -->
     <dependency>
       <groupId>junit</groupId>
