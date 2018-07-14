@@ -20,6 +20,7 @@ import io.vlingo.symbio.store.state.Entity1;
 import io.vlingo.symbio.store.state.StateStore;
 import io.vlingo.symbio.store.state.StateTypeStateStoreMap;
 import io.vlingo.symbio.store.state.TextStateStore;
+import io.vlingo.symbio.store.state.dynamodb.adapters.TextStateRecordAdapter;
 import io.vlingo.symbio.store.state.dynamodb.interests.CreateTableInterest;
 import org.junit.*;
 
@@ -291,7 +292,7 @@ public class DynamoDBTextStateActorTest {
 
     private StateStore.Dispatchable<String> dispatchableByState(State<String> state) {
         String dispatchableId = state.type + ":" + state.id;
-        GetItemResult item = dynamoDBSyncClient().getItem(DISPATCHABLE_TABLE_NAME, StateRecordAdapter.marshallForQuery(dispatchableId));
+        GetItemResult item = dynamoDBSyncClient().getItem(DISPATCHABLE_TABLE_NAME, TextStateRecordAdapter.marshallForQuery(dispatchableId));
 
         Map<String, AttributeValue> dispatchableSerializedItem = item.getItem();
         if (dispatchableSerializedItem == null) {

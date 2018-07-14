@@ -1,4 +1,4 @@
-package io.vlingo.symbio.store.state.dynamodb;
+package io.vlingo.symbio.store.state.dynamodb.adapters;
 
 import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import io.vlingo.common.serialization.JsonSerialization;
@@ -9,7 +9,7 @@ import io.vlingo.symbio.store.state.StateStore;
 import java.util.HashMap;
 import java.util.Map;
 
-public final class StateRecordAdapter {
+public final class TextStateRecordAdapter {
     private static final String ID_FIELD = "Id";
     private static final String STATE_FIELD = "State";
     private static final String DATA_FIELD = "Data";

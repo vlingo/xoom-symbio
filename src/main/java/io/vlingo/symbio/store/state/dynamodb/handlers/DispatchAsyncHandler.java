@@ -5,7 +5,7 @@ import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.amazonaws.services.dynamodbv2.model.ScanRequest;
 import com.amazonaws.services.dynamodbv2.model.ScanResult;
 import io.vlingo.symbio.store.state.StateStore;
-import io.vlingo.symbio.store.state.dynamodb.StateRecordAdapter;
+import io.vlingo.symbio.store.state.dynamodb.adapters.TextStateRecordAdapter;
 
 import java.util.List;
 import java.util.Map;
@@ -26,7 +26,7 @@ public class DispatchAsyncHandler implements AsyncHandler<ScanRequest, ScanResul
     public void onSuccess(ScanRequest request, ScanResult scanResult) {
         List<Map<String, AttributeValue>> items = scanResult.getItems();
         for (Map<String, AttributeValue> item : items) {
-            StateStore.Dispatchable<String> dispatchable = StateRecordAdapter.unmarshallDispatchable(item);
+            StateStore.Dispatchable<String> dispatchable = TextStateRecordAdapter.unmarshallDispatchable(item);
             dispatcher.dispatch(dispatchable.id, dispatchable.state.asTextState());
         }
     }

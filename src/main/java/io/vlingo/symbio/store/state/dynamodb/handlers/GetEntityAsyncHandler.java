@@ -6,7 +6,7 @@ import com.amazonaws.services.dynamodbv2.model.GetItemRequest;
 import com.amazonaws.services.dynamodbv2.model.GetItemResult;
 import io.vlingo.symbio.State;
 import io.vlingo.symbio.store.state.StateStore;
-import io.vlingo.symbio.store.state.dynamodb.StateRecordAdapter;
+import io.vlingo.symbio.store.state.dynamodb.adapters.TextStateRecordAdapter;
 
 import java.util.Map;
 
@@ -34,7 +34,7 @@ public class GetEntityAsyncHandler implements AsyncHandler<GetItemRequest, GetIt
         }
 
         try {
-            State<String> state = StateRecordAdapter.unmarshallState(item);
+            State<String> state = TextStateRecordAdapter.unmarshallState(item);
             interest.readResultedIn(StateStore.Result.Success, id, state);
         } catch (ClassNotFoundException e) {
             interest.readResultedIn(StateStore.Result.Failure, e, id, NO_STATE);
