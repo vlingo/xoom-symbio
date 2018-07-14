@@ -121,9 +121,9 @@ public class TextStateProjectionDispatcherTest extends ProjectionDispatcherTest 
 
       final Protocols.Two<ProjectionDispatcher, Projection> projectionFilter = Protocols.two(projectionProtocols);
 
-      projectionDispatcher.projectTo(projectionFilter.p2(), becauseOf);
+      projectionDispatcher.projectTo(projectionFilter._2, becauseOf);
 
-      return projectionFilter.p1();
+      return projectionFilter._1;
     }
 
     public FilterProjectionDispatcherActor(final FilterOutcome outcome) {

@@ -39,8 +39,8 @@ public abstract class ProjectionDispatcherTest {
                     new Class<?>[] { dispatcherInterfaceClass(), ProjectionDispatcher.class });
 
     final Protocols.Two<Dispatcher, ProjectionDispatcher> dispatchers = Protocols.two(dispatcherProtocols);
-    dispatcher = dispatchers.p1();
-    projectionDispatcher = dispatchers.p2();
+    dispatcher = dispatchers._1;
+    projectionDispatcher = dispatchers._2;
 
     final Protocols storeProtocols =
             world.actorFor(
@@ -48,8 +48,8 @@ public abstract class ProjectionDispatcherTest {
                     new Class<?>[] { stateStoreInterfaceClass(), DispatcherControl.class });
 
     final Protocols.Two<StateStore, DispatcherControl> storeWithControl = Protocols.two(storeProtocols);
-    store = storeWithControl.p1();
-    dispatcherControl = storeWithControl.p2();
+    store = storeWithControl._1;
+    dispatcherControl = storeWithControl._2;
 
     StateTypeStateStoreMap.stateTypeToStoreName(Entity1.class, Entity1.class.getSimpleName());
     StateTypeStateStoreMap.stateTypeToStoreName(Entity2.class, Entity2.class.getSimpleName());
