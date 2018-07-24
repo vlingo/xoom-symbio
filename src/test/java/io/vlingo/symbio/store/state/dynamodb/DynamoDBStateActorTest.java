@@ -12,7 +12,6 @@ import com.amazonaws.services.dynamodbv2.local.server.DynamoDBProxyServer;
 import com.amazonaws.services.dynamodbv2.model.*;
 import io.vlingo.actors.Protocols;
 import io.vlingo.actors.World;
-import io.vlingo.common.serialization.JsonSerialization;
 import io.vlingo.symbio.State;
 import io.vlingo.symbio.store.state.Entity1;
 import io.vlingo.symbio.store.state.StateStore;
@@ -32,13 +31,13 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
 
 public abstract class DynamoDBStateActorTest<T extends StateStore, K> {
+    protected static final int DEFAULT_TIMEOUT = 6000;
     private static final String DYNAMODB_HOST = "http://localhost:8000";
     private static final String DYNAMODB_REGION = "eu-west-1";
     private static final AWSStaticCredentialsProvider DYNAMODB_CREDENTIALS = new AWSStaticCredentialsProvider(new BasicAWSCredentials("1", "2"));
     private static final AwsClientBuilder.EndpointConfiguration DYNAMODB_ENDPOINT_CONFIGURATION = new AwsClientBuilder.EndpointConfiguration(DYNAMODB_HOST, DYNAMODB_REGION);
     private static final String TABLE_NAME = "vlingo_io_vlingo_symbio_store_state_Entity1";
     private static final String DISPATCHABLE_TABLE_NAME = "vlingo_dispatchables";
-    private static final int DEFAULT_TIMEOUT = 6000;
     private static DynamoDBProxyServer dynamodbServer;
 
     private World world;
@@ -67,11 +66,20 @@ public abstract class DynamoDBStateActorTest<T extends StateStore, K> {
     }
 
     protected abstract Protocols stateStoreProtocols(World world, StateStore.Dispatcher dispatcher, AmazonDynamoDBAsync dynamodb, CreateTableInterest interest);
+
     protected abstract void doWrite(T actor, State<K> state, StateStore.WriteResultInterest<K> interest);
+
     protected abstract void doRead(T actor, String id, Class<?> type, StateStore.ReadResultInterest<K> interest);
+
     protected abstract State<K> nullState();
+
     protected abstract State<K> randomState();
+
     protected abstract State<K> newFor(State<K> oldState);
+
+    protected abstract void verifyDispatched(StateStore.Dispatcher dispatcher, String id, StateStore.Dispatchable<K> dispatchable);
+
+    protected abstract void verifyDispatched(StateStore.Dispatcher dispatcher, String id, State<K> state);
 
     protected abstract RecordAdapter<K> recordAdapter();
 
@@ -188,7 +196,8 @@ public abstract class DynamoDBStateActorTest<T extends StateStore, K> {
         doWrite(stateStore, state, writeResultInterest);
         verify(writeResultInterest, timeout(DEFAULT_TIMEOUT)).writeResultedIn(StateStore.Result.Success, state.id, state);
 
-        verify(dispatcher, timeout(DEFAULT_TIMEOUT)).dispatch(state.type + ":" + state.id, state.asTextState());
+        verifyDispatched(dispatcher, state.type + ":" + state.id, state);
+//        verify(dispatcher, timeout(DEFAULT_TIMEOUT)).dispatch(state.type + ":" + state.id, state.asTextState());
     }
 
     @Test
@@ -198,7 +207,7 @@ public abstract class DynamoDBStateActorTest<T extends StateStore, K> {
         doWrite(stateStore, state, writeResultInterest);
         verify(writeResultInterest, timeout(DEFAULT_TIMEOUT)).writeResultedIn(StateStore.Result.Success, state.id, state);
 
-        StateStore.Dispatchable<String> dispatchable = dispatchableByState(state);
+        StateStore.Dispatchable<K> dispatchable = dispatchableByState(state);
         Assert.assertEquals(state, dispatchable.state);
     }
 
@@ -209,10 +218,11 @@ public abstract class DynamoDBStateActorTest<T extends StateStore, K> {
         doWrite(stateStore, state, writeResultInterest);
         verify(writeResultInterest, timeout(DEFAULT_TIMEOUT)).writeResultedIn(StateStore.Result.Success, state.id, state);
 
-        StateStore.Dispatchable<String> dispatchable = dispatchableByState(state);
+        StateStore.Dispatchable<K> dispatchable = dispatchableByState(state);
 
         dispatcherControl.dispatchUnconfirmed();
-        verify(dispatcher).dispatch(dispatchable.id, dispatchable.state.asTextState());
+        verifyDispatched(dispatcher, dispatchable.id, dispatchable);
+//        verify(dispatcher).dispatch(dispatchable.id, stateFromDispatchable(dispatchable));
     }
 
     @Test
@@ -222,7 +232,7 @@ public abstract class DynamoDBStateActorTest<T extends StateStore, K> {
         doWrite(stateStore, state, writeResultInterest);
         verify(writeResultInterest, timeout(DEFAULT_TIMEOUT)).writeResultedIn(StateStore.Result.Success, state.id, state);
 
-        StateStore.Dispatchable<String> dispatchable = dispatchableByState(state);
+        StateStore.Dispatchable<K> dispatchable = dispatchableByState(state);
         dispatcherControl.confirmDispatched(dispatchable.id, confirmDispatchedResultInterest);
 
         verify(confirmDispatchedResultInterest, timeout(DEFAULT_TIMEOUT))
@@ -271,7 +281,7 @@ public abstract class DynamoDBStateActorTest<T extends StateStore, K> {
         }
     }
 
-    private StateStore.Dispatchable<String> dispatchableByState(State<K> state) {
+    private StateStore.Dispatchable<K> dispatchableByState(State<K> state) {
         String dispatchableId = state.type + ":" + state.id;
         GetItemResult item = dynamoDBSyncClient().getItem(DISPATCHABLE_TABLE_NAME, recordAdapter().marshallForQuery(dispatchableId));
 
@@ -280,8 +290,7 @@ public abstract class DynamoDBStateActorTest<T extends StateStore, K> {
             return null;
         }
 
-        String stateAsJson = dispatchableSerializedItem.get("State").getS();
-        return new StateStore.Dispatchable<>(dispatchableId, JsonSerialization.deserialized(stateAsJson, State.TextState.class));
+        return recordAdapter().unmarshallDispatchable(dispatchableSerializedItem);
     }
 
     private AmazonDynamoDB dynamoDBSyncClient() {

@@ -15,6 +15,9 @@ import io.vlingo.symbio.store.state.dynamodb.interests.CreateTableInterest;
 
 import java.util.UUID;
 
+import static org.mockito.Mockito.timeout;
+import static org.mockito.Mockito.verify;
+
 public class DynamoDBTextStateActorTest extends DynamoDBStateActorTest<TextStateStore, String> {
     @Override
     protected Protocols stateStoreProtocols(World world, StateStore.Dispatcher dispatcher, AmazonDynamoDBAsync dynamodb, CreateTableInterest interest) {
@@ -61,6 +64,16 @@ public class DynamoDBTextStateActorTest extends DynamoDBStateActorTest<TextState
                 oldState.dataVersion + 1,
                 oldState.metadata
         );
+    }
+
+    @Override
+    protected void verifyDispatched(StateStore.Dispatcher dispatcher, String id, StateStore.Dispatchable<String> dispatchable) {
+        verify(dispatcher).dispatch(dispatchable.id, dispatchable.state.asTextState());
+    }
+
+    @Override
+    protected void verifyDispatched(StateStore.Dispatcher dispatcher, String id, State<String> state) {
+        verify(dispatcher, timeout(DEFAULT_TIMEOUT)).dispatch(id, state.asTextState());
     }
 
     @Override

@@ -9,20 +9,21 @@ import io.vlingo.symbio.State;
 import io.vlingo.symbio.store.state.BinaryStateStore;
 import io.vlingo.symbio.store.state.Entity1;
 import io.vlingo.symbio.store.state.StateStore;
-import io.vlingo.symbio.store.state.TextStateStore;
 import io.vlingo.symbio.store.state.dynamodb.adapters.BinaryStateRecordAdapter;
 import io.vlingo.symbio.store.state.dynamodb.adapters.RecordAdapter;
-import io.vlingo.symbio.store.state.dynamodb.adapters.TextStateRecordAdapter;
 import io.vlingo.symbio.store.state.dynamodb.interests.CreateTableInterest;
 
 import java.util.UUID;
+
+import static org.mockito.Mockito.timeout;
+import static org.mockito.Mockito.verify;
 
 public class DynamoDBBinaryStateActorTest extends DynamoDBStateActorTest<BinaryStateStore, byte[]> {
     @Override
     protected Protocols stateStoreProtocols(World world, StateStore.Dispatcher dispatcher, AmazonDynamoDBAsync dynamodb, CreateTableInterest interest) {
         return world.actorFor(
                 Definition.has(DynamoDBBinaryStateActor.class, Definition.parameters(dispatcher, dynamodb, interest)),
-                new Class[]{State.BinaryState.class, StateStore.DispatcherControl.class}
+                new Class[]{BinaryStateStore.class, StateStore.DispatcherControl.class}
         );
     }
 
@@ -63,6 +64,16 @@ public class DynamoDBBinaryStateActorTest extends DynamoDBStateActorTest<BinaryS
                 oldState.dataVersion + 1,
                 oldState.metadata
         );
+    }
+
+    @Override
+    protected void verifyDispatched(StateStore.Dispatcher dispatcher, String id, StateStore.Dispatchable<byte[]> dispatchable) {
+        verify(dispatcher).dispatch(dispatchable.id, dispatchable.state.asBinaryState());
+    }
+
+    @Override
+    protected void verifyDispatched(StateStore.Dispatcher dispatcher, String id, State<byte[]> state) {
+        verify(dispatcher, timeout(DEFAULT_TIMEOUT)).dispatch(id, state.asBinaryState());
     }
 
     @Override
