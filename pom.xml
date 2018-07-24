@@ -106,9 +106,9 @@
   <dependencies>
       <!-- Serialization libraries -->
       <dependency>
-          <groupId>com.google.protobuf</groupId>
-          <artifactId>protobuf-java</artifactId>
-          <version>3.6.0</version>
+          <groupId>org.msgpack</groupId>
+          <artifactId>msgpack</artifactId>
+          <version>0.6.12</version>
       </dependency>
       <!-- Basic Testing Dependencies -->
     <dependency>

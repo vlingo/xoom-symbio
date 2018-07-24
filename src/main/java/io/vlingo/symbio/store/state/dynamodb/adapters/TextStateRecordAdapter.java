@@ -9,7 +9,7 @@ import io.vlingo.symbio.store.state.StateStore;
 import java.util.HashMap;
 import java.util.Map;
 
-public final class TextStateRecordAdapter {
+public final class TextStateRecordAdapter implements RecordAdapter<String> {
     private static final String ID_FIELD = "Id";
     private static final String STATE_FIELD = "State";
     private static final String DATA_FIELD = "Data";
@@ -18,7 +18,8 @@ public final class TextStateRecordAdapter {
     private static final String TYPE_VERSION_FIELD = "TypeVersion";
     private static final String DATA_VERSION_FIELD = "DataVersion";
 
-    public static Map<String, AttributeValue> marshall(State<String> state) {
+    @Override
+    public Map<String, AttributeValue> marshallState(State<String> state) {
         String metadataAsJson = JsonSerialization.serialized(state.metadata);
 
         Map<String, AttributeValue> stateItem = new HashMap<>();
@@ -32,7 +33,8 @@ public final class TextStateRecordAdapter {
         return stateItem;
     }
 
-    public static Map<String, AttributeValue> marshall(StateStore.Dispatchable<String> dispatchable) {
+    @Override
+    public Map<String, AttributeValue> marshallDispatchable(StateStore.Dispatchable<String> dispatchable) {
         Map<String, AttributeValue> stateItem = new HashMap<>();
         stateItem.put(ID_FIELD, new AttributeValue().withS(dispatchable.id));
         stateItem.put(STATE_FIELD, new AttributeValue().withS(JsonSerialization.serialized(dispatchable.state)));
@@ -40,25 +42,32 @@ public final class TextStateRecordAdapter {
         return stateItem;
     }
 
-    public static Map<String, AttributeValue> marshallForQuery(String id) {
+    @Override
+    public Map<String, AttributeValue> marshallForQuery(String id) {
         Map<String, AttributeValue> stateItem = new HashMap<>();
         stateItem.put(ID_FIELD, new AttributeValue().withS(id));
 
         return stateItem;
     }
 
-    public static State<String> unmarshallState(Map<String, AttributeValue> record) throws ClassNotFoundException {
-        return new State.TextState(
-                record.get(ID_FIELD).getS(),
-                Class.forName(record.get(TYPE_FIELD).getS()),
-                Integer.valueOf(record.get(TYPE_VERSION_FIELD).getN()),
-                record.get(DATA_FIELD).getS(),
-                Integer.valueOf(record.get(DATA_VERSION_FIELD).getN()),
-                JsonSerialization.deserialized(record.get(METADATA_FIELD).getS(), Metadata.class)
-        );
+    @Override
+    public State<String> unmarshallState(Map<String, AttributeValue> record) {
+        try {
+            return new State.TextState(
+                    record.get(ID_FIELD).getS(),
+                    Class.forName(record.get(TYPE_FIELD).getS()),
+                    Integer.valueOf(record.get(TYPE_VERSION_FIELD).getN()),
+                    record.get(DATA_FIELD).getS(),
+                    Integer.valueOf(record.get(DATA_VERSION_FIELD).getN()),
+                    JsonSerialization.deserialized(record.get(METADATA_FIELD).getS(), Metadata.class)
+            );
+        } catch (ClassNotFoundException e) {
+            throw new IllegalStateException(e);
+        }
     }
 
-    public static StateStore.Dispatchable<String> unmarshallDispatchable(Map<String, AttributeValue> item) {
+    @Override
+    public StateStore.Dispatchable<String> unmarshallDispatchable(Map<String, AttributeValue> item) {
         String id = item.get(ID_FIELD).getS();
         String json = item.get(STATE_FIELD).getS();
 

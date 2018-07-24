@@ -6,29 +6,33 @@ import com.amazonaws.services.dynamodbv2.model.BatchWriteItemResult;
 import io.vlingo.symbio.State;
 import io.vlingo.symbio.store.state.StateStore;
 
-import static io.vlingo.symbio.store.state.dynamodb.DynamoDBTextStateActor.DISPATCHABLE_TABLE_NAME;
+import java.util.function.Function;
 
-public class BatchWriteItemAsyncHandler implements AsyncHandler<BatchWriteItemRequest, BatchWriteItemResult> {
-    private final State<String> state;
-    private final StateStore.WriteResultInterest<String> interest;
-    private final StateStore.Dispatchable<String> dispatchable;
+public class BatchWriteItemAsyncHandler<T> implements AsyncHandler<BatchWriteItemRequest, BatchWriteItemResult> {
+    private final State<T> state;
+    private final StateStore.WriteResultInterest<T> interest;
+    private final StateStore.Dispatchable<T> dispatchable;
     private final StateStore.Dispatcher dispatcher;
+    private final State<T> nullState;
+    private final Function<StateStore.Dispatchable<T>, Void> dispatchState;
 
-    public BatchWriteItemAsyncHandler(State<String> state, StateStore.WriteResultInterest<String> interest, StateStore.Dispatchable<String> dispatchable, StateStore.Dispatcher dispatcher) {
+    public BatchWriteItemAsyncHandler(State<T> state, StateStore.WriteResultInterest<T> interest, StateStore.Dispatchable<T> dispatchable, StateStore.Dispatcher dispatcher, State<T> nullState, Function<StateStore.Dispatchable<T>, Void> dispatchState) {
         this.state = state;
         this.interest = interest;
         this.dispatchable = dispatchable;
         this.dispatcher = dispatcher;
+        this.nullState = nullState;
+        this.dispatchState = dispatchState;
     }
 
     @Override
     public void onError(Exception e) {
-        interest.writeResultedIn(StateStore.Result.NoTypeStore, new IllegalStateException(e), state.id, State.NullState.Text);
+        interest.writeResultedIn(StateStore.Result.NoTypeStore, new IllegalStateException(e), state.id, nullState);
     }
 
     @Override
     public void onSuccess(BatchWriteItemRequest request, BatchWriteItemResult batchWriteItemResult) {
         interest.writeResultedIn(StateStore.Result.Success, state.id, state);
-        dispatcher.dispatch(dispatchable.id, dispatchable.state.asTextState());
+        dispatchState.apply(dispatchable);
     }
 }

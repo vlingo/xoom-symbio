@@ -17,7 +17,7 @@ import io.vlingo.symbio.State;
 import io.vlingo.symbio.store.state.Entity1;
 import io.vlingo.symbio.store.state.StateStore;
 import io.vlingo.symbio.store.state.StateTypeStateStoreMap;
-import io.vlingo.symbio.store.state.dynamodb.adapters.TextStateRecordAdapter;
+import io.vlingo.symbio.store.state.dynamodb.adapters.RecordAdapter;
 import io.vlingo.symbio.store.state.dynamodb.interests.CreateTableInterest;
 import org.junit.*;
 
@@ -67,16 +67,13 @@ public abstract class DynamoDBStateActorTest<T extends StateStore, K> {
     }
 
     protected abstract Protocols stateStoreProtocols(World world, StateStore.Dispatcher dispatcher, AmazonDynamoDBAsync dynamodb, CreateTableInterest interest);
-
     protected abstract void doWrite(T actor, State<K> state, StateStore.WriteResultInterest<K> interest);
-
     protected abstract void doRead(T actor, String id, Class<?> type, StateStore.ReadResultInterest<K> interest);
-
     protected abstract State<K> nullState();
-
     protected abstract State<K> randomState();
-
     protected abstract State<K> newFor(State<K> oldState);
+
+    protected abstract RecordAdapter<K> recordAdapter();
 
     @Before
     public void setUp() {
@@ -276,7 +273,7 @@ public abstract class DynamoDBStateActorTest<T extends StateStore, K> {
 
     private StateStore.Dispatchable<String> dispatchableByState(State<K> state) {
         String dispatchableId = state.type + ":" + state.id;
-        GetItemResult item = dynamoDBSyncClient().getItem(DISPATCHABLE_TABLE_NAME, TextStateRecordAdapter.marshallForQuery(dispatchableId));
+        GetItemResult item = dynamoDBSyncClient().getItem(DISPATCHABLE_TABLE_NAME, recordAdapter().marshallForQuery(dispatchableId));
 
         Map<String, AttributeValue> dispatchableSerializedItem = item.getItem();
         if (dispatchableSerializedItem == null) {

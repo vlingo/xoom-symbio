@@ -9,6 +9,8 @@ import io.vlingo.symbio.State;
 import io.vlingo.symbio.store.state.Entity1;
 import io.vlingo.symbio.store.state.StateStore;
 import io.vlingo.symbio.store.state.TextStateStore;
+import io.vlingo.symbio.store.state.dynamodb.adapters.RecordAdapter;
+import io.vlingo.symbio.store.state.dynamodb.adapters.TextStateRecordAdapter;
 import io.vlingo.symbio.store.state.dynamodb.interests.CreateTableInterest;
 
 import java.util.UUID;
@@ -59,5 +61,10 @@ public class DynamoDBTextStateActorTest extends DynamoDBStateActorTest<TextState
                 oldState.dataVersion + 1,
                 oldState.metadata
         );
+    }
+
+    @Override
+    protected RecordAdapter<String> recordAdapter() {
+        return new TextStateRecordAdapter();
     }
 }
