@@ -255,7 +255,7 @@ public class InMemoryTextStateStoreTest {
 
   @Before
   public void setUp() {
-    world = World.start("test-store", true);
+    world = World.startWithDefaults("test-store");
 
     interest = new MockResultInterest(0);
     dispatcher = new MockTextDispatcher(0, interest);
