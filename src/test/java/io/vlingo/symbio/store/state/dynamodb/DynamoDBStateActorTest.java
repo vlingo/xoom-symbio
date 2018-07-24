@@ -88,7 +88,7 @@ public abstract class DynamoDBStateActorTest<T extends StateStore, K> {
         createTable(TABLE_NAME);
         createTable(DISPATCHABLE_TABLE_NAME);
 
-        world = World.start(UUID.randomUUID().toString(), true);
+        world = World.startWithDefaults(UUID.randomUUID().toString());
 
         dynamodb = AmazonDynamoDBAsyncClient.asyncBuilder()
                 .withCredentials(DYNAMODB_CREDENTIALS)
