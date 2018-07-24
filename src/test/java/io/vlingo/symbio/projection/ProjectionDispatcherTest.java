@@ -31,7 +31,7 @@ public abstract class ProjectionDispatcherTest {
 
   @Before
   public void setUp() {
-    world = World.start("test-store", true);
+    world = World.startWithDefaults("test-store");
 
     final Protocols dispatcherProtocols =
             world.actorFor(
