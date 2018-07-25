@@ -20,8 +20,10 @@ These are the available storage implementations:
 
    - In-memory binary: `InMemoryBinaryStateStoreActor`
    - In-memory text: `InMemoryTextStateStoreActor`
+   - DynamoDB Text Store: `DynamoDBTextStateActor`
+   - DynamoDB Binary Store: `DynamoDBBinaryStateActor`
    - General-purpose JDBC: `JDBCTextStateStoreActor`
-
+   
 The `JDBCTextStateStoreActor` has these database delegate implementations:
 
    - HSQLDB: `HSQLDBStorageDelegate`

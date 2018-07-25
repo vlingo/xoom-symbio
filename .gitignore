@@ -16,3 +16,6 @@ build/
 *.ipr
 .gradle/
 out/
+
+# DynamoDB
+native-libs/
