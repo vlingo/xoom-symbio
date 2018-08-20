@@ -31,12 +31,22 @@ public class InMemoryBinaryStateStoreActor extends InMemoryStateStoreActor<byte[
 
   @Override
   public void read(final String id, Class<?> type, final ReadResultInterest<byte[]> interest) {
-    readFor(id, type, interest);
+    readFor(id, type, interest, null);
+  }
+
+  @Override
+  public void read(final String id, Class<?> type, final ReadResultInterest<byte[]> interest, final Object object) {
+    readFor(id, type, interest, object);
   }
 
   @Override
   public void write(final State<byte[]> state, final WriteResultInterest<byte[]> interest) {
-    writeWith(state, interest);
+    writeWith(state, interest, null);
+  }
+
+  @Override
+  public void write(final State<byte[]> state, final WriteResultInterest<byte[]> interest, final Object object) {
+    writeWith(state, interest, object);
   }
 
   @Override
