@@ -86,18 +86,18 @@ public interface StateStore {
 
   public static interface Dispatcher {
     void controlWith(final DispatcherControl control);
-    default <T> void dispatch(final String dispatchId, final BinaryState state) { }
-    default <T> void dispatch(final String dispatchId, final TextState state) { }
+    default void dispatch(final String dispatchId, final BinaryState state) { }
+    default void dispatch(final String dispatchId, final TextState state) { }
   }
 
   public static interface ReadResultInterest<T> {
-    void readResultedIn(final Result result, final String id, final State<T> state);
-    void readResultedIn(final Result result, final Exception cause, final String id, final State<T> state);
+    void readResultedIn(final Result result, final String id, final State<T> state, final Object object);
+    void readResultedIn(final Result result, final Exception cause, final String id, final State<T> state, final Object object);
   }
 
   public static interface WriteResultInterest<T> {
-    void writeResultedIn(final Result result, final String id, final State<T> state);
-    void writeResultedIn(final Result result, final Exception cause, final String id, final State<T> state);
+    void writeResultedIn(final Result result, final String id, final State<T> state, final Object object);
+    void writeResultedIn(final Result result, final Exception cause, final String id, final State<T> state, final Object object);
   }
 
   public static interface StorageDelegate {

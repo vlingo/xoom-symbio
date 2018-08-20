@@ -22,18 +22,18 @@ public class StateStoreWriteResultInterest__Proxy<T> implements WriteResultInter
   }
 
   @SuppressWarnings({ "rawtypes", "unchecked" })
-  public void writeResultedIn(io.vlingo.symbio.store.state.StateStore.Result arg0, java.lang.String arg1, io.vlingo.symbio.State<T> arg2) {
+  public void writeResultedIn(io.vlingo.symbio.store.state.StateStore.Result arg0, java.lang.String arg1, io.vlingo.symbio.State<T> arg2, final Object arg3) {
     if (!actor.isStopped()) {
-      final Consumer<WriteResultInterest<T>> consumer = (actor) -> actor.writeResultedIn(arg0, arg1, arg2);
+      final Consumer<WriteResultInterest<T>> consumer = (actor) -> actor.writeResultedIn(arg0, arg1, arg2, arg3);
       mailbox.send(new LocalMessage(actor, WriteResultInterest.class, consumer, writeResultedInRepresentation1));
     } else {
       actor.deadLetters().failedDelivery(new DeadLetter(actor, writeResultedInRepresentation1));
     }
   }
   @SuppressWarnings({ "rawtypes", "unchecked" })
-  public void writeResultedIn(io.vlingo.symbio.store.state.StateStore.Result arg0, java.lang.Exception arg1, java.lang.String arg2, io.vlingo.symbio.State<T> arg3) {
+  public void writeResultedIn(io.vlingo.symbio.store.state.StateStore.Result arg0, java.lang.Exception arg1, java.lang.String arg2, io.vlingo.symbio.State<T> arg3, final Object arg4) {
     if (!actor.isStopped()) {
-      final Consumer<WriteResultInterest<T>> consumer = (actor) -> actor.writeResultedIn(arg0, arg1, arg2, arg3);
+      final Consumer<WriteResultInterest<T>> consumer = (actor) -> actor.writeResultedIn(arg0, arg1, arg2, arg3, arg4);
       mailbox.send(new LocalMessage(actor, WriteResultInterest.class, consumer, writeResultedInRepresentation2));
     } else {
       actor.deadLetters().failedDelivery(new DeadLetter(actor, writeResultedInRepresentation2));

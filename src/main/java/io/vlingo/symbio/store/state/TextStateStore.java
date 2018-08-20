@@ -11,7 +11,9 @@ import io.vlingo.symbio.State;
 
 public interface TextStateStore extends StateStore {
   void read(final String id, final Class<?> type, final ReadResultInterest<String> interest);
+  void read(final String id, final Class<?> type, final ReadResultInterest<String> interest, final Object object);
   void write(final State<String> state, final WriteResultInterest<String> interest);
+  void write(final State<String> state, final WriteResultInterest<String> interest, final Object object);
 
   public static interface TextDispatcher extends Dispatcher {
     void dispatchText(final String dispatchId, final State<String> state);

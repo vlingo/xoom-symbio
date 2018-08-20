@@ -11,7 +11,9 @@ import io.vlingo.symbio.State;
 
 public interface BinaryStateStore extends StateStore {
   void read(final String id, final Class<?> type, final ReadResultInterest<byte[]> interest);
+  void read(final String id, final Class<?> type, final ReadResultInterest<byte[]> interest, final Object object);
   void write(final State<byte[]> state, final WriteResultInterest<byte[]> interest);
+  void write(final State<byte[]> state, final WriteResultInterest<byte[]> interest, final Object object);
 
   public static interface BinaryDispatcher extends Dispatcher {
     void dispatchBinary(final String dispatchId, final State<byte[]> state);
