@@ -45,7 +45,7 @@ public class MockResultInterest
   }
 
   @Override
-  public void readResultedIn(final Result result, final String id, final State<String> state) {
+  public void readResultedIn(final Result result, final String id, final State<String> state, final Object object) {
     readTextResultedIn.incrementAndGet();
     textReadResult.set(result);
     textState.set(state);
@@ -53,7 +53,7 @@ public class MockResultInterest
   }
 
   @Override
-  public void readResultedIn(final Result result, final Exception cause, final String id, final State<String> state) {
+  public void readResultedIn(final Result result, final Exception cause, final String id, final State<String> state, final Object object) {
     readTextResultedIn.incrementAndGet();
     textReadResult.set(result);
     textState.set(state);
@@ -62,7 +62,7 @@ public class MockResultInterest
   }
 
   @Override
-  public void writeResultedIn(final Result result, final String id, final State<String> state) {
+  public void writeResultedIn(final Result result, final String id, final State<String> state, final Object object) {
     writeTextResultedIn.incrementAndGet();
     textWriteResult.set(result);
     textWriteAccumulatedResults.add(result);
@@ -71,7 +71,7 @@ public class MockResultInterest
   }
 
   @Override
-  public void writeResultedIn(final Result result, final Exception cause, final String id, final State<String> state) {
+  public void writeResultedIn(final Result result, final Exception cause, final String id, final State<String> state, final Object object) {
     writeTextResultedIn.incrementAndGet();
     textWriteResult.set(result);
     textWriteAccumulatedResults.add(result);
