@@ -7,6 +7,9 @@
 
 package io.vlingo.symbio.projection.state;
 
+import java.util.Arrays;
+import java.util.Collection;
+
 import io.vlingo.symbio.projection.AbstractProjectionDispatcherActor;
 import io.vlingo.symbio.projection.Projectable;
 import io.vlingo.symbio.projection.Projection;
@@ -25,6 +28,12 @@ public abstract class StateProjectionDispatcherActor extends AbstractProjectionD
   private final ProjectionControl projectionControl;
 
   protected StateProjectionDispatcherActor() {
+    this(Arrays.asList());
+  }
+
+  protected StateProjectionDispatcherActor(final Collection<ProjectToDescription> projectToDescriptions) {
+    super(projectToDescriptions);
+
     this.interest = selfAs(ConfirmDispatchedResultInterest.class);
     this.projectionControl = new ProjectionControl() {
       @Override

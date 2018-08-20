@@ -14,6 +14,7 @@ public interface Projectable {
   int dataVersion();
   String dataId();
   String metadata();
+  <T> T object();
   String projectionId();
   String type();
   int typeVersion();

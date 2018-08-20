@@ -20,6 +20,11 @@ public abstract class ProjectableState implements Projectable {
   }
 
   @Override
+  public String becauseOf() {
+    return state.metadata.operation;
+  }
+
+  @Override
   public byte[] dataAsBytes() {
     throw new UnsupportedOperationException("Projectable data is not binary compatible.");
   }
@@ -45,8 +50,9 @@ public abstract class ProjectableState implements Projectable {
   }
 
   @Override
-  public String becauseOf() {
-    return state.metadata.operation;
+  @SuppressWarnings("unchecked")
+  public <T> T object() {
+    return (T) state.metadata.object;
   }
 
   @Override

@@ -7,6 +7,8 @@
 
 package io.vlingo.symbio.projection.state;
 
+import java.util.Collection;
+
 import io.vlingo.symbio.State;
 import io.vlingo.symbio.projection.ProjectionDispatcher;
 import io.vlingo.symbio.store.state.TextStateStore.TextDispatcher;
@@ -16,6 +18,10 @@ public class TextStateProjectionDispatcherActor extends StateProjectionDispatche
 
   public TextStateProjectionDispatcherActor() {
     super();
+  }
+
+  public TextStateProjectionDispatcherActor(final Collection<ProjectToDescription> projectToDescriptions) {
+    super(projectToDescriptions);
   }
 
   @Override

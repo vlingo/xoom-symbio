@@ -7,15 +7,30 @@
 
 package io.vlingo.symbio.projection;
 
+import java.util.Collection;
 import java.util.List;
 
 import io.vlingo.actors.Actor;
+import io.vlingo.actors.Definition;
 
 public class AbstractProjectionDispatcherActor extends Actor implements ProjectionDispatcher {
   private final MatchableProjections matchableProjections;
 
   protected AbstractProjectionDispatcherActor() {
     this.matchableProjections = new MatchableProjections();
+  }
+
+  protected AbstractProjectionDispatcherActor(final Collection<ProjectToDescription> projectToDescriptions) {
+    this();
+
+    for (final ProjectToDescription discription : projectToDescriptions) {
+      final Projection projection =
+              stage().actorFor(
+                      Definition.has(discription.projectionType, Definition.NoParameters),
+                      Projection.class);
+
+      projectTo(projection, discription.becauseOf);
+    }
   }
 
   //=====================================
