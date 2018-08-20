@@ -36,7 +36,7 @@ public class ProjectableTextStateTest {
   }
 
   @Test(expected = UnsupportedOperationException.class)
-  public void testProjectableNotText() {
+  public void testProjectableNotBytes() {
     final String textState = "test-state";
     final TextState state =
             new TextState("123", String.class, 1, textState, 1, Metadata.with("value", "op"));

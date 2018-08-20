@@ -9,6 +9,7 @@ package io.vlingo.symbio.projection.state;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.Test;
@@ -25,7 +26,9 @@ import io.vlingo.symbio.projection.Projectable;
 import io.vlingo.symbio.projection.Projection;
 import io.vlingo.symbio.projection.ProjectionControl;
 import io.vlingo.symbio.projection.ProjectionDispatcher;
+import io.vlingo.symbio.projection.ProjectionDispatcher.ProjectToDescription;
 import io.vlingo.symbio.projection.ProjectionDispatcherTest;
+import io.vlingo.symbio.projection.state.DescribedProjection.Outcome;
 import io.vlingo.symbio.store.state.Entity1;
 import io.vlingo.symbio.store.state.Entity2;
 import io.vlingo.symbio.store.state.MockResultInterest;
@@ -62,6 +65,28 @@ public class TextStateProjectionDispatcherTest extends ProjectionDispatcherTest 
     assertEquals(2, projection.projectedDataIds.size());
     assertEquals("123-1", projection.projectedDataIds.get(0));
     assertEquals("123-2", projection.projectedDataIds.get(1));
+  }
+
+  @Test
+  public void testThatDescribedProjectionsRegister() {
+    final ProjectToDescription description = new ProjectToDescription(DescribedProjection.class, "op1;op2");
+
+    final TextDispatcher dispatcher =
+            world.actorFor(
+                    Definition.has(
+                            TextStateProjectionDispatcherActor.class,
+                            Definition.parameters(Arrays.asList(description))),
+                    TextDispatcher.class);
+
+    final Outcome outcome = new Outcome(2);
+    dispatcher.controlWith(outcome);
+
+    dispatcher.dispatchText("123", new TextState("123", Object.class, 1, "blah1", 1, Metadata.with("", "op1")));
+    dispatcher.dispatchText("123", new TextState("123", Object.class, 1, "blah2", 1, Metadata.with("", "op2")));
+
+    outcome.until.completes();
+
+    assertEquals(2, outcome.count.get());
   }
 
   @Test
