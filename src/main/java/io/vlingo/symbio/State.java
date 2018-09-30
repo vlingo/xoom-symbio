@@ -11,6 +11,7 @@ import java.util.Comparator;
 
 public abstract class State<T> implements Comparable<State<T>> {
   private final static byte[] EmptyBytesData = new byte[0];
+  private final static Object EmptyObjectData = new Object() { @Override public String toString() { return "(empty)"; } };
   private final static String EmptyTextData = "";
   private final static String NoOp = "";
 
@@ -44,6 +45,11 @@ public abstract class State<T> implements Comparable<State<T>> {
     return (BinaryState) this;
   }
 
+  @SuppressWarnings("unchecked")
+  public ObjectState<T> asObjectState() {
+    return (ObjectState<T>) this;
+  }
+
   public TextState asTextState() {
     return (TextState) this;
   }
@@ -61,6 +67,10 @@ public abstract class State<T> implements Comparable<State<T>> {
   }
 
   public boolean isNull() {
+    return false;
+  }
+
+  public boolean isObject() {
     return false;
   }
 
@@ -108,7 +118,7 @@ public abstract class State<T> implements Comparable<State<T>> {
   public String toString() {
     return getClass().getSimpleName() +
             "[id=" + id + " type=" + type + " typeVersion=" + typeVersion +
-            " data=" + (isText() ? data.toString() : "(binary)") + " dataVersion=" + dataVersion +
+            " data=" + (isText() || isObject() ? data.toString() : "(binary)") + " dataVersion=" + dataVersion +
             " metadata=" + metadata + "]";
   }
 
@@ -155,6 +165,31 @@ public abstract class State<T> implements Comparable<State<T>> {
     }
   }
 
+  public static final class ObjectState<T> extends State<Object> {
+    public ObjectState(final String id, final Class<?> type, final int typeVersion, final T data, final int dataVersion, final Metadata metadata) {
+      super(id, type, typeVersion, data, dataVersion, metadata);
+    }
+
+    public ObjectState(String id, Class<?> type, int typeVersion, T data, int dataVersion) {
+      super(id, type, typeVersion, data, dataVersion);
+    }
+
+    @SuppressWarnings("unchecked")
+    public ObjectState() {
+      super(NoOp, Object.class, 1, (T) State.EmptyObjectData, 1, Metadata.nullMetadata());
+    }
+
+    @Override
+    public boolean isEmpty() {
+      return data == State.EmptyObjectData;
+    }
+
+    @Override
+    public boolean isObject() {
+      return true;
+    }
+  }
+
   public static final class TextState extends State<String> {
     public TextState(final String id, final Class<?> type, final int typeVersion, final String data, final int dataVersion, final Metadata metadata) {
       super(id, type, typeVersion, data, dataVersion, metadata);
@@ -181,6 +216,7 @@ public abstract class State<T> implements Comparable<State<T>> {
 
   public static final class NullState<T> extends State<T> {
     public static NullState<byte[]> Binary = new NullState<>(EmptyBytesData);
+    public static NullState<Object> Object = new NullState<>(EmptyObjectData);
     public static NullState<String> Text = new NullState<>(EmptyTextData);
 
     private NullState(final T data) {
