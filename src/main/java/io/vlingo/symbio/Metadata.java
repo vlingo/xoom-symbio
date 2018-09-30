@@ -10,7 +10,7 @@ package io.vlingo.symbio;
 import java.util.Comparator;
 
 public class Metadata implements Comparable<Metadata> {
-  public final static Object EmptyObject = new Object();
+  public final static Object EmptyObject = new Object() { @Override public String toString() { return "(empty)"; } };
 
   public final Object object;
   public final String operation;
