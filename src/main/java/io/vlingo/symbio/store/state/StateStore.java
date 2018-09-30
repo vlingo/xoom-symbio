@@ -11,6 +11,7 @@ import java.util.Collection;
 
 import io.vlingo.symbio.State;
 import io.vlingo.symbio.State.BinaryState;
+import io.vlingo.symbio.State.ObjectState;
 import io.vlingo.symbio.State.TextState;
 
 public interface StateStore {
@@ -87,6 +88,7 @@ public interface StateStore {
   public static interface Dispatcher {
     void controlWith(final DispatcherControl control);
     default void dispatch(final String dispatchId, final BinaryState state) { }
+    default void dispatch(final String dispatchId, final ObjectState<?> state) { }
     default void dispatch(final String dispatchId, final TextState state) { }
   }
 
