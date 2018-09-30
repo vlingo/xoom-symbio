@@ -22,7 +22,7 @@ import io.vlingo.common.serialization.JsonSerialization;
 import io.vlingo.symbio.Metadata;
 import io.vlingo.symbio.State.TextState;
 import io.vlingo.symbio.store.state.Entity1;
-import io.vlingo.symbio.store.state.MockResultInterest;
+import io.vlingo.symbio.store.state.MockTextResultInterest;
 import io.vlingo.symbio.store.state.MockTextDispatcher;
 import io.vlingo.symbio.store.state.StateStore.Result;
 import io.vlingo.symbio.store.state.StateTypeStateStoreMap;
@@ -32,7 +32,7 @@ public class InMemoryTextStateStoreTest {
   private final static String StoreName = Entity1.class.getSimpleName();
 
   private MockTextDispatcher dispatcher;
-  private MockResultInterest interest;
+  private MockTextResultInterest interest;
   private TextStateStore store;
   private World world;
 
@@ -257,7 +257,7 @@ public class InMemoryTextStateStoreTest {
   public void setUp() {
     world = World.startWithDefaults("test-store");
 
-    interest = new MockResultInterest(0);
+    interest = new MockTextResultInterest(0);
     dispatcher = new MockTextDispatcher(0, interest);
 
     store = world.actorFor(Definition.has(InMemoryTextStateStoreActor.class, Definition.parameters(dispatcher)), TextStateStore.class);
