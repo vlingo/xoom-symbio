@@ -18,7 +18,7 @@ import io.vlingo.symbio.store.state.StateStore.ReadResultInterest;
 import io.vlingo.symbio.store.state.StateStore.Result;
 import io.vlingo.symbio.store.state.StateStore.WriteResultInterest;
 
-public class MockResultInterest
+public class MockTextResultInterest
     implements ReadResultInterest<String>,
                WriteResultInterest<String>,
                ConfirmDispatchedResultInterest {
@@ -34,7 +34,7 @@ public class MockResultInterest
   public AtomicReference<State<String>> textState = new AtomicReference<>();
   public ConcurrentLinkedQueue<Exception> errorCauses = new ConcurrentLinkedQueue<>();
 
-  public MockResultInterest(final int testUntilHappenings) {
+  public MockTextResultInterest(final int testUntilHappenings) {
     until = TestUntil.happenings(testUntilHappenings);
   }
 
