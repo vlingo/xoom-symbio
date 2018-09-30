@@ -15,4 +15,9 @@ public class Entity1 {
     this.id = id;
     this.value = value;
   }
+
+  @Override
+  public String toString() {
+    return "Entity1[id=" + id + " value=" + value + "]";
+  }
 }
