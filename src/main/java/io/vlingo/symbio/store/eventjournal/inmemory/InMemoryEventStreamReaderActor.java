@@ -44,9 +44,13 @@ public class InMemoryEventStreamReaderActor<T> extends Actor implements EventStr
   @Override
   public Completes<EventStream<T>> streamFor(final String streamName, final int fromStreamVersion) {
     int version = fromStreamVersion;
-    final State<T> snapshot = snapshotsView.get(streamName);
-    if (snapshot != null && snapshot.dataVersion > version) {
-      version = snapshot.dataVersion + 1;
+    State<T> snapshot = snapshotsView.get(streamName);
+    if (snapshot != null) {
+      if (snapshot.dataVersion > version) {
+        version = snapshot.dataVersion + 1;
+      } else {
+        snapshot = null; // reading from beyond snapshot
+      }
     }
     final Map<Integer,Integer> versionIndexes = streamIndexesView.get(streamName);
     final List<Event<T>> events = new ArrayList<>();

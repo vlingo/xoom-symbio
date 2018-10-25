@@ -9,6 +9,7 @@ package io.vlingo.symbio.store.eventjournal.inmemory;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 import java.util.Arrays;
 import java.util.Iterator;
@@ -104,6 +105,31 @@ public class InMemoryEventJournalActorTest {
         final Iterator<Event<String>> iterator = eventStream.events.iterator();
         assertEquals("4", iterator.next().id());
         assertEquals("5", iterator.next().id());
+        assertNotNull(eventStream.snapshot);
+        untilAsserted.happened();
+      });
+    untilAsserted.completes();
+  }
+
+  @Test
+  public void testThatStreamReaderReadsFromBeyondSnapshot() {
+    listener.until = TestUntil.happenings(5);
+    journal.append("123", 1, new TextEvent());
+    journal.append("123", 2, new TextEvent());
+    journal.appendWith("123", 3, new TextEvent(), new TextState("1", String.class, 1, "data", 3));
+    journal.append("123", 4, new TextEvent());
+    journal.append("123", 5, new TextEvent());
+    listener.until.completes();
+    final TestUntil untilAsserted = TestUntil.happenings(1);
+    journal
+      .eventStreamReader("test")
+      .andThenInto(reader -> reader.streamFor("123", 4))
+      .andThenConsume(eventStream -> {
+        assertEquals(2, eventStream.events.size());
+        final Iterator<Event<String>> iterator = eventStream.events.iterator();
+        assertEquals("4", iterator.next().id());
+        assertEquals("5", iterator.next().id());
+        assertNull(eventStream.snapshot);
         untilAsserted.happened();
       });
     untilAsserted.completes();
