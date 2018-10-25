@@ -64,6 +64,6 @@ public class EventStream<T> {
    * @return boolean
    */
   public boolean hasSnapshot() {
-    return !snapshot.isEmpty();
+    return snapshot != null && !snapshot.isEmpty();
   }
 }
