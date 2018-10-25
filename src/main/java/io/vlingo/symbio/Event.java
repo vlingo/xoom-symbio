@@ -26,7 +26,7 @@ public abstract class Event<T> implements Comparable<Event<T>> {
    * My String id that is unique within the EventJournal&lt;T&gt; where persisted,
    * and is (generally) assigned by the journal.
    */
-  public final String id;
+  private String id;
 
   /**
    * My data representation of the event, generally serialized as
@@ -70,6 +70,14 @@ public abstract class Event<T> implements Comparable<Event<T>> {
 
   public Event(final Class<?> type, final int typeVersion, final T eventData, final Metadata metadata) {
     this(UnknownId, type, typeVersion, eventData, metadata);
+  }
+
+  /**
+   * Answers my id;
+   * @return String
+   */
+  public String id() {
+    return id;
   }
 
   /**
@@ -211,6 +219,10 @@ public abstract class Event<T> implements Comparable<Event<T>> {
             "[id=" + id + " type=" + type + " typeVersion=" + typeVersion +
             " eventData=" + (isText() || isObject() ? eventData.toString() : "(binary)") +
             " metadata=" + metadata + "]";
+  }
+
+  public void __internal__setId(final String id) {
+    this.id = id;
   }
 
   private int compareData(final Event<T> state1, final Event<T> state2) {
