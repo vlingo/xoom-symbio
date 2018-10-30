@@ -13,6 +13,7 @@ import io.vlingo.symbio.State;
 import io.vlingo.symbio.State.BinaryState;
 import io.vlingo.symbio.State.ObjectState;
 import io.vlingo.symbio.State.TextState;
+import io.vlingo.symbio.store.Result;
 
 public interface StateStore {
   public enum DataFormat {
@@ -26,34 +27,6 @@ public interface StateStore {
     public boolean isBinary() { return false; }
     public boolean isText() { return false; }
   };
-
-  public enum Result {
-    ConcurrentyViolation {
-      @Override public boolean isConcurrentyViolation() { return true; }
-    },
-    Error {
-      @Override public boolean isError() { return true; }
-    },
-    Failure {
-      @Override public boolean isFailure() { return true; }
-    },
-    NotFound {
-      @Override public boolean isNotFound() { return true; }
-    },
-    NoTypeStore {
-      @Override public boolean isNoTypeStore() { return true; }
-    },
-    Success {
-      @Override public boolean isSuccess() { return true; }
-    };
-
-    public boolean isConcurrentyViolation() { return false; }
-    public boolean isError() { return false; }
-    public boolean isFailure() { return false; }
-    public boolean isNotFound() { return false; }
-    public boolean isNoTypeStore() { return false; }
-    public boolean isSuccess() { return false; }
-  }
 
   public static interface ConfirmDispatchedResultInterest {
     void confirmDispatchedResultedIn(final Result result, final String dispatchId);
