@@ -1,0 +1,36 @@
+// Copyright © 2012-2018 Vaughn Vernon. All rights reserved.
+//
+// This Source Code Form is subject to the terms of the
+// Mozilla Public License, v. 2.0. If a copy of the MPL
+// was not distributed with this file, You can obtain
+// one at https://mozilla.org/MPL/2.0/.
+
+package io.vlingo.symbio.store;
+
+public enum Result {
+  ConcurrentyViolation {
+    @Override public boolean isConcurrentyViolation() { return true; }
+  },
+  Error {
+    @Override public boolean isError() { return true; }
+  },
+  Failure {
+    @Override public boolean isFailure() { return true; }
+  },
+  NotFound {
+    @Override public boolean isNotFound() { return true; }
+  },
+  NoTypeStore {
+    @Override public boolean isNoTypeStore() { return true; }
+  },
+  Success {
+    @Override public boolean isSuccess() { return true; }
+  };
+
+  public boolean isConcurrentyViolation() { return false; }
+  public boolean isError() { return false; }
+  public boolean isFailure() { return false; }
+  public boolean isNotFound() { return false; }
+  public boolean isNoTypeStore() { return false; }
+  public boolean isSuccess() { return false; }
+}
