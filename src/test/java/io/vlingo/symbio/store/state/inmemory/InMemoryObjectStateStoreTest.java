@@ -20,11 +20,11 @@ import io.vlingo.actors.World;
 import io.vlingo.actors.testkit.TestUntil;
 import io.vlingo.symbio.Metadata;
 import io.vlingo.symbio.State.ObjectState;
+import io.vlingo.symbio.store.Result;
 import io.vlingo.symbio.store.state.Entity1;
 import io.vlingo.symbio.store.state.MockObjectDispatcher;
 import io.vlingo.symbio.store.state.MockObjectResultInterest;
 import io.vlingo.symbio.store.state.ObjectStateStore;
-import io.vlingo.symbio.store.state.StateStore.Result;
 import io.vlingo.symbio.store.state.StateTypeStateStoreMap;
 
 public class InMemoryObjectStateStoreTest {
