@@ -21,10 +21,10 @@ import io.vlingo.actors.testkit.TestUntil;
 import io.vlingo.common.serialization.JsonSerialization;
 import io.vlingo.symbio.Metadata;
 import io.vlingo.symbio.State.TextState;
+import io.vlingo.symbio.store.Result;
 import io.vlingo.symbio.store.state.Entity1;
-import io.vlingo.symbio.store.state.MockTextResultInterest;
 import io.vlingo.symbio.store.state.MockTextDispatcher;
-import io.vlingo.symbio.store.state.StateStore.Result;
+import io.vlingo.symbio.store.state.MockTextResultInterest;
 import io.vlingo.symbio.store.state.StateTypeStateStoreMap;
 import io.vlingo.symbio.store.state.TextStateStore;
 
