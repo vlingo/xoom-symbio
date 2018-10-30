@@ -27,6 +27,8 @@ import io.vlingo.symbio.State.TextState;
 import io.vlingo.symbio.store.eventjournal.EventJournal;
 
 public class InMemoryEventJournalActorTest {
+  private Object object = new Object();
+  private MockAppendResultInterest interest = new MockAppendResultInterest();
   private MockEventJournalListener<String> listener;
   private EventJournal<String> journal;
   private World world;
@@ -34,7 +36,7 @@ public class InMemoryEventJournalActorTest {
   @Test
   public void testThatJournalAppendsOneEvent() {
     listener.until = TestUntil.happenings(1);
-    journal.append("123", 1, new TextEvent());
+    journal.append("123", 1, new TextEvent(), interest, object);
     listener.until.completes();
     assertEquals(1, listener.events.size());
     assertEquals("1", listener.events.get(0).id());
@@ -43,7 +45,7 @@ public class InMemoryEventJournalActorTest {
   @Test
   public void testThatJournalAppendsOneEventWithSnapshot() {
     listener.until = TestUntil.happenings(1);
-    journal.appendWith("123", 1, new TextEvent(), new TextState());
+    journal.appendWith("123", 1, new TextEvent(), new TextState(), interest, object);
     listener.until.completes();
     assertEquals(1, listener.events.size());
     assertEquals("1", listener.events.get(0).id());
@@ -53,7 +55,7 @@ public class InMemoryEventJournalActorTest {
   @Test
   public void testThatJournalReaderReadsOneEvent() {
     listener.until = TestUntil.happenings(1);
-    journal.append("123", 1, new TextEvent());
+    journal.append("123", 1, new TextEvent(), interest, object);
     listener.until.completes();
     final TestUntil untilAsserted = TestUntil.happenings(1);
     journal
@@ -70,7 +72,7 @@ public class InMemoryEventJournalActorTest {
   public void testThatJournalReaderReadsThreeEvents() {
     listener.until = TestUntil.happenings(1);
     final List<Event<String>> three = Arrays.asList(new TextEvent(), new TextEvent(), new TextEvent());
-    journal.appendAll("123", 1, three);
+    journal.appendAll("123", 1, three, interest, object);
     listener.until.completes();
     final TestUntil untilAsserted = TestUntil.happenings(1);
     journal
@@ -90,11 +92,11 @@ public class InMemoryEventJournalActorTest {
   @Test
   public void testThatStreamReaderReadsFiveEventsWithSnapshot() {
     listener.until = TestUntil.happenings(5);
-    journal.append("123", 1, new TextEvent());
-    journal.append("123", 2, new TextEvent());
-    journal.appendWith("123", 3, new TextEvent(), new TextState("1", String.class, 1, "data", 3));
-    journal.append("123", 4, new TextEvent());
-    journal.append("123", 5, new TextEvent());
+    journal.append("123", 1, new TextEvent(), interest, object);
+    journal.append("123", 2, new TextEvent(), interest, object);
+    journal.appendWith("123", 3, new TextEvent(), new TextState("1", String.class, 1, "data", 3), interest, object);
+    journal.append("123", 4, new TextEvent(), interest, object);
+    journal.append("123", 5, new TextEvent(), interest, object);
     listener.until.completes();
     final TestUntil untilAsserted = TestUntil.happenings(1);
     journal
@@ -114,11 +116,11 @@ public class InMemoryEventJournalActorTest {
   @Test
   public void testThatStreamReaderReadsFromBeyondSnapshot() {
     listener.until = TestUntil.happenings(5);
-    journal.append("123", 1, new TextEvent());
-    journal.append("123", 2, new TextEvent());
-    journal.appendWith("123", 3, new TextEvent(), new TextState("1", String.class, 1, "data", 3));
-    journal.append("123", 4, new TextEvent());
-    journal.append("123", 5, new TextEvent());
+    journal.append("123", 1, new TextEvent(), interest, object);
+    journal.append("123", 2, new TextEvent(), interest, object);
+    journal.appendWith("123", 3, new TextEvent(), new TextState("1", String.class, 1, "data", 3), interest, object);
+    journal.append("123", 4, new TextEvent(), interest, object);
+    journal.append("123", 5, new TextEvent(), interest, object);
     listener.until.completes();
     final TestUntil untilAsserted = TestUntil.happenings(1);
     journal
