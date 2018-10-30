@@ -14,11 +14,11 @@ import java.util.Map;
 
 import io.vlingo.actors.Actor;
 import io.vlingo.symbio.State;
+import io.vlingo.symbio.store.Result;
 import io.vlingo.symbio.store.state.StateStore.ConfirmDispatchedResultInterest;
 import io.vlingo.symbio.store.state.StateStore.Dispatchable;
 import io.vlingo.symbio.store.state.StateStore.DispatcherControl;
 import io.vlingo.symbio.store.state.StateStore.ReadResultInterest;
-import io.vlingo.symbio.store.state.StateStore.Result;
 import io.vlingo.symbio.store.state.StateStore.WriteResultInterest;
 import io.vlingo.symbio.store.state.StateTypeStateStoreMap;
 
