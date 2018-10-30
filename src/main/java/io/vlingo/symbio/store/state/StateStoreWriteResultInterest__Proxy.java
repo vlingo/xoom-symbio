@@ -10,8 +10,8 @@ import io.vlingo.symbio.store.state.StateStore.WriteResultInterest;
 
 public class StateStoreWriteResultInterest__Proxy<T> implements WriteResultInterest<T> {
 
-  private static final String writeResultedInRepresentation1 = "writeResultedIn(io.vlingo.symbio.store.state.StateStore.Result, java.lang.String, io.vlingo.symbio.State<T>)";
-  private static final String writeResultedInRepresentation2 = "writeResultedIn(io.vlingo.symbio.store.state.StateStore.Result, java.lang.Exception, java.lang.String, io.vlingo.symbio.State<T>)";
+  private static final String writeResultedInRepresentation1 = "writeResultedIn(io.vlingo.symbio.store.Result, java.lang.String, io.vlingo.symbio.State<T>)";
+  private static final String writeResultedInRepresentation2 = "writeResultedIn(io.vlingo.symbio.store.Result, java.lang.Exception, java.lang.String, io.vlingo.symbio.State<T>)";
 
   private final Actor actor;
   private final Mailbox mailbox;
@@ -22,7 +22,7 @@ public class StateStoreWriteResultInterest__Proxy<T> implements WriteResultInter
   }
 
   @SuppressWarnings({ "rawtypes", "unchecked" })
-  public void writeResultedIn(io.vlingo.symbio.store.state.StateStore.Result arg0, java.lang.String arg1, io.vlingo.symbio.State<T> arg2, final Object arg3) {
+  public void writeResultedIn(io.vlingo.symbio.store.Result arg0, java.lang.String arg1, io.vlingo.symbio.State<T> arg2, final Object arg3) {
     if (!actor.isStopped()) {
       final Consumer<WriteResultInterest<T>> consumer = (actor) -> actor.writeResultedIn(arg0, arg1, arg2, arg3);
       mailbox.send(new LocalMessage(actor, WriteResultInterest.class, consumer, writeResultedInRepresentation1));
@@ -31,7 +31,7 @@ public class StateStoreWriteResultInterest__Proxy<T> implements WriteResultInter
     }
   }
   @SuppressWarnings({ "rawtypes", "unchecked" })
-  public void writeResultedIn(io.vlingo.symbio.store.state.StateStore.Result arg0, java.lang.Exception arg1, java.lang.String arg2, io.vlingo.symbio.State<T> arg3, final Object arg4) {
+  public void writeResultedIn(io.vlingo.symbio.store.Result arg0, java.lang.Exception arg1, java.lang.String arg2, io.vlingo.symbio.State<T> arg3, final Object arg4) {
     if (!actor.isStopped()) {
       final Consumer<WriteResultInterest<T>> consumer = (actor) -> actor.writeResultedIn(arg0, arg1, arg2, arg3, arg4);
       mailbox.send(new LocalMessage(actor, WriteResultInterest.class, consumer, writeResultedInRepresentation2));
