@@ -18,6 +18,7 @@ import io.vlingo.actors.Definition;
 import io.vlingo.common.Completes;
 import io.vlingo.symbio.Event;
 import io.vlingo.symbio.State;
+import io.vlingo.symbio.store.Result;
 import io.vlingo.symbio.store.eventjournal.EventJournal;
 import io.vlingo.symbio.store.eventjournal.EventJournalListener;
 import io.vlingo.symbio.store.eventjournal.EventJournalReader;
@@ -41,29 +42,33 @@ public class InMemoryEventJournalActor<T> extends Actor implements EventJournal<
   }
 
   @Override
-  public void append(final String streamName, final int streamVersion, final Event<T> event) {
+  public void append(final String streamName, final int streamVersion, final Event<T> event, final AppendResultInterest<T> interest, final Object object) {
     insert(streamName, streamVersion, event);
     listener.appended(event);
+    interest.appendResultedIn(Result.Success, streamName, streamVersion, event, object);
   }
 
   @Override
-  public void appendWith(final String streamName, final int streamVersion, final Event<T> event, final State<T> snapshot) {
+  public void appendWith(final String streamName, final int streamVersion, final Event<T> event, final State<T> snapshot, final AppendResultInterest<T> interest, final Object object) {
     insert(streamName, streamVersion, event);
     snapshots.put(streamName, snapshot);
     listener.appendedWith(event, snapshot);
+    interest.appendResultedIn(Result.Success, streamName, streamVersion, event, snapshot, object);
   }
 
   @Override
-  public void appendAll(final String streamName, final int fromStreamVersion, final List<Event<T>> events) {
+  public void appendAll(final String streamName, final int fromStreamVersion, final List<Event<T>> events, final AppendResultInterest<T> interest, final Object object) {
     insert(streamName, fromStreamVersion, events);
     listener.appendedAll(events);
+    interest.appendResultedIn(Result.Success, streamName, fromStreamVersion, events, object);
   }
 
   @Override
-  public void appendAllWith(final String streamName, final int fromStreamVersion, final List<Event<T>> events, final State<T> snapshot) {
+  public void appendAllWith(final String streamName, final int fromStreamVersion, final List<Event<T>> events, final State<T> snapshot, final AppendResultInterest<T> interest, final Object object) {
     insert(streamName, fromStreamVersion, events);
     snapshots.put(streamName, snapshot);
     listener.appendedAllWith(events, snapshot);
+    interest.appendResultedIn(Result.Success, streamName, fromStreamVersion, events, snapshot, object);
   }
 
   @Override
