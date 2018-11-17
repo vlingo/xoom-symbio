@@ -23,6 +23,7 @@ These are the available storage implementations:
    - DynamoDB Text Store: `DynamoDBTextStateActor`
    - DynamoDB Binary Store: `DynamoDBBinaryStateActor`
    - General-purpose JDBC: `JDBCTextStateStoreActor`
+   - Apache Geode: `GeodeStateStoreActor`
    
 The `JDBCTextStateStoreActor` has these database delegate implementations:
 
