@@ -13,8 +13,11 @@ import java.util.List;
 import java.util.Map;
 
 import io.vlingo.actors.Actor;
+import io.vlingo.common.Failure;
+import io.vlingo.common.Success;
 import io.vlingo.symbio.State;
 import io.vlingo.symbio.store.Result;
+import io.vlingo.symbio.store.StorageException;
 import io.vlingo.symbio.store.state.StateStore.ConfirmDispatchedResultInterest;
 import io.vlingo.symbio.store.state.StateStore.Dispatchable;
 import io.vlingo.symbio.store.state.StateStore.DispatcherControl;
@@ -54,30 +57,30 @@ public abstract class InMemoryStateStoreActor<T> extends Actor implements Dispat
   protected void readFor(final String id, final Class<?> type, final ReadResultInterest<T> interest, final Object object) {
     if (interest != null) {
       if (id == null || type == null) {
-        interest.readResultedIn(Result.Error, new IllegalArgumentException(id == null ? "The id is null." : "The type is null."), id, emptyState, object);
+        interest.readResultedIn(Failure.of(new StorageException(Result.Error, id == null ? "The id is null." : "The type is null.")), id, emptyState, object);
         return;
       }
 
       final String storeName = StateTypeStateStoreMap.storeNameFrom(type);
 
       if (storeName == null) {
-        interest.readResultedIn(Result.NoTypeStore, new IllegalStateException("No type store."), id, emptyState, object);
+        interest.readResultedIn(Failure.of(new StorageException(Result.NoTypeStore, "No type store for: " + type.getSimpleName())), id, emptyState, object);
         return;
       }
 
       final Map<String, State<T>> typeStore = store.get(storeName);
 
       if (typeStore == null) {
-        interest.readResultedIn(Result.NotFound, new IllegalStateException("Store not found: " + storeName), id, emptyState, object);
+        interest.readResultedIn(Failure.of(new StorageException(Result.NotFound, "Store not found: " + storeName)), id, emptyState, object);
         return;
       }
 
       final State<T> state = typeStore.get(id);
 
       if (state != null) {
-        interest.readResultedIn(Result.Success, id, state, object);
+        interest.readResultedIn(Success.of(Result.Success), id, state, object);
       } else {
-        interest.readResultedIn(Result.NotFound, new IllegalStateException("Not found."), id, emptyState, object);
+        interest.readResultedIn(Failure.of(new StorageException(Result.NotFound, "Not found.")), id, emptyState, object);
       }
     } else {
       logger().log(
@@ -90,13 +93,13 @@ public abstract class InMemoryStateStoreActor<T> extends Actor implements Dispat
   protected void writeWith(final State<T> state, final WriteResultInterest<T> interest, final Object object) {
     if (interest != null) {
       if (state == null) {
-        interest.writeResultedIn(Result.Error, new IllegalArgumentException("The state is null."), null, emptyState, object);
+        interest.writeResultedIn(Failure.of(new StorageException(Result.Error, "The state is null.")), null, emptyState, object);
       } else {
         try {
           final String storeName = StateTypeStateStoreMap.storeNameFrom(state.type);
 
           if (storeName == null) {
-            interest.writeResultedIn(Result.NoTypeStore, new IllegalStateException("Store not found: " + storeName), state.id, state, object);
+            interest.writeResultedIn(Failure.of(new StorageException(Result.NoTypeStore, "No type store for: " + state.type)), state.id, state, object);
             return;
           }
 
@@ -113,7 +116,7 @@ public abstract class InMemoryStateStoreActor<T> extends Actor implements Dispat
           final State<T> persistedState = typeStore.putIfAbsent(state.id, state);
           if (persistedState != null) {
             if (persistedState.dataVersion >= state.dataVersion) {
-              interest.writeResultedIn(Result.ConcurrentyViolation, new IllegalArgumentException("Version conflict."), state.id, state, object);
+              interest.writeResultedIn(Failure.of(new StorageException(Result.ConcurrentyViolation, "Version conflict.")), state.id, state, object);
               return;
             }
             typeStore.put(state.id, state);
@@ -122,10 +125,10 @@ public abstract class InMemoryStateStoreActor<T> extends Actor implements Dispat
           dispatchables.add(new Dispatchable<T>(dispatchId, state));
           dispatch(dispatchId, state);
 
-          interest.writeResultedIn(Result.Success, state.id, state, object);
+          interest.writeResultedIn(Success.of(Result.Success), state.id, state, object);
         } catch (Exception e) {
           logger().log(getClass().getSimpleName() + " writeText() error because: " + e.getMessage(), e);
-          interest.writeResultedIn(Result.Error, e, state.id, state, object);
+          interest.writeResultedIn(Failure.of(new StorageException(Result.Error, e.getMessage(), e)), state.id, state, object);
         }
       }
     } else {
