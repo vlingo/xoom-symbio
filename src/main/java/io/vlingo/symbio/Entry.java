@@ -10,38 +10,38 @@ package io.vlingo.symbio;
 import java.util.Comparator;
 
 /**
- * The abstract base class of all journal event types.
+ * The abstract base class of all journal entry types.
  *
- * @param <T> the concrete type of Event&lt;T&gt; stored and read, which maybe be String, byte[], or Object
+ * @param <T> the concrete type of {@code Entry<T>} stored and read, which maybe be String, byte[], or Object
  * 
- * @see BinaryEvent ObjectEvent TextEvent NullEvent
+ * @see BinaryEntry ObjectEvent TextEntry NullEntry
  */
-public abstract class Event<T> implements Comparable<Event<T>> {
+public abstract class Entry<T> implements Comparable<Entry<T>> {
   private static final byte[] EmptyBytesData = new byte[0];
   private static final Object EmptyObjectData = new Object() { @Override public String toString() { return "(empty)"; } };
   private static final String EmptyTextData = "";
   private static final String UnknownId = "";
 
   /**
-   * My String id that is unique within the EventJournal&lt;T&gt; where persisted,
+   * My {@code String} id that is unique within the {@code Journal<T>} where persisted,
    * and is (generally) assigned by the journal.
    */
   private String id;
 
   /**
-   * My data representation of the event, generally serialized as
+   * My data representation of the entry, generally serialized as
    * String, byte[], or Object.
    */
-  public final T eventData;
+  public final T entryData;
 
   /**
-   * My associated Metadata if any.
+   * My associated {@code Metadata} if any.
    */
   public final Metadata metadata;
 
   /**
    * My String type that is the fully-qualified class name of
-   * the original event type.
+   * the original entry type.
    */
   public final String type;
 
@@ -51,25 +51,25 @@ public abstract class Event<T> implements Comparable<Event<T>> {
    */
   public final int typeVersion;
 
-  public Event(final String id, final Class<?> type, final int typeVersion, final T eventData, final Metadata metadata) {
-    if (id == null) throw new IllegalArgumentException("Event id must not be null.");
+  public Entry(final String id, final Class<?> type, final int typeVersion, final T entryData, final Metadata metadata) {
+    if (id == null) throw new IllegalArgumentException("Entry id must not be null.");
     this.id = id;
-    if (type == null) throw new IllegalArgumentException("Event type must not be null.");
+    if (type == null) throw new IllegalArgumentException("Entry type must not be null.");
     this.type = type.getName();
-    if (typeVersion <= 0) throw new IllegalArgumentException("Event typeVersion must be greater than 0.");
+    if (typeVersion <= 0) throw new IllegalArgumentException("Entry typeVersion must be greater than 0.");
     this.typeVersion = typeVersion;
-    if (eventData == null) throw new IllegalArgumentException("Event eventData must not be null.");
-    this.eventData = eventData;
-    if (metadata == null) throw new IllegalArgumentException("Event metadata must not be null.");
+    if (entryData == null) throw new IllegalArgumentException("Entry entryData must not be null.");
+    this.entryData = entryData;
+    if (metadata == null) throw new IllegalArgumentException("Entry metadata must not be null.");
     this.metadata = metadata;
   }
 
-  protected Event(final String id, final Class<?> type, final int typeVersion, final T eventData) {
-    this(id, type, typeVersion, eventData, Metadata.nullMetadata());
+  protected Entry(final String id, final Class<?> type, final int typeVersion, final T entryData) {
+    this(id, type, typeVersion, entryData, Metadata.nullMetadata());
   }
 
-  public Event(final Class<?> type, final int typeVersion, final T eventData, final Metadata metadata) {
-    this(UnknownId, type, typeVersion, eventData, metadata);
+  public Entry(final Class<?> type, final int typeVersion, final T entryData, final Metadata metadata) {
+    this(UnknownId, type, typeVersion, entryData, metadata);
   }
 
   /**
@@ -81,28 +81,28 @@ public abstract class Event<T> implements Comparable<Event<T>> {
   }
 
   /**
-   * Answers myself as a BinaryEvent.
-   * @return BinaryEvent
+   * Answers myself as a BinaryEntry.
+   * @return BinaryEntry
    */
-  public BinaryEvent asBinaryEvent() {
-    return (BinaryEvent) this;
+  public BinaryEntry asBinaryEvent() {
+    return (BinaryEntry) this;
   }
 
   /**
-   * Answers myself as an ObjectEvent.
-   * @return ObjectEvent
+   * Answers myself as an ObjectEntry.
+   * @return ObjectEntry
    */
   @SuppressWarnings("unchecked")
-  public ObjectEvent<T> asObjectEvent() {
-    return (ObjectEvent<T>) this;
+  public ObjectEntry<T> asObjectEvent() {
+    return (ObjectEntry<T>) this;
   }
 
   /**
-   * Answers myself as a TextEvent.
-   * @return TextEvent
+   * Answers myself as a TextEntry.
+   * @return TextEntry
    */
-  public TextEvent asTextEvent() {
-    return (TextEvent) this;
+  public TextEntry asTextEvent() {
+    return (TextEntry) this;
   }
 
   /**
@@ -114,7 +114,7 @@ public abstract class Event<T> implements Comparable<Event<T>> {
   }
 
   /**
-   * Answers whether or not I am a BinaryEvent.
+   * Answers whether or not I am a BinaryEntry.
    * @return boolean
    */
   public boolean isBinary() {
@@ -122,7 +122,7 @@ public abstract class Event<T> implements Comparable<Event<T>> {
   }
 
   /**
-   * Answers whether or not I am a completely empty Event.
+   * Answers whether or not I am a completely empty Entry.
    * @return boolean
    */
   public boolean isEmpty() {
@@ -130,7 +130,7 @@ public abstract class Event<T> implements Comparable<Event<T>> {
   }
 
   /**
-   * Answers whether or not I am a NullEvent.
+   * Answers whether or not I am a NullEntry.
    * @return boolean
    */
   public boolean isNull() {
@@ -138,7 +138,7 @@ public abstract class Event<T> implements Comparable<Event<T>> {
   }
 
   /**
-   * Answers whether or not I am an ObjectEvent.
+   * Answers whether or not I am an ObjectEntry.
    * @return boolean
    */
   public boolean isObject() {
@@ -146,7 +146,7 @@ public abstract class Event<T> implements Comparable<Event<T>> {
   }
 
   /**
-   * Answers whether or not I am a TextEvent.
+   * Answers whether or not I am a TextEntry.
    * @return boolean
    */
   public boolean isText() {
@@ -168,19 +168,19 @@ public abstract class Event<T> implements Comparable<Event<T>> {
   }
 
   /**
-   * Answers the difference between me and other per Comparable&lt;Event&lt;T&gt;&gt;.
+   * Answers the difference between me and other per {@code Comparable<Entry<T>>}.
    * 
-   * @param other the Event&lt;T&gt; to compare to myself
+   * @param other the {@code Entry<T>} to compare to myself
    * 
    * @return int
    */
   @Override
-  public int compareTo(final Event<T> other) {
+  public int compareTo(final Entry<T> other) {
     final int dataDiff = compareData(this, other);
     if (dataDiff != 0) return dataDiff;
 
     return Comparator
-      .comparing((Event<T> s) -> s.id)
+      .comparing((Entry<T> s) -> s.id)
       .thenComparing(s -> s.type)
       .thenComparingInt(s -> s.typeVersion)
       .thenComparing(s -> s.metadata)
@@ -206,7 +206,7 @@ public abstract class Event<T> implements Comparable<Event<T>> {
     if (other == null || other.getClass() != this.getClass()) {
       return false;
     }
-    return id.equals(((Event<?>) other).id);
+    return id.equals(((Entry<?>) other).id);
   }
 
   /**
@@ -217,7 +217,7 @@ public abstract class Event<T> implements Comparable<Event<T>> {
   public String toString() {
     return getClass().getSimpleName() +
             "[id=" + id + " type=" + type + " typeVersion=" + typeVersion +
-            " eventData=" + (isText() || isObject() ? eventData.toString() : "(binary)") +
+            " entryData=" + (isText() || isObject() ? entryData.toString() : "(binary)") +
             " metadata=" + metadata + "]";
   }
 
@@ -225,12 +225,12 @@ public abstract class Event<T> implements Comparable<Event<T>> {
     this.id = id;
   }
 
-  private int compareData(final Event<T> state1, final Event<T> state2) {
+  private int compareData(final Entry<T> state1, final Entry<T> state2) {
     if (state1.isText() && state2.isText()) {
-      return ((String) state1.eventData).compareTo((String) state2.eventData);
+      return ((String) state1.entryData).compareTo((String) state2.entryData);
     } else if (state1.isBinary() && state2.isBinary()) {
-      final byte[] data1 = (byte[]) state1.eventData;
-      final byte[] data2 = (byte[]) state2.eventData;
+      final byte[] data1 = (byte[]) state1.entryData;
+      final byte[] data2 = (byte[]) state2.entryData;
       if (data1.length == data2.length) {
         for (int idx = 0; idx < data1.length; ++idx) {
           if (data1[idx] != data2[idx]) {
@@ -245,19 +245,23 @@ public abstract class Event<T> implements Comparable<Event<T>> {
   }
 
   /**
-   * The byte[] form of Event&lt;T&gt;.
+   * The byte[] form of {@code Entry<T>}.
    */
-  public static final class BinaryEvent extends Event<byte[]> {
-    public BinaryEvent(final String id, final Class<?> type, final int typeVersion, final byte[] eventData, final Metadata metadata) {
-      super(id, type, typeVersion, eventData, metadata);
+  public static final class BinaryEntry extends Entry<byte[]> {
+    public BinaryEntry(final String id, final Class<?> type, final int typeVersion, final byte[] entryData, final Metadata metadata) {
+      super(id, type, typeVersion, entryData, metadata);
     }
 
-    public BinaryEvent(final String id, final Class<?> type, final int typeVersion, final byte[] eventData) {
-      super(id, type, typeVersion, eventData);
+    public BinaryEntry(final String id, final Class<?> type, final int typeVersion, final byte[] entryData) {
+      super(id, type, typeVersion, entryData);
     }
 
-    public BinaryEvent() {
-      super(UnknownId, Object.class, 1, Event.EmptyBytesData, Metadata.nullMetadata());
+    public BinaryEntry(final Class<?> type, final int typeVersion, final byte[] entryData, final Metadata metadata) {
+      super(UnknownId, type, typeVersion, entryData, metadata);
+    }
+
+    public BinaryEntry() {
+      super(UnknownId, Object.class, 1, Entry.EmptyBytesData, Metadata.nullMetadata());
     }
 
     @Override
@@ -267,30 +271,34 @@ public abstract class Event<T> implements Comparable<Event<T>> {
 
     @Override
     public boolean isEmpty() {
-      return eventData.length == 0;
+      return entryData.length == 0;
     }
   }
 
   /**
-   * The Object form of Event&lt;T&gt;.
+   * The Object form of {@code Entry<T>}.
    */
-  public static final class ObjectEvent<T> extends Event<Object> {
-    public ObjectEvent(final String id, final Class<?> type, final int typeVersion, final T eventData, final Metadata metadata) {
-      super(id, type, typeVersion, eventData, metadata);
+  public static final class ObjectEntry<T> extends Entry<Object> {
+    public ObjectEntry(final String id, final Class<?> type, final int typeVersion, final T entryData, final Metadata metadata) {
+      super(id, type, typeVersion, entryData, metadata);
     }
 
-    public ObjectEvent(String id, Class<?> type, int typeVersion, T eventData, int dataVersion) {
-      super(id, type, typeVersion, eventData);
+    public ObjectEntry(String id, Class<?> type, int typeVersion, T entryData, int dataVersion) {
+      super(id, type, typeVersion, entryData);
+    }
+
+    public ObjectEntry(final Class<?> type, final int typeVersion, final T entryData, final Metadata metadata) {
+      super(UnknownId, type, typeVersion, entryData, metadata);
     }
 
     @SuppressWarnings("unchecked")
-    public ObjectEvent() {
-      super(UnknownId, Object.class, 1, (T) Event.EmptyObjectData, Metadata.nullMetadata());
+    public ObjectEntry() {
+      super(UnknownId, Object.class, 1, (T) Entry.EmptyObjectData, Metadata.nullMetadata());
     }
 
     @Override
     public boolean isEmpty() {
-      return eventData == Event.EmptyObjectData;
+      return entryData == Entry.EmptyObjectData;
     }
 
     @Override
@@ -300,24 +308,28 @@ public abstract class Event<T> implements Comparable<Event<T>> {
   }
 
   /**
-   * The text String form of Event&lt;T&gt;.
+   * The text String form of {@code Entry<T>}.
    */
-  public static final class TextEvent extends Event<String> {
-    public TextEvent(final String id, final Class<?> type, final int typeVersion, final String eventData, final Metadata metadata) {
-      super(id, type, typeVersion, eventData, metadata);
+  public static final class TextEntry extends Entry<String> {
+    public TextEntry(final String id, final Class<?> type, final int typeVersion, final String entryData, final Metadata metadata) {
+      super(id, type, typeVersion, entryData, metadata);
     }
 
-    public TextEvent(final String id, final Class<?> type, final int typeVersion, final String eventData) {
-      super(id, type, typeVersion, eventData);
+    public TextEntry(final String id, final Class<?> type, final int typeVersion, final String entryData) {
+      super(id, type, typeVersion, entryData);
     }
 
-    public TextEvent() {
-      super(UnknownId, Object.class, 1, Event.EmptyTextData, Metadata.nullMetadata());
+    public TextEntry(final Class<?> type, final int typeVersion, final String entryData, final Metadata metadata) {
+      super(UnknownId, type, typeVersion, entryData, metadata);
+    }
+
+    public TextEntry() {
+      super(UnknownId, Object.class, 1, Entry.EmptyTextData, Metadata.nullMetadata());
     }
 
     @Override
     public boolean isEmpty() {
-      return eventData.isEmpty();
+      return entryData.isEmpty();
     }
 
     @Override
@@ -327,15 +339,15 @@ public abstract class Event<T> implements Comparable<Event<T>> {
   }
 
   /**
-   * The Null Object form of Event&lt;T&gt;.
+   * The Null Object form of {@code Entry<T>}.
    */
-  public static final class NullEvent<T> extends Event<T> {
-    public static NullEvent<byte[]> Binary = new NullEvent<>(EmptyBytesData);
-    public static NullEvent<Object> Object = new NullEvent<>(EmptyObjectData);
-    public static NullEvent<String> Text = new NullEvent<>(EmptyTextData);
+  public static final class NullEntry<T> extends Entry<T> {
+    public static NullEntry<byte[]> Binary = new NullEntry<>(EmptyBytesData);
+    public static NullEntry<Object> Object = new NullEntry<>(EmptyObjectData);
+    public static NullEntry<String> Text = new NullEntry<>(EmptyTextData);
 
-    private NullEvent(final T eventData) {
-      super(UnknownId, Object.class, 1, eventData, Metadata.nullMetadata());
+    private NullEntry(final T entryData) {
+      super(UnknownId, Object.class, 1, entryData, Metadata.nullMetadata());
     }
 
     @Override
