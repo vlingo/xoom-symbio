@@ -5,7 +5,7 @@
 // was not distributed with this file, You can obtain
 // one at https://mozilla.org/MPL/2.0/.
 
-package io.vlingo.symbio.store.eventjournal.inmemory;
+package io.vlingo.symbio.store.journal.inmemory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,15 +13,15 @@ import java.util.ListIterator;
 
 import io.vlingo.actors.Actor;
 import io.vlingo.common.Completes;
-import io.vlingo.symbio.Event;
-import io.vlingo.symbio.store.eventjournal.EventJournalReader;
-import io.vlingo.symbio.store.eventjournal.EventStream;
+import io.vlingo.symbio.Entry;
+import io.vlingo.symbio.store.journal.JournalReader;
+import io.vlingo.symbio.store.journal.Stream;
 
-public class InMemoryEventJournalReaderActor<T> extends Actor implements EventJournalReader<T> {
-  private final ListIterator<Event<T>> journalView;
+public class InMemoryJournalReaderActor<T> extends Actor implements JournalReader<T> {
+  private final ListIterator<Entry<T>> journalView;
   private final String name;
 
-  public InMemoryEventJournalReaderActor(final ListIterator<Event<T>> journalView, final String name) {
+  public InMemoryJournalReaderActor(final ListIterator<Entry<T>> journalView, final String name) {
     this.journalView = journalView;
     this.name = name;
   }
@@ -32,7 +32,7 @@ public class InMemoryEventJournalReaderActor<T> extends Actor implements EventJo
   }
 
   @Override
-  public Completes<Event<T>> readNext() {
+  public Completes<Entry<T>> readNext() {
     if (journalView.hasNext()) {
       return completes().with(journalView.next());
     }
@@ -40,19 +40,19 @@ public class InMemoryEventJournalReaderActor<T> extends Actor implements EventJo
   }
 
   @Override
-  public Completes<EventStream<T>> readNext(final int maximumEvents) {
-    final List<Event<T>> events = new ArrayList<>(maximumEvents);
+  public Completes<Stream<T>> readNext(final int maximumEntries) {
+    final List<Entry<T>> entries = new ArrayList<>(maximumEntries);
 
     int streamVersion = journalView.nextIndex();
-    for (int count = 0; count < maximumEvents; ++count) {
+    for (int count = 0; count < maximumEntries; ++count) {
       if (journalView.hasNext()) {
         ++streamVersion; // 1-based
-        events.add(journalView.next());
+        entries.add(journalView.next());
       } else {
-        count = maximumEvents + 1;
+        count = maximumEntries + 1;
       }
     }
-    return completes().with(new EventStream<>(name, streamVersion, events, null));
+    return completes().with(new Stream<>(name, streamVersion, entries, null));
   }
 
   @Override
@@ -105,8 +105,8 @@ public class InMemoryEventJournalReaderActor<T> extends Actor implements EventJo
   private void to(final String id) {
     rewind();
     while (journalView.hasNext()) {
-      final Event<T> event = journalView.next();
-      if (event.id().equals(id)) {
+      final Entry<T> entry = journalView.next();
+      if (entry.id().equals(id)) {
         return;
       }
     }

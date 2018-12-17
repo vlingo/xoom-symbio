@@ -9,11 +9,13 @@ package io.vlingo.symbio.store.state;
 
 import java.util.Collection;
 
+import io.vlingo.common.Outcome;
 import io.vlingo.symbio.State;
 import io.vlingo.symbio.State.BinaryState;
 import io.vlingo.symbio.State.ObjectState;
 import io.vlingo.symbio.State.TextState;
 import io.vlingo.symbio.store.Result;
+import io.vlingo.symbio.store.StorageException;
 
 public interface StateStore {
   public enum DataFormat {
@@ -66,13 +68,11 @@ public interface StateStore {
   }
 
   public static interface ReadResultInterest<T> {
-    void readResultedIn(final Result result, final String id, final State<T> state, final Object object);
-    void readResultedIn(final Result result, final Exception cause, final String id, final State<T> state, final Object object);
+    void readResultedIn(final Outcome<StorageException,Result> outcome, final String id, final State<T> state, final Object object);
   }
 
   public static interface WriteResultInterest<T> {
-    void writeResultedIn(final Result result, final String id, final State<T> state, final Object object);
-    void writeResultedIn(final Result result, final Exception cause, final String id, final State<T> state, final Object object);
+    void writeResultedIn(final Outcome<StorageException,Result> outcome, final String id, final State<T> state, final Object object);
   }
 
   public static interface StorageDelegate {
