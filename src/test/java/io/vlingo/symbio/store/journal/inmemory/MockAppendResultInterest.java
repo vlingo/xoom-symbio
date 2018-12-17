@@ -5,54 +5,29 @@
 // was not distributed with this file, You can obtain
 // one at https://mozilla.org/MPL/2.0/.
 
-package io.vlingo.symbio.store.eventjournal.inmemory;
+package io.vlingo.symbio.store.journal.inmemory;
 
 import java.util.List;
+import java.util.Optional;
 
-import io.vlingo.symbio.Event;
+import io.vlingo.common.Outcome;
+import io.vlingo.symbio.Source;
 import io.vlingo.symbio.State;
 import io.vlingo.symbio.store.Result;
-import io.vlingo.symbio.store.eventjournal.EventJournal.AppendResultInterest;
+import io.vlingo.symbio.store.StorageException;
+import io.vlingo.symbio.store.journal.Journal.AppendResultInterest;
 
 public class MockAppendResultInterest implements AppendResultInterest<String> {
 
   @Override
-  public void appendResultedIn(Result result, String streamName, int streamVersion, Event<String> event, Object object) {
+  public <S> void appendResultedIn(Outcome<StorageException, Result> outcome, String streamName, int streamVersion,
+          Source<S> source, Optional<State<String>> snapshot, Object object) {
     
   }
 
   @Override
-  public void appendResultedIn(Result result, Exception cause, String streamName, int streamVersion, Event<String> event, Object object) {
-    
-  }
-
-  @Override
-  public void appendResultedIn(Result result, String streamName, int streamVersion, Event<String> event, State<String> snapshot, Object object) {
-    
-  }
-
-  @Override
-  public void appendResultedIn(Result result, Exception cause, String streamName, int streamVersion, Event<String> events, State<String> snapshot, Object object) {
-    
-  }
-
-  @Override
-  public void appendResultedIn(Result result, String streamName, int streamVersion, List<Event<String>> events, Object object) {
-    
-  }
-
-  @Override
-  public void appendResultedIn(Result result, Exception cause, String streamName, int streamVersion, List<Event<String>> event, Object object) {
-    
-  }
-
-  @Override
-  public void appendResultedIn(Result result, String streamName, int streamVersion, List<Event<String>> events, State<String> snapshot, Object object) {
-    
-  }
-
-  @Override
-  public void appendResultedIn(Result result, Exception cause, String streamName, int streamVersion, List<Event<String>> events, State<String> snapshot, Object object) {
+  public <S> void appendAllResultedIn(Outcome<StorageException, Result> outcome, String streamName, int streamVersion,
+          List<Source<S>> sources, Optional<State<String>> snapshot, Object object) {
     
   }
 }
