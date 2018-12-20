@@ -84,7 +84,7 @@ public abstract class Entry<T> implements Comparable<Entry<T>> {
    * Answers myself as a BinaryEntry.
    * @return BinaryEntry
    */
-  public BinaryEntry asBinaryEvent() {
+  public BinaryEntry asBinaryEntry() {
     return (BinaryEntry) this;
   }
 
@@ -93,7 +93,7 @@ public abstract class Entry<T> implements Comparable<Entry<T>> {
    * @return ObjectEntry
    */
   @SuppressWarnings("unchecked")
-  public ObjectEntry<T> asObjectEvent() {
+  public ObjectEntry<T> asObjectEntry() {
     return (ObjectEntry<T>) this;
   }
 
@@ -101,7 +101,7 @@ public abstract class Entry<T> implements Comparable<Entry<T>> {
    * Answers myself as a TextEntry.
    * @return TextEntry
    */
-  public TextEntry asTextEvent() {
+  public TextEntry asTextEntry() {
     return (TextEntry) this;
   }
 
