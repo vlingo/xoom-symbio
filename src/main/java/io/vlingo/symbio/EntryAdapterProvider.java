@@ -11,8 +11,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiConsumer;
 
-public class EntryAdapterProvider<S extends Source<?>,E extends Entry<?>> {
+public class EntryAdapterProvider {
   private final Map<Class<?>,EntryAdapter<?,?>> adapters;
   private final Map<String,EntryAdapter<?,?>> namedAdapters;
 
@@ -21,13 +22,19 @@ public class EntryAdapterProvider<S extends Source<?>,E extends Entry<?>> {
     this.namedAdapters = new HashMap<>();
   }
 
-  public void registerAdapter(final Class<?> sourceType, final EntryAdapter<?,?> adapter) {
+  public <S extends Source<?>,E extends Entry<?>> void registerAdapter(final Class<S> sourceType, final EntryAdapter<S,E> adapter) {
     adapters.put(sourceType, adapter);
     namedAdapters.put(sourceType.getName(), adapter);
   }
 
-  public List<E> asEntries(final List<S> sources) {
-    final List<E> entries = new ArrayList<>();
+  public <S extends Source<?>,E extends Entry<?>> void registerAdapter(final Class<S> sourceType, final EntryAdapter<S,E> adapter, final BiConsumer<Class<S>,EntryAdapter<S,E>> consumer) {
+    adapters.put(sourceType, adapter);
+    namedAdapters.put(sourceType.getName(), adapter);
+    consumer.accept(sourceType, adapter);
+  }
+
+  public <S extends Source<?>,E extends Entry<?>> List<E> asEntries(final List<S> sources) {
+    final List<E> entries = new ArrayList<>(sources.size());
     for (final S source : sources) {
       entries.add(asEntry(source));
     }
@@ -35,18 +42,26 @@ public class EntryAdapterProvider<S extends Source<?>,E extends Entry<?>> {
   }
 
   @SuppressWarnings("unchecked")
-  public E asEntry(final S source) {
+  public <S extends Source<?>,E extends Entry<?>> E asEntry(final S source) {
     final EntryAdapter<S,E>  adapter = (EntryAdapter<S,E>) adapter((Class<S>) source.getClass());
     return adapter.toEntry(source);
   }
 
-  public S asSource(final E entry) {
+  public <S extends Source<?>,E extends Entry<?>> List<S> asSources(final List<E> entries) {
+    final List<S> sources = new ArrayList<>(entries.size());
+    for (final E entry : entries) {
+      sources.add(asSource(entry));
+    }
+    return sources;
+  }
+
+  public <S extends Source<?>,E extends Entry<?>> S asSource(final E entry) {
     EntryAdapter<S,E> adapter = namedAdapter(entry);
     return (S) adapter.fromEntry(entry);
   }
 
   @SuppressWarnings("unchecked")
-  private EntryAdapter<S,E> adapter(final Class<?> sourceType) {
+  private <S extends Source<?>,E extends Entry<?>> EntryAdapter<S,E> adapter(final Class<?> sourceType) {
     final EntryAdapter<S,E> adapter = (EntryAdapter<S,E>) adapters.get(sourceType);
     if (adapter != null) {
       return adapter;
@@ -55,7 +70,7 @@ public class EntryAdapterProvider<S extends Source<?>,E extends Entry<?>> {
   }
 
   @SuppressWarnings("unchecked")
-  private EntryAdapter<S,E> namedAdapter(final E entry) {
+  private <S extends Source<?>,E extends Entry<?>> EntryAdapter<S,E> namedAdapter(final E entry) {
     final EntryAdapter<S,E> adapter = (EntryAdapter<S,E>) namedAdapters.get(entry.type);
     if (adapter != null) {
       return adapter;
