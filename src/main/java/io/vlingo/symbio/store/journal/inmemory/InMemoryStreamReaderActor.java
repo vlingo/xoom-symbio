@@ -52,14 +52,16 @@ public class InMemoryStreamReaderActor<T> extends Actor implements StreamReader<
         snapshot = null; // reading from beyond snapshot
       }
     }
-    final Map<Integer,Integer> versionIndexes = streamIndexesView.get(streamName);
     final List<Entry<T>> entries = new ArrayList<>();
-    Integer journalIndex = versionIndexes.get(version);
-
-    while (journalIndex != null) {
-      final Entry<T> entry = journalView.get(journalIndex);
-      entries.add(entry);
-      journalIndex = versionIndexes.get(++version);
+    final Map<Integer,Integer> versionIndexes = streamIndexesView.get(streamName);
+    if (versionIndexes != null) {
+      Integer journalIndex = versionIndexes.get(version);
+  
+      while (journalIndex != null) {
+        final Entry<T> entry = journalView.get(journalIndex);
+        entries.add(entry);
+        journalIndex = versionIndexes.get(++version);
+      }
     }
     return completes().with(new Stream<>(name, version - 1, entries, snapshot));
   }
