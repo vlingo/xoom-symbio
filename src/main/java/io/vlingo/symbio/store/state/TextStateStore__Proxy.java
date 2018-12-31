@@ -7,43 +7,60 @@
 
 package io.vlingo.symbio.store.state;
 
-import java.util.function.Consumer;
-
 import io.vlingo.actors.Actor;
+import io.vlingo.actors.DeadLetter;
 import io.vlingo.actors.LocalMessage;
 import io.vlingo.actors.Mailbox;
-import io.vlingo.symbio.State;
 
-public class TextStateStore__Proxy implements TextStateStore {
+public class TextStateStore__Proxy implements io.vlingo.symbio.store.state.TextStateStore {
+
+  private static final String writeRepresentation1 = "write(io.vlingo.symbio.State.TextState, io.vlingo.symbio.store.state.StateStore.io.vlingo.symbio.store.state.StateStore.WriteResultInterest<io.vlingo.symbio.State.TextState>, java.lang.Object)";
+  private static final String writeRepresentation2 = "write(io.vlingo.symbio.State.TextState, io.vlingo.symbio.store.state.StateStore.io.vlingo.symbio.store.state.StateStore.WriteResultInterest<io.vlingo.symbio.State.TextState>)";
+  private static final String readRepresentation3 = "read(java.lang.String, java.lang.Class<?>, io.vlingo.symbio.store.state.StateStore.io.vlingo.symbio.store.state.StateStore.ReadResultInterest<io.vlingo.symbio.State.TextState>, java.lang.Object)";
+  private static final String readRepresentation4 = "read(java.lang.String, java.lang.Class<?>, io.vlingo.symbio.store.state.StateStore.io.vlingo.symbio.store.state.StateStore.ReadResultInterest<io.vlingo.symbio.State.TextState>)";
+
   private final Actor actor;
   private final Mailbox mailbox;
 
-  public TextStateStore__Proxy(final Actor actor, final Mailbox mailbox) {
+  public TextStateStore__Proxy(final Actor actor, final Mailbox mailbox){
     this.actor = actor;
     this.mailbox = mailbox;
   }
 
-  @Override
-  public void read(final String id, final Class<?> type, final ReadResultInterest<String> interest) {
-    final Consumer<TextStateStore> consumer = (actor) -> actor.read(id, type, interest);
-    mailbox.send(new LocalMessage<TextStateStore>(actor, TextStateStore.class, consumer, "readBinary()"));
+  public void write(io.vlingo.symbio.State.TextState arg0, io.vlingo.symbio.store.state.StateStore.WriteResultInterest<io.vlingo.symbio.State.TextState> arg1, java.lang.Object arg2) {
+    if (!actor.isStopped()) {
+      final java.util.function.Consumer<TextStateStore> consumer = (actor) -> actor.write(arg0, arg1, arg2);
+      if (mailbox.isPreallocated()) { mailbox.send(actor, TextStateStore.class, consumer, null, writeRepresentation1); }
+      else { mailbox.send(new LocalMessage<TextStateStore>(actor, TextStateStore.class, consumer, writeRepresentation1)); }
+    } else {
+      actor.deadLetters().failedDelivery(new DeadLetter(actor, writeRepresentation1));
+    }
   }
-
-  @Override
-  public void read(final String id, final Class<?> type, final ReadResultInterest<String> interest, final Object object) {
-    final Consumer<TextStateStore> consumer = (actor) -> actor.read(id, type, interest, object);
-    mailbox.send(new LocalMessage<TextStateStore>(actor, TextStateStore.class, consumer, "readBinary()"));
+  public void write(io.vlingo.symbio.State.TextState arg0, io.vlingo.symbio.store.state.StateStore.WriteResultInterest<io.vlingo.symbio.State.TextState> arg1) {
+    if (!actor.isStopped()) {
+      final java.util.function.Consumer<TextStateStore> consumer = (actor) -> actor.write(arg0, arg1);
+      if (mailbox.isPreallocated()) { mailbox.send(actor, TextStateStore.class, consumer, null, writeRepresentation2); }
+      else { mailbox.send(new LocalMessage<TextStateStore>(actor, TextStateStore.class, consumer, writeRepresentation2)); }
+    } else {
+      actor.deadLetters().failedDelivery(new DeadLetter(actor, writeRepresentation2));
+    }
   }
-
-  @Override
-  public void write(final State<String> data, final WriteResultInterest<String> interest) {
-    final Consumer<TextStateStore> consumer = (actor) -> actor.write(data, interest);
-    mailbox.send(new LocalMessage<TextStateStore>(actor, TextStateStore.class, consumer, "writeText()"));
+  public void read(java.lang.String arg0, java.lang.Class<?> arg1, io.vlingo.symbio.store.state.StateStore.ReadResultInterest<io.vlingo.symbio.State.TextState> arg2, java.lang.Object arg3) {
+    if (!actor.isStopped()) {
+      final java.util.function.Consumer<TextStateStore> consumer = (actor) -> actor.read(arg0, arg1, arg2, arg3);
+      if (mailbox.isPreallocated()) { mailbox.send(actor, TextStateStore.class, consumer, null, readRepresentation3); }
+      else { mailbox.send(new LocalMessage<TextStateStore>(actor, TextStateStore.class, consumer, readRepresentation3)); }
+    } else {
+      actor.deadLetters().failedDelivery(new DeadLetter(actor, readRepresentation3));
+    }
   }
-
-  @Override
-  public void write(final State<String> data, final WriteResultInterest<String> interest, final Object object) {
-    final Consumer<TextStateStore> consumer = (actor) -> actor.write(data, interest, object);
-    mailbox.send(new LocalMessage<TextStateStore>(actor, TextStateStore.class, consumer, "writeText()"));
+  public void read(java.lang.String arg0, java.lang.Class<?> arg1, io.vlingo.symbio.store.state.StateStore.ReadResultInterest<io.vlingo.symbio.State.TextState> arg2) {
+    if (!actor.isStopped()) {
+      final java.util.function.Consumer<TextStateStore> consumer = (actor) -> actor.read(arg0, arg1, arg2);
+      if (mailbox.isPreallocated()) { mailbox.send(actor, TextStateStore.class, consumer, null, readRepresentation4); }
+      else { mailbox.send(new LocalMessage<TextStateStore>(actor, TextStateStore.class, consumer, readRepresentation4)); }
+    } else {
+      actor.deadLetters().failedDelivery(new DeadLetter(actor, readRepresentation4));
+    }
   }
 }

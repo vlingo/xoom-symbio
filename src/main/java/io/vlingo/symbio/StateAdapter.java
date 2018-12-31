@@ -7,7 +7,15 @@
 
 package io.vlingo.symbio;
 
-public interface StateAdapter<S,R> {
-  S fromRaw(final R raw, final int stateVersion, final int typeVersion);
-  R toRaw(final S state, final int stateVersion, final int typeVersion);
+public interface StateAdapter<S,RS extends State<?>> {
+  default boolean isBinary() { return false; }
+  default boolean isObject() { return false; }
+  default boolean isText() { return false; }
+  int typeVersion();
+  S fromRawState(final RS raw);
+  RS toRawState(final S state, final int stateVersion, final Metadata metadata);
+
+  default RS toRawState(final S state, final int stateVersion) {
+    return toRawState(state, stateVersion, Metadata.nullMetadata());
+  }
 }

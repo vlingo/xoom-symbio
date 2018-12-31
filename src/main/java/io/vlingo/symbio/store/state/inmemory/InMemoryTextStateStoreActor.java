@@ -7,18 +7,17 @@
 
 package io.vlingo.symbio.store.state.inmemory;
 
-import io.vlingo.symbio.State;
-import io.vlingo.symbio.State.NullState;
+import io.vlingo.symbio.State.TextState;
 import io.vlingo.symbio.store.state.StateStore.DispatcherControl;
 import io.vlingo.symbio.store.state.TextStateStore;
 
-public class InMemoryTextStateStoreActor extends InMemoryStateStoreActor<String>
+public class InMemoryTextStateStoreActor extends InMemoryStateStoreActor<TextState>
     implements TextStateStore, DispatcherControl {
 
   private final TextDispatcher dispatcher;
 
   public InMemoryTextStateStoreActor(final TextDispatcher dispatcher) {
-    super(NullState.Text);
+    super(TextState.Null);
 
     if (dispatcher == null) {
       throw new IllegalArgumentException("Dispatcher must not be null.");
@@ -30,26 +29,26 @@ public class InMemoryTextStateStoreActor extends InMemoryStateStoreActor<String>
   }
 
   @Override
-  public void read(final String id, final Class<?> type, final ReadResultInterest<String> interest) {
+  public void read(final String id, final Class<?> type, final ReadResultInterest<TextState> interest) {
     readFor(id, type, interest, null);
   }
 
   @Override
-  public void read(final String id, final Class<?> type, final ReadResultInterest<String> interest, final Object object) {
+  public void read(final String id, final Class<?> type, final ReadResultInterest<TextState> interest, final Object object) {
     readFor(id, type, interest, object);
   }
 
   @Override
-  public void write(final State<String> state, final WriteResultInterest<String> interest) {
+  public void write(final TextState state, final WriteResultInterest<TextState> interest) {
     writeWith(state, interest, null);
   }
 
   @Override
-  public void write(final State<String> state, final WriteResultInterest<String> interest, final Object object) {
+  public void write(final TextState state, final WriteResultInterest<TextState> interest, final Object object) {
     writeWith(state, interest, object);
   }
 
-  protected void dispatch(final String dispatchId, final State<String> state) {
+  protected void dispatch(final String dispatchId, final TextState state) {
     dispatcher.dispatchText(dispatchId, state);
   }
 }

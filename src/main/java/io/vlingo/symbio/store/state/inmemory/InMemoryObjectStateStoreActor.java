@@ -7,18 +7,17 @@
 
 package io.vlingo.symbio.store.state.inmemory;
 
-import io.vlingo.symbio.State;
-import io.vlingo.symbio.State.NullState;
+import io.vlingo.symbio.State.ObjectState;
 import io.vlingo.symbio.store.state.ObjectStateStore;
 import io.vlingo.symbio.store.state.StateStore.DispatcherControl;
 
-public class InMemoryObjectStateStoreActor extends InMemoryStateStoreActor<Object>
+public class InMemoryObjectStateStoreActor extends InMemoryStateStoreActor<ObjectState<Object>>
     implements ObjectStateStore, DispatcherControl {
 
   private final ObjectDispatcher dispatcher;
  
   public InMemoryObjectStateStoreActor(final ObjectDispatcher dispatcher) {
-    super(NullState.Object);
+    super(ObjectState.Null);
 
     if (dispatcher == null) {
       throw new IllegalArgumentException("Dispatcher must not be null.");
@@ -30,26 +29,27 @@ public class InMemoryObjectStateStoreActor extends InMemoryStateStoreActor<Objec
   }
 
   @Override
-  public void read(final String id, final Class<?> type, final ReadResultInterest<Object> interest) {
+  public void read(final String id, Class<?> type, final ReadResultInterest<ObjectState<Object>> interest) {
     readFor(id, type, interest, null);
   }
 
   @Override
-  public void read(final String id, final Class<?> type, final ReadResultInterest<Object> interest, final Object object) {
+  public void read(final String id, final Class<?> type, final ReadResultInterest<ObjectState<Object>> interest, final Object object) {
     readFor(id, type, interest, object);
   }
 
   @Override
-  public void write(final State<Object> state, final WriteResultInterest<Object> interest) {
+  public void write(final ObjectState<Object> state, final WriteResultInterest<ObjectState<Object>> interest) {
     writeWith(state, interest, null);
   }
 
   @Override
-  public void write(final State<Object> state, final WriteResultInterest<Object> interest, final Object object) {
+  public void write(final ObjectState<Object> state, final WriteResultInterest<ObjectState<Object>> interest, final Object object) {
     writeWith(state, interest, object);
   }
 
-  protected void dispatch(final String dispatchId, final State<Object> state) {
+  @Override
+  protected void dispatch(final String dispatchId, final ObjectState<Object> state) {
     dispatcher.dispatchObject(dispatchId, state);
   }
 }

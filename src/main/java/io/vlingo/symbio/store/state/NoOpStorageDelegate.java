@@ -14,7 +14,7 @@ import io.vlingo.symbio.store.state.StateStore.Dispatchable;
 import io.vlingo.symbio.store.state.StateStore.StorageDelegate;
 
 public class NoOpStorageDelegate implements StorageDelegate {
-  @Override public <S> Collection<Dispatchable<S>> allUnconfirmedDispatchableStates() { return null; }
+  @Override public <S extends State<?>> Collection<Dispatchable<S>> allUnconfirmedDispatchableStates() { return null; }
 
   @Override public void beginRead() {  }
 

@@ -39,11 +39,11 @@ public interface StateStore {
     void dispatchUnconfirmed();
   }
 
-  public static class Dispatchable<T> {
+  public static class Dispatchable<R extends State<?>> {
     public final String id;
-    public final State<T> state;
+    public final R state;
 
-    public Dispatchable(final String id, final State<T> state) {
+    public Dispatchable(final String id, final R state) {
       this.id = id;
       this.state = state;
     }
@@ -56,7 +56,7 @@ public interface StateStore {
     @Override
     @SuppressWarnings("unchecked")
     public boolean equals(final Object other) {
-      return this.id.equals(((Dispatchable<T>) other).id);
+      return this.id.equals(((Dispatchable<R>) other).id);
     }
   }
 
@@ -67,16 +67,16 @@ public interface StateStore {
     default void dispatch(final String dispatchId, final TextState state) { }
   }
 
-  public static interface ReadResultInterest<T> {
-    void readResultedIn(final Outcome<StorageException,Result> outcome, final String id, final State<T> state, final Object object);
+  public static interface ReadResultInterest<R extends State<?>> {
+    void readResultedIn(final Outcome<StorageException,Result> outcome, final String id, final R state, final Object object);
   }
 
-  public static interface WriteResultInterest<T> {
-    void writeResultedIn(final Outcome<StorageException,Result> outcome, final String id, final State<T> state, final Object object);
+  public static interface WriteResultInterest<R extends State<?>> {
+    void writeResultedIn(final Outcome<StorageException,Result> outcome, final String id, final R state, final Object object);
   }
 
   public static interface StorageDelegate {
-    <S> Collection<Dispatchable<S>> allUnconfirmedDispatchableStates() throws Exception;
+    <S extends State<?>> Collection<Dispatchable<S>> allUnconfirmedDispatchableStates() throws Exception;
     void beginRead() throws Exception;
     void beginWrite() throws Exception;
     void close();

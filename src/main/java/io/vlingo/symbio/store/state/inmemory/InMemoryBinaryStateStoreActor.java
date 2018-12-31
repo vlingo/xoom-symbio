@@ -7,18 +7,17 @@
 
 package io.vlingo.symbio.store.state.inmemory;
 
-import io.vlingo.symbio.State;
-import io.vlingo.symbio.State.NullState;
+import io.vlingo.symbio.State.BinaryState;
 import io.vlingo.symbio.store.state.BinaryStateStore;
 import io.vlingo.symbio.store.state.StateStore.DispatcherControl;
 
-public class InMemoryBinaryStateStoreActor extends InMemoryStateStoreActor<byte[]>
+public class InMemoryBinaryStateStoreActor extends InMemoryStateStoreActor<BinaryState>
     implements BinaryStateStore, DispatcherControl {
 
   private final BinaryDispatcher dispatcher;
 
   protected InMemoryBinaryStateStoreActor(final BinaryDispatcher dispatcher) {
-    super(NullState.Binary);
+    super(BinaryState.Null);
 
     if (dispatcher == null) {
       throw new IllegalArgumentException("Dispatcher must not be null.");
@@ -30,27 +29,27 @@ public class InMemoryBinaryStateStoreActor extends InMemoryStateStoreActor<byte[
   }
 
   @Override
-  public void read(final String id, Class<?> type, final ReadResultInterest<byte[]> interest) {
+  public void read(final String id, Class<?> type, final ReadResultInterest<BinaryState> interest) {
     readFor(id, type, interest, null);
   }
 
   @Override
-  public void read(final String id, Class<?> type, final ReadResultInterest<byte[]> interest, final Object object) {
+  public void read(final String id, Class<?> type, final ReadResultInterest<BinaryState> interest, final Object object) {
     readFor(id, type, interest, object);
   }
 
   @Override
-  public void write(final State<byte[]> state, final WriteResultInterest<byte[]> interest) {
+  public void write(final BinaryState state, final WriteResultInterest<BinaryState> interest) {
     writeWith(state, interest, null);
   }
 
   @Override
-  public void write(final State<byte[]> state, final WriteResultInterest<byte[]> interest, final Object object) {
+  public void write(final BinaryState state, final WriteResultInterest<BinaryState> interest, final Object object) {
     writeWith(state, interest, object);
   }
 
   @Override
-  protected void dispatch(final String dispatchId, final State<byte[]> state) {
+  protected void dispatch(final String dispatchId, final BinaryState state) {
     dispatcher.dispatchBinary(dispatchId, state);
   }
 }

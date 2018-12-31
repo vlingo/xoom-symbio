@@ -7,15 +7,15 @@
 
 package io.vlingo.symbio.store.state;
 
-import io.vlingo.symbio.State;
+import io.vlingo.symbio.State.TextState;
 
 public interface TextStateStore extends StateStore {
-  void read(final String id, final Class<?> type, final ReadResultInterest<String> interest);
-  void read(final String id, final Class<?> type, final ReadResultInterest<String> interest, final Object object);
-  void write(final State<String> state, final WriteResultInterest<String> interest);
-  void write(final State<String> state, final WriteResultInterest<String> interest, final Object object);
+  void read(final String id, final Class<?> type, final ReadResultInterest<TextState> interest);
+  void read(final String id, final Class<?> type, final ReadResultInterest<TextState> interest, final Object object);
+  void write(final TextState state, final WriteResultInterest<TextState> interest);
+  void write(final TextState state, final WriteResultInterest<TextState> interest, final Object object);
 
   public static interface TextDispatcher extends Dispatcher {
-    void dispatchText(final String dispatchId, final State<String> state);
+    void dispatchText(final String dispatchId, final TextState state);
   }
 }

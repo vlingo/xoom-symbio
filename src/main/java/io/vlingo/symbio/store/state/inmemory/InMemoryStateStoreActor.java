@@ -25,12 +25,12 @@ import io.vlingo.symbio.store.state.StateStore.ReadResultInterest;
 import io.vlingo.symbio.store.state.StateStore.WriteResultInterest;
 import io.vlingo.symbio.store.state.StateTypeStateStoreMap;
 
-public abstract class InMemoryStateStoreActor<T> extends Actor implements DispatcherControl {
-  private final List<Dispatchable<T>> dispatchables;
-  private final State<T> emptyState;
-  private final Map<String, Map<String, State<T>>> store;
+public abstract class InMemoryStateStoreActor<RS extends State<?>> extends Actor implements DispatcherControl {
+  private final List<Dispatchable<RS>> dispatchables;
+  private final RS emptyState;
+  private final Map<String, Map<String, RS>> store;
 
-  protected InMemoryStateStoreActor(final State<T> emptyState) {
+  protected InMemoryStateStoreActor(final RS emptyState) {
     this.emptyState = emptyState;
     this.store = new HashMap<>();
     this.dispatchables = new ArrayList<>();
@@ -40,21 +40,21 @@ public abstract class InMemoryStateStoreActor<T> extends Actor implements Dispat
 
   @Override
   public void confirmDispatched(final String dispatchId, final ConfirmDispatchedResultInterest interest) {
-    dispatchables.remove(new Dispatchable<T>(dispatchId, null));
+    dispatchables.remove(new Dispatchable<RS>(dispatchId, null));
     interest.confirmDispatchedResultedIn(Result.Success, dispatchId);
   }
 
   @Override
   public void dispatchUnconfirmed() {
     for (int idx = 0; idx < dispatchables.size(); ++idx) {
-      final Dispatchable<T> dispatchable = dispatchables.get(idx);
+      final Dispatchable<RS> dispatchable = dispatchables.get(idx);
       dispatch(dispatchable.id, dispatchable.state);
     }
   }
 
-  protected abstract void dispatch(final String dispatchId, final State<T> state);
+  protected abstract void dispatch(final String dispatchId, final RS state);
   
-  protected void readFor(final String id, final Class<?> type, final ReadResultInterest<T> interest, final Object object) {
+  protected void readFor(final String id, final Class<?> type, final ReadResultInterest<RS> interest, final Object object) {
     if (interest != null) {
       if (id == null || type == null) {
         interest.readResultedIn(Failure.of(new StorageException(Result.Error, id == null ? "The id is null." : "The type is null.")), id, emptyState, object);
@@ -68,18 +68,22 @@ public abstract class InMemoryStateStoreActor<T> extends Actor implements Dispat
         return;
       }
 
-      final Map<String, State<T>> typeStore = store.get(storeName);
+      final Map<String, RS> typeStore = store.get(storeName);
 
       if (typeStore == null) {
         interest.readResultedIn(Failure.of(new StorageException(Result.NotFound, "Store not found: " + storeName)), id, emptyState, object);
         return;
       }
 
-      final State<T> state = typeStore.get(id);
+      final RS state = typeStore.get(id);
 
       if (state != null) {
         interest.readResultedIn(Success.of(Result.Success), id, state, object);
       } else {
+        for (String storeId : typeStore.keySet()) {
+          System.out.println("UNFOUND STATES\n=====================");
+          System.out.println("STORE ID: '" + storeId + "' STATE: " + typeStore.get(storeId));
+        }
         interest.readResultedIn(Failure.of(new StorageException(Result.NotFound, "Not found.")), id, emptyState, object);
       }
     } else {
@@ -90,7 +94,7 @@ public abstract class InMemoryStateStoreActor<T> extends Actor implements Dispat
     }
   }
 
-  protected void writeWith(final State<T> state, final WriteResultInterest<T> interest, final Object object) {
+  protected void writeWith(final RS state, final WriteResultInterest<RS> interest, final Object object) {
     if (interest != null) {
       if (state == null) {
         interest.writeResultedIn(Failure.of(new StorageException(Result.Error, "The state is null.")), null, emptyState, object);
@@ -103,17 +107,17 @@ public abstract class InMemoryStateStoreActor<T> extends Actor implements Dispat
             return;
           }
 
-          Map<String, State<T>> typeStore = store.get(storeName);
+          Map<String, RS> typeStore = store.get(storeName);
 
           if (typeStore == null) {
             typeStore = new HashMap<>();
-            final Map<String, State<T>> existingTypeStore = store.putIfAbsent(storeName, typeStore);
+            final Map<String, RS> existingTypeStore = store.putIfAbsent(storeName, typeStore);
             if (existingTypeStore != null) {
               typeStore = existingTypeStore;
             }
           }
 
-          final State<T> persistedState = typeStore.putIfAbsent(state.id, state);
+          final RS persistedState = typeStore.putIfAbsent(state.id, state);
           if (persistedState != null) {
             if (persistedState.dataVersion >= state.dataVersion) {
               interest.writeResultedIn(Failure.of(new StorageException(Result.ConcurrentyViolation, "Version conflict.")), state.id, state, object);
@@ -122,7 +126,7 @@ public abstract class InMemoryStateStoreActor<T> extends Actor implements Dispat
             typeStore.put(state.id, state);
           }
           final String dispatchId = storeName + ":" + state.id;
-          dispatchables.add(new Dispatchable<T>(dispatchId, state));
+          dispatchables.add(new Dispatchable<RS>(dispatchId, state));
           dispatch(dispatchId, state);
 
           interest.writeResultedIn(Success.of(Result.Success), state.id, state, object);

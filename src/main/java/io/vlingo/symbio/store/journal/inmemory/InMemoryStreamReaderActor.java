@@ -47,7 +47,7 @@ public class InMemoryStreamReaderActor<T> extends Actor implements StreamReader<
     State<T> snapshot = snapshotsView.get(streamName);
     if (snapshot != null) {
       if (snapshot.dataVersion > version) {
-        version = snapshot.dataVersion + 1;
+        version = snapshot.dataVersion;
       } else {
         snapshot = null; // reading from beyond snapshot
       }
