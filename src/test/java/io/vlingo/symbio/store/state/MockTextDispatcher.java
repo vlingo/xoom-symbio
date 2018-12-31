@@ -45,7 +45,7 @@ public class MockTextDispatcher implements TextDispatcher {
   }
 
   @Override
-  public void dispatchText(final String dispatchId, final State<String> state) {
+  public void dispatchText(final String dispatchId, final TextState state) {
     if (processDispatch.get()) {
       dispatched.put(dispatchId, state);
       control.confirmDispatched(dispatchId, confirmDispatchedResultInterest);

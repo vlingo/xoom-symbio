@@ -12,22 +12,21 @@ import java.util.Optional;
 
 import io.vlingo.common.Outcome;
 import io.vlingo.symbio.Source;
-import io.vlingo.symbio.State;
 import io.vlingo.symbio.store.Result;
 import io.vlingo.symbio.store.StorageException;
 import io.vlingo.symbio.store.journal.Journal.AppendResultInterest;
 
-public class MockAppendResultInterest implements AppendResultInterest<String> {
+public class MockAppendResultInterest implements AppendResultInterest<SnapshotState> {
 
   @Override
   public <S> void appendResultedIn(Outcome<StorageException, Result> outcome, String streamName, int streamVersion,
-          Source<S> source, Optional<State<String>> snapshot, Object object) {
+          Source<S> source, Optional<SnapshotState> snapshot, Object object) {
     
   }
 
   @Override
   public <S> void appendAllResultedIn(Outcome<StorageException, Result> outcome, String streamName, int streamVersion,
-          List<Source<S>> sources, Optional<State<String>> snapshot, Object object) {
+          List<Source<S>> sources, Optional<SnapshotState> snapshot, Object object) {
     
   }
 }

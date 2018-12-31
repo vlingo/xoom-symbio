@@ -27,8 +27,8 @@ import io.vlingo.symbio.Entry.TextEntry;
 import io.vlingo.symbio.EntryAdapter;
 import io.vlingo.symbio.Metadata;
 import io.vlingo.symbio.Source;
-import io.vlingo.symbio.State.TextState;
 import io.vlingo.symbio.store.journal.Journal;
+import io.vlingo.symbio.store.state.SnapshotStateAdapter;
 
 public class InMemoryEventJournalActorTest {
   private Object object = new Object();
@@ -49,7 +49,7 @@ public class InMemoryEventJournalActorTest {
   @Test
   public void testThatJournalAppendsOneEventWithSnapshot() {
     listener.until = TestUntil.happenings(1);
-    journal.appendWith("123", 1, new Test1Source(), new TextState(), interest, object);
+    journal.appendWith("123", 1, new Test1Source(), new SnapshotState(), interest, object);
     listener.until.completes();
     assertEquals(1, listener.entries.size());
     assertEquals("1", listener.entries.get(0).id());
@@ -98,7 +98,7 @@ public class InMemoryEventJournalActorTest {
     listener.until = TestUntil.happenings(5);
     journal.append("123", 1, new Test1Source(), interest, object);
     journal.append("123", 2, new Test1Source(), interest, object);
-    journal.appendWith("123", 3, new Test1Source(), new TextState("1", String.class, 1, "data", 3), interest, object);
+    journal.appendWith("123", 3, new Test1Source(), new SnapshotState(), interest, object);
     journal.append("123", 4, new Test1Source(), interest, object);
     journal.append("123", 5, new Test1Source(), interest, object);
     listener.until.completes();
@@ -107,8 +107,9 @@ public class InMemoryEventJournalActorTest {
       .streamReader("test")
       .andThenTo(reader -> reader.streamFor("123"))
       .andThenConsume(eventStream -> {
-        assertEquals(2, eventStream.entries.size());
+        assertEquals(3, eventStream.entries.size());
         final Iterator<Entry<String>> iterator = eventStream.entries.iterator();
+        assertEquals("3", iterator.next().id());
         assertEquals("4", iterator.next().id());
         assertEquals("5", iterator.next().id());
         assertNotNull(eventStream.snapshot);
@@ -122,7 +123,7 @@ public class InMemoryEventJournalActorTest {
     listener.until = TestUntil.happenings(5);
     journal.append("123", 1, new Test1Source(), interest, object);
     journal.append("123", 2, new Test1Source(), interest, object);
-    journal.appendWith("123", 3, new Test1Source(), new TextState("1", String.class, 1, "data", 3), interest, object);
+    journal.appendWith("123", 3, new Test1Source(), new SnapshotState(), interest, object);
     journal.append("123", 4, new Test1Source(), interest, object);
     journal.append("123", 5, new Test1Source(), interest, object);
     listener.until.completes();
@@ -149,6 +150,7 @@ public class InMemoryEventJournalActorTest {
     journal = world.actorFor(Definition.has(InMemoryJournalActor.class, Definition.parameters(listener)), Journal.class);
     journal.registerAdapter(Test1Source.class, new Test1SourceAdapter());
     journal.registerAdapter(Test2Source.class, new Test2SourceAdapter());
+    journal.registerAdapter(SnapshotState.class, new SnapshotStateAdapter());
   }
 
   public static final class Test1Source extends Source<String> {

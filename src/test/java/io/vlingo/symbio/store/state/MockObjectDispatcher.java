@@ -46,7 +46,7 @@ public class MockObjectDispatcher implements ObjectDispatcher {
   }
 
   @Override
-  public void dispatchObject(final String dispatchId, final State<Object> state) {
+  public void dispatchObject(final String dispatchId, final ObjectState<Object> state) {
     if (processDispatch.get()) {
       dispatched.put(dispatchId, state);
       control.confirmDispatched(dispatchId, confirmDispatchedResultInterest);
