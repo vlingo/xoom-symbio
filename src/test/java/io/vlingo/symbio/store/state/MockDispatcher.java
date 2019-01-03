@@ -13,19 +13,18 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import io.vlingo.actors.testkit.TestUntil;
 import io.vlingo.symbio.State;
-import io.vlingo.symbio.State.ObjectState;
 import io.vlingo.symbio.store.state.StateStore.ConfirmDispatchedResultInterest;
+import io.vlingo.symbio.store.state.StateStore.Dispatcher;
 import io.vlingo.symbio.store.state.StateStore.DispatcherControl;
-import io.vlingo.symbio.store.state.ObjectStateStore.ObjectDispatcher;
 
-public class MockObjectDispatcher implements ObjectDispatcher {
+public class MockDispatcher implements Dispatcher {
   public final ConfirmDispatchedResultInterest confirmDispatchedResultInterest;
   public DispatcherControl control;
-  public final Map<String,State<Object>> dispatched = new HashMap<>();
+  public final Map<String,State<?>> dispatched = new HashMap<>();
   public final AtomicBoolean processDispatch = new AtomicBoolean(true);
   public TestUntil until = TestUntil.happenings(0);
 
-  public MockObjectDispatcher(final int testUntilHappenings, final ConfirmDispatchedResultInterest confirmDispatchedResultInterest) {
+  public MockDispatcher(final int testUntilHappenings, final ConfirmDispatchedResultInterest confirmDispatchedResultInterest) {
     this.until = TestUntil.happenings(testUntilHappenings);
     this.confirmDispatchedResultInterest = confirmDispatchedResultInterest;
   }
@@ -36,17 +35,7 @@ public class MockObjectDispatcher implements ObjectDispatcher {
   }
 
   @Override
-  @SuppressWarnings({ "rawtypes", "unchecked" }) 
-  public void dispatch(final String dispatchId, final ObjectState<?> state) {
-    if (processDispatch.get()) {
-      dispatched.put(dispatchId, (ObjectState) state);
-      control.confirmDispatched(dispatchId, confirmDispatchedResultInterest);
-      until.happened();
-    }
-  }
-
-  @Override
-  public void dispatchObject(final String dispatchId, final ObjectState<Object> state) {
+  public <S extends State<?>> void dispatch(final String dispatchId, final S state) {
     if (processDispatch.get()) {
       dispatched.put(dispatchId, state);
       control.confirmDispatched(dispatchId, confirmDispatchedResultInterest);
