@@ -7,14 +7,44 @@
 
 package io.vlingo.symbio;
 
+/**
+ * Adapts the native state to the raw {@code State<?>}, and the raw {@code State<?>} to the native state.
+ *
+ * @param <S> the native type of the state
+ * @param <RS> the raw {@code State<?>} of the state
+ */
 public interface StateAdapter<S,RS extends State<?>> {
-  default boolean isBinary() { return false; }
-  default boolean isObject() { return false; }
-  default boolean isText() { return false; }
+
+  /**
+   * Answer the state type's version, as in the number of times
+   * the type has been defined and redefined.
+   * @return int
+   */
   int typeVersion();
+
+  /**
+   * Answer the {@code S} native state instance.
+   * @param raw the {@code State<?>} instance from which the native state is derived
+   * @return S
+   */
   S fromRawState(final RS raw);
+
+  /**
+   * Answer the {@code RS} raw {@code State<?>} instance of the {@code S} instance.
+   * @param state the {@code S} native state instance
+   * @param stateVersion the int state version
+   * @param metadata the Metadata for this state
+   * @return RS
+   */
   RS toRawState(final S state, final int stateVersion, final Metadata metadata);
 
+  /**
+   * Answer the {@code RS} raw {@code State<?>} instance of the {@code S} instance
+   * using the {@code Metadata.nullMetadata()}.
+   * @param state the {@code S} native state instance
+   * @param stateVersion the int state version
+   * @return RS
+   */
   default RS toRawState(final S state, final int stateVersion) {
     return toRawState(state, stateVersion, Metadata.nullMetadata());
   }
