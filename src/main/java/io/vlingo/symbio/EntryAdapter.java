@@ -7,7 +7,25 @@
 
 package io.vlingo.symbio;
 
+/**
+ * Adapts the native {@code Source<?>} state to the raw {@code Entry<?>},
+ * and the raw {@code Entry<?>} to the native {@code Source<?>}.
+ *
+ * @param <S> the native {@code Source<?>}
+ * @param <E> the raw {@code Entry<?>}
+ */
 public interface EntryAdapter<S extends Source<?>,E extends Entry<?>> {
+  /**
+   * Answer the {@code S Source<?>} native state from the {@code E Entry<?>} state.
+   * @param entry the {@code E Entry<?>} to adapt from
+   * @return S
+   */
   S fromEntry(final E entry);
+
+  /**
+   * Answer the {@code E Entry<?>} state from the {@code S Source<?>} native state.
+   * @param source the {@code S Source<?>} native state
+   * @return E
+   */
   E toEntry(final S source);
 }
