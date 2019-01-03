@@ -15,25 +15,35 @@ import java.util.Map;
 import io.vlingo.actors.Actor;
 import io.vlingo.common.Failure;
 import io.vlingo.common.Success;
+import io.vlingo.symbio.Metadata;
 import io.vlingo.symbio.State;
+import io.vlingo.symbio.StateAdapter;
 import io.vlingo.symbio.store.Result;
 import io.vlingo.symbio.store.StorageException;
-import io.vlingo.symbio.store.state.StateStore.ConfirmDispatchedResultInterest;
-import io.vlingo.symbio.store.state.StateStore.Dispatchable;
+import io.vlingo.symbio.store.state.StateStore;
 import io.vlingo.symbio.store.state.StateStore.DispatcherControl;
-import io.vlingo.symbio.store.state.StateStore.ReadResultInterest;
-import io.vlingo.symbio.store.state.StateStore.WriteResultInterest;
+import io.vlingo.symbio.store.state.StateStoreAdapterAssistant;
 import io.vlingo.symbio.store.state.StateTypeStateStoreMap;
 
-public abstract class InMemoryStateStoreActor<RS extends State<?>> extends Actor implements DispatcherControl {
+public class InMemoryStateStoreActor<RS extends State<?>> extends Actor
+    implements StateStore, DispatcherControl {
+
+  private final StateStoreAdapterAssistant adapterAssistant;
   private final List<Dispatchable<RS>> dispatchables;
-  private final RS emptyState;
+  private final Dispatcher dispatcher;
   private final Map<String, Map<String, RS>> store;
 
-  protected InMemoryStateStoreActor(final RS emptyState) {
-    this.emptyState = emptyState;
+  public InMemoryStateStoreActor(final Dispatcher dispatcher) {
+    if (dispatcher == null) {
+      throw new IllegalArgumentException("Dispatcher must not be null.");
+    }
+    this.dispatcher = dispatcher;
+
+    this.adapterAssistant = new StateStoreAdapterAssistant();
     this.store = new HashMap<>();
     this.dispatchables = new ArrayList<>();
+
+    dispatcher.controlWith(selfAs(DispatcherControl.class));
 
     selfAs(DispatcherControl.class).dispatchUnconfirmed();
   }
@@ -52,39 +62,73 @@ public abstract class InMemoryStateStoreActor<RS extends State<?>> extends Actor
     }
   }
 
-  protected abstract void dispatch(final String dispatchId, final RS state);
-  
-  protected void readFor(final String id, final Class<?> type, final ReadResultInterest<RS> interest, final Object object) {
+  @Override
+  public void read(final String id, Class<?> type, final ReadResultInterest interest) {
+    readFor(id, type, interest, null);
+  }
+
+  @Override
+  public void read(final String id, Class<?> type, final ReadResultInterest interest, final Object object) {
+    readFor(id, type, interest, object);
+  }
+
+  @Override
+  public <S> void write(final String id, final S state, final int stateVersion, final WriteResultInterest interest) {
+    writeWith(id, state, stateVersion, null, interest, null);
+  }
+
+  @Override
+  public <S> void write(final String id, final S state, final int stateVersion, final Metadata metadata, final WriteResultInterest interest) {
+    writeWith(id, state, stateVersion, metadata, interest, null);
+  }
+
+  @Override
+  public <S> void write(final String id, final S state, final int stateVersion, final WriteResultInterest interest, final Object object) {
+    writeWith(id, state, stateVersion, null, interest, object);
+  }
+
+  @Override
+  public <S> void write(final String id, final S state, final int stateVersion, final Metadata metadata, final WriteResultInterest interest, final Object object) {
+    writeWith(id, state, stateVersion, metadata, interest, object);
+  }
+
+  @Override
+  public <S, R extends State<?>> void registerAdapter(Class<S> stateType, StateAdapter<S, R> adapter) {
+    adapterAssistant.registerAdapter(stateType, adapter);
+  }
+
+  protected void readFor(final String id, final Class<?> type, final ReadResultInterest interest, final Object object) {
     if (interest != null) {
       if (id == null || type == null) {
-        interest.readResultedIn(Failure.of(new StorageException(Result.Error, id == null ? "The id is null." : "The type is null.")), id, emptyState, object);
+        interest.readResultedIn(Failure.of(new StorageException(Result.Error, id == null ? "The id is null." : "The type is null.")), id, null, -1, null, object);
         return;
       }
 
       final String storeName = StateTypeStateStoreMap.storeNameFrom(type);
 
       if (storeName == null) {
-        interest.readResultedIn(Failure.of(new StorageException(Result.NoTypeStore, "No type store for: " + type.getSimpleName())), id, emptyState, object);
+        interest.readResultedIn(Failure.of(new StorageException(Result.NoTypeStore, "No type store for: " + type.getSimpleName())), id, null, -1, null, object);
         return;
       }
 
       final Map<String, RS> typeStore = store.get(storeName);
 
       if (typeStore == null) {
-        interest.readResultedIn(Failure.of(new StorageException(Result.NotFound, "Store not found: " + storeName)), id, emptyState, object);
+        interest.readResultedIn(Failure.of(new StorageException(Result.NotFound, "Store not found: " + storeName)), id, null, -1, null, object);
         return;
       }
 
-      final RS state = typeStore.get(id);
+      final RS raw = typeStore.get(id);
 
-      if (state != null) {
-        interest.readResultedIn(Success.of(Result.Success), id, state, object);
+      if (raw != null) {
+        final Object state = adapterAssistant.adaptFromRawState(raw);
+        interest.readResultedIn(Success.of(Result.Success), id, state, raw.dataVersion, raw.metadata, object);
       } else {
         for (String storeId : typeStore.keySet()) {
           System.out.println("UNFOUND STATES\n=====================");
           System.out.println("STORE ID: '" + storeId + "' STATE: " + typeStore.get(storeId));
         }
-        interest.readResultedIn(Failure.of(new StorageException(Result.NotFound, "Not found.")), id, emptyState, object);
+        interest.readResultedIn(Failure.of(new StorageException(Result.NotFound, "Not found.")), id, null, -1, null, object);
       }
     } else {
       logger().log(
@@ -94,16 +138,16 @@ public abstract class InMemoryStateStoreActor<RS extends State<?>> extends Actor
     }
   }
 
-  protected void writeWith(final RS state, final WriteResultInterest<RS> interest, final Object object) {
+  protected <S> void writeWith(final String id, final S state, final int stateVersion, final Metadata metadata, final WriteResultInterest interest, final Object object) {
     if (interest != null) {
       if (state == null) {
-        interest.writeResultedIn(Failure.of(new StorageException(Result.Error, "The state is null.")), null, emptyState, object);
+        interest.writeResultedIn(Failure.of(new StorageException(Result.Error, "The state is null.")), id, state, stateVersion, object);
       } else {
         try {
-          final String storeName = StateTypeStateStoreMap.storeNameFrom(state.type);
+          final String storeName = StateTypeStateStoreMap.storeNameFrom(state.getClass());
 
           if (storeName == null) {
-            interest.writeResultedIn(Failure.of(new StorageException(Result.NoTypeStore, "No type store for: " + state.type)), state.id, state, object);
+            interest.writeResultedIn(Failure.of(new StorageException(Result.NoTypeStore, "No type store for: " + state.getClass())), id, state, stateVersion, object);
             return;
           }
 
@@ -117,29 +161,37 @@ public abstract class InMemoryStateStoreActor<RS extends State<?>> extends Actor
             }
           }
 
-          final RS persistedState = typeStore.putIfAbsent(state.id, state);
+          final RS raw = metadata == null ?
+                  adapterAssistant.adaptToRawState(state, stateVersion) :
+                  adapterAssistant.adaptToRawState(state, stateVersion, metadata);
+
+          final RS persistedState = typeStore.putIfAbsent(raw.id, raw);
           if (persistedState != null) {
-            if (persistedState.dataVersion >= state.dataVersion) {
-              interest.writeResultedIn(Failure.of(new StorageException(Result.ConcurrentyViolation, "Version conflict.")), state.id, state, object);
+            if (persistedState.dataVersion >= raw.dataVersion) {
+              interest.writeResultedIn(Failure.of(new StorageException(Result.ConcurrentyViolation, "Version conflict.")), id, state, stateVersion, object);
               return;
             }
-            typeStore.put(state.id, state);
+            typeStore.put(id, raw);
           }
-          final String dispatchId = storeName + ":" + state.id;
-          dispatchables.add(new Dispatchable<RS>(dispatchId, state));
-          dispatch(dispatchId, state);
+          final String dispatchId = storeName + ":" + id;
+          dispatchables.add(new Dispatchable<RS>(dispatchId, raw));
+          dispatch(dispatchId, raw);
 
-          interest.writeResultedIn(Success.of(Result.Success), state.id, state, object);
+          interest.writeResultedIn(Success.of(Result.Success), id, state, stateVersion, object);
         } catch (Exception e) {
           logger().log(getClass().getSimpleName() + " writeText() error because: " + e.getMessage(), e);
-          interest.writeResultedIn(Failure.of(new StorageException(Result.Error, e.getMessage(), e)), state.id, state, object);
+          interest.writeResultedIn(Failure.of(new StorageException(Result.Error, e.getMessage(), e)), id, state, stateVersion, object);
         }
       }
     } else {
       logger().log(
               getClass().getSimpleName() +
               " writeText() missing WriteResultInterest for: " +
-              (state == null ? "unknown id" : state.id));
+              (state == null ? "unknown id" : id));
     }
+  }
+
+  private <ST extends State<?>> void dispatch(final String dispatchId, final ST state) {
+    dispatcher.dispatch(dispatchId, state);
   }
 }
