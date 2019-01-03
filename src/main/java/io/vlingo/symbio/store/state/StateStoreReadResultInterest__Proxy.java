@@ -13,9 +13,9 @@ import io.vlingo.actors.LocalMessage;
 import io.vlingo.actors.Mailbox;
 import io.vlingo.symbio.store.state.StateStore.ReadResultInterest;
 
-public class StateStoreReadResultInterest__Proxy<R extends io.vlingo.symbio.State<?>> implements io.vlingo.symbio.store.state.StateStore.ReadResultInterest<R> {
+public class StateStoreReadResultInterest__Proxy implements io.vlingo.symbio.store.state.StateStore.ReadResultInterest {
 
-  private static final String readResultedInRepresentation1 = "readResultedIn(io.vlingo.common.Outcome<io.vlingo.symbio.store.StorageException, io.vlingo.symbio.store.Result>, java.lang.String, R, java.lang.Object)";
+  private static final String readResultedInRepresentation1 = "readResultedIn(io.vlingo.common.Outcome<io.vlingo.symbio.store.StorageException, io.vlingo.symbio.store.Result>, java.lang.String, S, int, io.vlingo.symbio.Metadata, java.lang.Object)";
 
   private final Actor actor;
   private final Mailbox mailbox;
@@ -25,10 +25,9 @@ public class StateStoreReadResultInterest__Proxy<R extends io.vlingo.symbio.Stat
     this.mailbox = mailbox;
   }
 
-  @SuppressWarnings({ "unchecked", "rawtypes" })
-  public void readResultedIn(io.vlingo.common.Outcome<io.vlingo.symbio.store.StorageException, io.vlingo.symbio.store.Result> arg0, java.lang.String arg1, R arg2, java.lang.Object arg3) {
+  public <S>void readResultedIn(io.vlingo.common.Outcome<io.vlingo.symbio.store.StorageException, io.vlingo.symbio.store.Result> arg0, java.lang.String arg1, S arg2, int arg3, io.vlingo.symbio.Metadata arg4, java.lang.Object arg5) {
     if (!actor.isStopped()) {
-      final java.util.function.Consumer<ReadResultInterest> consumer = (actor) -> actor.readResultedIn(arg0, arg1, arg2, arg3);
+      final java.util.function.Consumer<ReadResultInterest> consumer = (actor) -> actor.readResultedIn(arg0, arg1, arg2, arg3, arg4, arg5);
       if (mailbox.isPreallocated()) { mailbox.send(actor, ReadResultInterest.class, consumer, null, readResultedInRepresentation1); }
       else { mailbox.send(new LocalMessage<ReadResultInterest>(actor, ReadResultInterest.class, consumer, readResultedInRepresentation1)); }
     } else {

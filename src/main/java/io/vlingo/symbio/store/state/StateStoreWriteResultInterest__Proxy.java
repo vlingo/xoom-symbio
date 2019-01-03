@@ -13,9 +13,9 @@ import io.vlingo.actors.LocalMessage;
 import io.vlingo.actors.Mailbox;
 import io.vlingo.symbio.store.state.StateStore.WriteResultInterest;
 
-public class StateStoreWriteResultInterest__Proxy<R extends io.vlingo.symbio.State<?>> implements io.vlingo.symbio.store.state.StateStore.WriteResultInterest<R> {
+public class StateStoreWriteResultInterest__Proxy implements io.vlingo.symbio.store.state.StateStore.WriteResultInterest {
 
-  private static final String writeResultedInRepresentation1 = "writeResultedIn(io.vlingo.common.Outcome<io.vlingo.symbio.store.StorageException, io.vlingo.symbio.store.Result>, java.lang.String, R, java.lang.Object)";
+  private static final String writeResultedInRepresentation1 = "writeResultedIn(io.vlingo.common.Outcome<io.vlingo.symbio.store.StorageException, io.vlingo.symbio.store.Result>, java.lang.String, S, int, java.lang.Object)";
 
   private final Actor actor;
   private final Mailbox mailbox;
@@ -25,10 +25,9 @@ public class StateStoreWriteResultInterest__Proxy<R extends io.vlingo.symbio.Sta
     this.mailbox = mailbox;
   }
 
-  @SuppressWarnings({ "unchecked", "rawtypes" })
-  public void writeResultedIn(io.vlingo.common.Outcome<io.vlingo.symbio.store.StorageException, io.vlingo.symbio.store.Result> arg0, java.lang.String arg1, R arg2, java.lang.Object arg3) {
+  public <S>void writeResultedIn(io.vlingo.common.Outcome<io.vlingo.symbio.store.StorageException, io.vlingo.symbio.store.Result> arg0, java.lang.String arg1, S arg2, int arg3, java.lang.Object arg4) {
     if (!actor.isStopped()) {
-      final java.util.function.Consumer<WriteResultInterest> consumer = (actor) -> actor.writeResultedIn(arg0, arg1, arg2, arg3);
+      final java.util.function.Consumer<WriteResultInterest> consumer = (actor) -> actor.writeResultedIn(arg0, arg1, arg2, arg3, arg4);
       if (mailbox.isPreallocated()) { mailbox.send(actor, WriteResultInterest.class, consumer, null, writeResultedInRepresentation1); }
       else { mailbox.send(new LocalMessage<WriteResultInterest>(actor, WriteResultInterest.class, consumer, writeResultedInRepresentation1)); }
     } else {
