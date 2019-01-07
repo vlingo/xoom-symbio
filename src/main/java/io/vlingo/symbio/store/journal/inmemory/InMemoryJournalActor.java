@@ -111,7 +111,7 @@ public class InMemoryJournalActor<T,RS extends State<?>> extends Actor implement
   public Completes<JournalReader<T>> journalReader(final String name) {
     JournalReader<T> reader = journalReaders.get(name);
     if (reader == null) {
-      reader = stage().actorFor(Definition.has(InMemoryJournalReaderActor.class, Definition.parameters(journal.listIterator(), name)), JournalReader.class);
+      reader = childActorFor(JournalReader.class, Definition.has(InMemoryJournalReaderActor.class, Definition.parameters(journal.listIterator(), name)));
       journalReaders.put(name, reader);
     }
     return completes().with(reader);
@@ -125,7 +125,7 @@ public class InMemoryJournalActor<T,RS extends State<?>> extends Actor implement
       final List<Entry<T>> journalView = Collections.unmodifiableList(journal);
       final Map<String, Map<Integer,Integer>> streamIndexesView = Collections.unmodifiableMap(streamIndexes);
       final Map<String, RS> snapshotsView = Collections.unmodifiableMap(snapshots);
-      reader = childActorFor(Definition.has(InMemoryStreamReaderActor.class, Definition.parameters(journalView, streamIndexesView, snapshotsView, name)), StreamReader.class);
+      reader = childActorFor(StreamReader.class, Definition.has(InMemoryStreamReaderActor.class, Definition.parameters(journalView, streamIndexesView, snapshotsView, name)));
       streamReaders.put(name, reader);
     }
     return completes().with(reader);

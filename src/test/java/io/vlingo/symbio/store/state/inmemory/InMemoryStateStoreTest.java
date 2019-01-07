@@ -16,7 +16,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import io.vlingo.actors.Definition;
 import io.vlingo.actors.World;
 import io.vlingo.actors.testkit.TestUntil;
 import io.vlingo.actors.testkit.TestWorld;
@@ -224,7 +223,7 @@ public class InMemoryStateStoreTest {
     interest = new MockStateStoreResultInterest(0);
     dispatcher = new MockDispatcher(0, interest);
 
-    store = world.actorFor(Definition.has(InMemoryStateStoreActor.class, Definition.parameters(dispatcher)), StateStore.class);
+    store = world.actorFor(StateStore.class, InMemoryStateStoreActor.class, dispatcher);
     store.registerAdapter(Entity1.class, new Entity1StateAdapter());
 
     StateTypeStateStoreMap.stateTypeToStoreName(Entity1.class, StoreName);

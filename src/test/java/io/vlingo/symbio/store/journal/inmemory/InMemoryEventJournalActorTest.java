@@ -18,7 +18,6 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
-import io.vlingo.actors.Definition;
 import io.vlingo.actors.World;
 import io.vlingo.actors.testkit.TestUntil;
 import io.vlingo.common.serialization.JsonSerialization;
@@ -147,7 +146,7 @@ public class InMemoryEventJournalActorTest {
   public void setUp() {
     world = World.startWithDefaults("test-journal");
     listener = new MockEventJournalListener<>();
-    journal = world.actorFor(Definition.has(InMemoryJournalActor.class, Definition.parameters(listener)), Journal.class);
+    journal = world.actorFor(Journal.class, InMemoryJournalActor.class, listener);
     journal.registerAdapter(Test1Source.class, new Test1SourceAdapter());
     journal.registerAdapter(Test2Source.class, new Test2SourceAdapter());
     journal.registerAdapter(SnapshotState.class, new SnapshotStateAdapter());
