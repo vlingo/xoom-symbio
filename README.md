@@ -47,7 +47,7 @@ We welcome you to add support for your favorite database!
     <dependency>
       <groupId>io.vlingo</groupId>
       <artifactId>vlingo-symbio</artifactId>
-      <version>0.7.8</version>
+      <version>0.7.9</version>
       <scope>compile</scope>
     </dependency>
   </dependencies>
@@ -55,7 +55,7 @@ We welcome you to add support for your favorite database!
 
 ```gradle
 dependencies {
-    compile 'io.vlingo:vlingo-symbio:0.7.8'
+    compile 'io.vlingo:vlingo-symbio:0.7.9'
 }
 
 repositories {
