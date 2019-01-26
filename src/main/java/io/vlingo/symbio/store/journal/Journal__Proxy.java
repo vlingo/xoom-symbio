@@ -29,7 +29,7 @@ public class Journal__Proxy<T> implements io.vlingo.symbio.store.journal.Journal
   }
 
   @SuppressWarnings({ "unchecked", "rawtypes" })
-  public <S, ST>void append(java.lang.String arg0, int arg1, io.vlingo.symbio.Source<S> arg2, io.vlingo.symbio.store.journal.Journal.AppendResultInterest<ST> arg3, java.lang.Object arg4) {
+  public <S, ST>void append(java.lang.String arg0, int arg1, io.vlingo.symbio.Source<S> arg2, io.vlingo.symbio.store.journal.Journal.AppendResultInterest arg3, java.lang.Object arg4) {
     if (!actor.isStopped()) {
       final java.util.function.Consumer<Journal> consumer = (actor) -> actor.append(arg0, arg1, arg2, arg3, arg4);
       if (mailbox.isPreallocated()) { mailbox.send(actor, Journal.class, consumer, null, appendRepresentation1); }
@@ -39,7 +39,7 @@ public class Journal__Proxy<T> implements io.vlingo.symbio.store.journal.Journal
     }
   }
   @SuppressWarnings({ "unchecked", "rawtypes" })
-  public <S, ST>void appendAll(java.lang.String arg0, int arg1, java.util.List<io.vlingo.symbio.Source<S>> arg2, io.vlingo.symbio.store.journal.Journal.AppendResultInterest<ST> arg3, java.lang.Object arg4) {
+  public <S, ST>void appendAll(java.lang.String arg0, int arg1, java.util.List<io.vlingo.symbio.Source<S>> arg2, io.vlingo.symbio.store.journal.Journal.AppendResultInterest arg3, java.lang.Object arg4) {
     if (!actor.isStopped()) {
       final java.util.function.Consumer<Journal> consumer = (actor) -> actor.appendAll(arg0, arg1, arg2, arg3, arg4);
       if (mailbox.isPreallocated()) { mailbox.send(actor, Journal.class, consumer, null, appendAllRepresentation2); }
@@ -49,7 +49,7 @@ public class Journal__Proxy<T> implements io.vlingo.symbio.store.journal.Journal
     }
   }
   @SuppressWarnings({ "unchecked", "rawtypes" })
-  public <S, ST>void appendAllWith(java.lang.String arg0, int arg1, java.util.List<io.vlingo.symbio.Source<S>> arg2, ST arg3, io.vlingo.symbio.store.journal.Journal.AppendResultInterest<ST> arg4, java.lang.Object arg5) {
+  public <S, ST>void appendAllWith(java.lang.String arg0, int arg1, java.util.List<io.vlingo.symbio.Source<S>> arg2, ST arg3, io.vlingo.symbio.store.journal.Journal.AppendResultInterest arg4, java.lang.Object arg5) {
     if (!actor.isStopped()) {
       final java.util.function.Consumer<Journal> consumer = (actor) -> actor.appendAllWith(arg0, arg1, arg2, arg3, arg4, arg5);
       if (mailbox.isPreallocated()) { mailbox.send(actor, Journal.class, consumer, null, appendAllWithRepresentation3); }
@@ -59,7 +59,7 @@ public class Journal__Proxy<T> implements io.vlingo.symbio.store.journal.Journal
     }
   }
   @SuppressWarnings({ "unchecked", "rawtypes" })
-  public <S, ST>void appendWith(java.lang.String arg0, int arg1, io.vlingo.symbio.Source<S> arg2, ST arg3, io.vlingo.symbio.store.journal.Journal.AppendResultInterest<ST> arg4, java.lang.Object arg5) {
+  public <S, ST>void appendWith(java.lang.String arg0, int arg1, io.vlingo.symbio.Source<S> arg2, ST arg3, io.vlingo.symbio.store.journal.Journal.AppendResultInterest arg4, java.lang.Object arg5) {
     if (!actor.isStopped()) {
       final java.util.function.Consumer<Journal> consumer = (actor) -> actor.appendWith(arg0, arg1, arg2, arg3, arg4, arg5);
       if (mailbox.isPreallocated()) { mailbox.send(actor, Journal.class, consumer, null, appendWithRepresentation4); }
@@ -95,9 +95,9 @@ public class Journal__Proxy<T> implements io.vlingo.symbio.store.journal.Journal
     return null;
   }
   @SuppressWarnings({ "unchecked", "rawtypes" })
-  public <S extends Source<?>,E extends Entry<?>> void registerAdapter(java.lang.Class<S> arg0, io.vlingo.symbio.EntryAdapter<S, E> arg1) {
+  public <S extends Source<?>,E extends Entry<?>> void registerEntryAdapter(java.lang.Class<S> arg0, io.vlingo.symbio.EntryAdapter<S, E> arg1) {
     if (!actor.isStopped()) {
-      final java.util.function.Consumer<Journal> consumer = (actor) -> actor.registerAdapter(arg0, arg1);
+      final java.util.function.Consumer<Journal> consumer = (actor) -> actor.registerEntryAdapter(arg0, arg1);
       if (mailbox.isPreallocated()) { mailbox.send(actor, Journal.class, consumer, null, registerAdapterRepresentation7); }
       else { mailbox.send(new LocalMessage<Journal>(actor, Journal.class, consumer, registerAdapterRepresentation7)); }
     } else {
@@ -105,9 +105,9 @@ public class Journal__Proxy<T> implements io.vlingo.symbio.store.journal.Journal
     }
   }
   @SuppressWarnings({ "unchecked", "rawtypes" })
-  public <S,R extends State<?>> void registerAdapter(java.lang.Class<S> arg0, io.vlingo.symbio.StateAdapter<S, R> arg1) {
+  public <S,R extends State<?>> void registerStateAdapter(java.lang.Class<S> arg0, io.vlingo.symbio.StateAdapter<S, R> arg1) {
     if (!actor.isStopped()) {
-      final java.util.function.Consumer<Journal> consumer = (actor) -> actor.registerAdapter(arg0, arg1);
+      final java.util.function.Consumer<Journal> consumer = (actor) -> actor.registerStateAdapter(arg0, arg1);
       if (mailbox.isPreallocated()) { mailbox.send(actor, Journal.class, consumer, null, registerAdapterRepresentation8); }
       else { mailbox.send(new LocalMessage<Journal>(actor, Journal.class, consumer, registerAdapterRepresentation8)); }
     } else {
