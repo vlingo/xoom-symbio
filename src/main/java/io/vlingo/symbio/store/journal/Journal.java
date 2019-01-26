@@ -35,9 +35,8 @@ public interface Journal<T> {
 
   /**
    * The means by which the {@code Journal<T>} informs the sender of the result of any given append.
-   * @param <ST> the concrete state type communicated as {@code Optional<ST>} when {@code AppendResultInterest<ST>} informs of a given append result
    */
-  public static interface AppendResultInterest<ST> {
+  public static interface AppendResultInterest {
     /**
      * Conveys the {@code outcome} of a single appended {@code Source<S>} and a possible state {@code snapshot}.
      * @param outcome the {@code Outcome<StorageException,Result>} either failure or success
@@ -47,8 +46,9 @@ public interface Journal<T> {
      * @param snapshot the possible {@code Optional<ST>} that may have persisted as the stream's most recent snapshot
      * @param object the Object supplied by the sender to be sent back in this result
      * @param <S> the Source type
+     * @param <ST> the snapshot state type
      */
-    <S> void appendResultedIn(final Outcome<StorageException,Result> outcome, final String streamName, final int streamVersion, final Source<S> source, final Optional<ST> snapshot, final Object object);
+    <S,ST> void appendResultedIn(final Outcome<StorageException,Result> outcome, final String streamName, final int streamVersion, final Source<S> source, final Optional<ST> snapshot, final Object object);
 
     /**
      * Conveys the {@code outcome} of attempting to append multiple {@code Source<S>} instances and a possible state {@code snapshot}.
@@ -59,8 +59,9 @@ public interface Journal<T> {
      * @param snapshot the possible {@code Optional<ST>} that may have persisted as the stream's most recent snapshot
      * @param object the Object supplied by the sender to be sent back in this result
      * @param <S> the Source type
+     * @param <ST> the snapshot state type
      */
-    <S> void appendAllResultedIn(final Outcome<StorageException,Result> outcome, final String streamName, final int streamVersion, final List<Source<S>> sources, final Optional<ST> snapshot, final Object object);
+    <S,ST> void appendAllResultedIn(final Outcome<StorageException,Result> outcome, final String streamName, final int streamVersion, final List<Source<S>> sources, final Optional<ST> snapshot, final Object object);
   }
 
   /**
@@ -78,7 +79,7 @@ public interface Journal<T> {
    * @param <S> the Source type
    * @param <ST> the snapshot state type
    */
-  <S,ST> void append(final String streamName, final int streamVersion, final Source<S> source, final AppendResultInterest<ST> interest, final Object object);
+  <S,ST> void append(final String streamName, final int streamVersion, final Source<S> source, final AppendResultInterest interest, final Object object);
 
   /**
    * Appends the single {@code Source<S>} as an {@code Entry<T>} to the end of the journal
@@ -97,7 +98,7 @@ public interface Journal<T> {
    * @param <S> the Source type
    * @param <ST> the snapshot state type
    */
-  <S,ST> void appendWith(final String streamName, final int streamVersion, final Source<S> source, final ST snapshot, final AppendResultInterest<ST> interest, final Object object);
+  <S,ST> void appendWith(final String streamName, final int streamVersion, final Source<S> source, final ST snapshot, final AppendResultInterest interest, final Object object);
 
   /**
    * Appends all {@code Source<S>} instances as {@code Entry<T>} instances to the end of the
@@ -113,7 +114,7 @@ public interface Journal<T> {
    * @param <S> the Source type
    * @param <ST> the snapshot state type
    */
-  <S,ST> void appendAll(final String streamName, final int fromStreamVersion, final List<Source<S>> sources, final AppendResultInterest<ST> interest, final Object object);
+  <S,ST> void appendAll(final String streamName, final int fromStreamVersion, final List<Source<S>> sources, final AppendResultInterest interest, final Object object);
 
   /**
    * Appends all {@code Source<S>} instances as {@code Entry<T>} instances to the end of the
@@ -131,7 +132,7 @@ public interface Journal<T> {
    * @param <S> the Source type
    * @param <ST> the concrete state type
    */
-  <S,ST> void appendAllWith(final String streamName, final int fromStreamVersion, final List<Source<S>> sources, final ST snapshot, final AppendResultInterest<ST> interest, final Object object);
+  <S,ST> void appendAllWith(final String streamName, final int fromStreamVersion, final List<Source<S>> sources, final ST snapshot, final AppendResultInterest interest, final Object object);
 
   /**
    * Eventually answers the {@code JournalReader<T>} named {@code name} for this journal. If
@@ -166,7 +167,7 @@ public interface Journal<T> {
    * @param <S> the source type
    * @param <E> the Entry type
    */
-  public <S extends Source<?>,E extends Entry<?>> void registerAdapter(final Class<S> sourceType, final EntryAdapter<S,E> adapter);
+  public <S extends Source<?>,E extends Entry<?>> void registerEntryAdapter(final Class<S> sourceType, final EntryAdapter<S,E> adapter);
 
   /**
    * Registers the {@code adapter} with the journal for {@code stateType}.
@@ -175,7 +176,7 @@ public interface Journal<T> {
    * @param <S> the type of the natural state
    * @param <R> the raw State type
    */
-  public <S,R extends State<?>> void registerAdapter(final Class<S> stateType, final StateAdapter<S,R> adapter);
+  public <S,R extends State<?>> void registerStateAdapter(final Class<S> stateType, final StateAdapter<S,R> adapter);
 
   /**
    * The binary journal as type {@code Journal<byte[],BinaryState>}.
