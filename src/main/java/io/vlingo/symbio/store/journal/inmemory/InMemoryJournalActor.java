@@ -51,7 +51,7 @@ public class InMemoryJournalActor<T,RS extends State<?>> extends Actor implement
   }
 
   @Override
-  public <S,ST> void append(final String streamName, final int streamVersion, final Source<S> source, final AppendResultInterest<ST> interest, final Object object) {
+  public <S,ST> void append(final String streamName, final int streamVersion, final Source<S> source, final AppendResultInterest interest, final Object object) {
     final Entry<T> entry = asEntry(source);
     insert(streamName, streamVersion, entry);
     listener.appended(entry);
@@ -60,7 +60,7 @@ public class InMemoryJournalActor<T,RS extends State<?>> extends Actor implement
 
   @Override
   @SuppressWarnings("unchecked")
-  public <S,ST> void appendWith(final String streamName, final int streamVersion, final Source<S> source, final ST snapshot, final AppendResultInterest<ST> interest, final Object object) {
+  public <S,ST> void appendWith(final String streamName, final int streamVersion, final Source<S> source, final ST snapshot, final AppendResultInterest interest, final Object object) {
     final Entry<T> entry = asEntry(source);
     insert(streamName, streamVersion, entry);
     final RS raw;
@@ -79,7 +79,7 @@ public class InMemoryJournalActor<T,RS extends State<?>> extends Actor implement
   }
 
   @Override
-  public <S,ST> void appendAll(final String streamName, final int fromStreamVersion, final List<Source<S>> sources, final AppendResultInterest<ST> interest, final Object object) {
+  public <S,ST> void appendAll(final String streamName, final int fromStreamVersion, final List<Source<S>> sources, final AppendResultInterest interest, final Object object) {
     final List<Entry<T>> entries = asEntries(sources);
     insert(streamName, fromStreamVersion, entries);
     listener.appendedAll(entries);
@@ -88,7 +88,7 @@ public class InMemoryJournalActor<T,RS extends State<?>> extends Actor implement
 
   @Override
   @SuppressWarnings("unchecked")
-  public <S,ST> void appendAllWith(final String streamName, final int fromStreamVersion, final List<Source<S>> sources, final ST snapshot, final AppendResultInterest<ST> interest, final Object object) {
+  public <S,ST> void appendAllWith(final String streamName, final int fromStreamVersion, final List<Source<S>> sources, final ST snapshot, final AppendResultInterest interest, final Object object) {
     final List<Entry<T>> entries = asEntries(sources);
     insert(streamName, fromStreamVersion, entries);
     final RS raw;
@@ -132,12 +132,12 @@ public class InMemoryJournalActor<T,RS extends State<?>> extends Actor implement
   }
 
   @Override
-  public <S extends Source<?>,E extends Entry<?>> void registerAdapter(final Class<S> sourceType, final EntryAdapter<S,E> adapter) {
+  public <S extends Source<?>,E extends Entry<?>> void registerEntryAdapter(final Class<S> sourceType, final EntryAdapter<S,E> adapter) {
     entryAdapters.put(sourceType, adapter);
   }
 
   @Override
-  public <S,R extends State<?>> void registerAdapter(final Class<S> stateType, final StateAdapter<S,R> adapter) {
+  public <S,R extends State<?>> void registerStateAdapter(final Class<S> stateType, final StateAdapter<S,R> adapter) {
     stateAdapters.put(stateType, adapter);
   }
 
