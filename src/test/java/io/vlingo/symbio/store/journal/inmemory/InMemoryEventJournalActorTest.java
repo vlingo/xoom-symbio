@@ -147,9 +147,9 @@ public class InMemoryEventJournalActorTest {
     world = World.startWithDefaults("test-journal");
     listener = new MockEventJournalListener<>();
     journal = world.actorFor(Journal.class, InMemoryJournalActor.class, listener);
-    journal.registerAdapter(Test1Source.class, new Test1SourceAdapter());
-    journal.registerAdapter(Test2Source.class, new Test2SourceAdapter());
-    journal.registerAdapter(SnapshotState.class, new SnapshotStateAdapter());
+    journal.registerEntryAdapter(Test1Source.class, new Test1SourceAdapter());
+    journal.registerEntryAdapter(Test2Source.class, new Test2SourceAdapter());
+    journal.registerStateAdapter(SnapshotState.class, new SnapshotStateAdapter());
   }
 
   public static final class Test1Source extends Source<String> {
