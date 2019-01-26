@@ -118,41 +118,11 @@ public interface StateStore {
      * @param id the String unique identity of the state to attempted write
      * @param state the S native state that was possibly written
      * @param stateVersion the int version of the state that was possibly written
-     * @param object the Object passed to read() that is sent back to the receiver
+     * @param object the Object passed to write() that is sent back to the receiver
      * @param <S> the native state type
      */
     <S> void writeResultedIn(final Outcome<StorageException,Result> outcome, final String id, final S state, final int stateVersion, final Object object);
   }
-
-  /**
-   * Indicates the format of the stored data, either Binary or Text.
-   */
-  public enum DataFormat {
-    /**
-     * The binary format indicator.
-     */
-    Binary {
-      @Override public boolean isBinary() { return true; }
-    },
-    /**
-     * The text format indicator.
-     */
-    Text {
-      @Override public boolean isText() { return true; }
-    };
-
-    /**
-     * Answer whether or not this is a Binary indicator.
-     * @return boolean
-     */
-    public boolean isBinary() { return false; }
-
-    /**
-     * Answer whether or not this is a Text indicator.
-     * @return boolean
-     */
-    public boolean isText() { return false; }
-  };
 
   /**
    * Defines the means to communicate the confirmation of a previously
