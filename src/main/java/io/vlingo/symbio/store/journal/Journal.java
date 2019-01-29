@@ -10,6 +10,8 @@ package io.vlingo.symbio.store.journal;
 import java.util.List;
 import java.util.Optional;
 
+import io.vlingo.actors.Actor;
+import io.vlingo.actors.Stage;
 import io.vlingo.common.Completes;
 import io.vlingo.common.Outcome;
 import io.vlingo.symbio.Entry;
@@ -32,6 +34,20 @@ import io.vlingo.symbio.store.StorageException;
  * @param <T> the concrete type of {@code Entry<T>} and {@code State<?>} stored, which maybe be String, byte[], or Object
  */
 public interface Journal<T> {
+  /**
+   * Answer a new {@code Journal<T>} 
+   * @param stage the Stage within which the {@code Journal<T>} is created
+   * @param implementor the {@code Class<A>} of the implementor
+   * @param listener the {@code JournalListener<T>}
+   * @param additional the Object[] of additional parameters
+   * @param <A> the concrete type of the Actor implementing the {@code Journal<T>} protocol
+   * @param <T> the concrete type of {@code Entry<T>} stored and read, which maybe be String, byte[], or Object
+   * @return {@code Journal<T>}
+   */
+  @SuppressWarnings("unchecked")
+  static <A extends Actor,T> Journal<T> using(final Stage stage, final Class<A> implementor, final JournalListener<T> listener, final Object...additional) {
+    return (Journal<T>) stage.actorFor(Journal.class, implementor, listener, additional);
+  }
 
   /**
    * The means by which the {@code Journal<T>} informs the sender of the result of any given append.
