@@ -46,7 +46,9 @@ public interface Journal<T> {
    */
   @SuppressWarnings("unchecked")
   static <A extends Actor,T> Journal<T> using(final Stage stage, final Class<A> implementor, final JournalListener<T> listener, final Object...additional) {
-    return (Journal<T>) stage.actorFor(Journal.class, implementor, listener, additional);
+    return (Journal<T>) (additional.length == 0 ?
+             stage.actorFor(Journal.class, implementor, listener) :
+             stage.actorFor(Journal.class, implementor, listener, additional));
   }
 
   /**
