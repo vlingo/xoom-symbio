@@ -142,11 +142,10 @@ public class InMemoryEventJournalActorTest {
   }
 
   @Before
-  @SuppressWarnings("unchecked")
   public void setUp() {
     world = World.startWithDefaults("test-journal");
     listener = new MockEventJournalListener<>();
-    journal = world.actorFor(Journal.class, InMemoryJournalActor.class, listener);
+    journal = Journal.using(world.stage(), InMemoryJournalActor.class, listener);
     journal.registerEntryAdapter(Test1Source.class, new Test1SourceAdapter());
     journal.registerEntryAdapter(Test2Source.class, new Test2SourceAdapter());
     journal.registerStateAdapter(SnapshotState.class, new SnapshotStateAdapter());
