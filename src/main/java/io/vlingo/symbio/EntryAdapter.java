@@ -28,4 +28,12 @@ public interface EntryAdapter<S extends Source<?>,E extends Entry<?>> {
    * @return E
    */
   E toEntry(final S source);
+
+  /**
+   * Answer the {@code E Entry<?>} state with its {@code id} from the {@code S Source<?>} native state.
+   * @param source the {@code S Source<?>} native state
+   * @param id the String unique identity to assign to the Entry
+   * @return E
+   */
+  E toEntry(final S source, final String id);
 }
