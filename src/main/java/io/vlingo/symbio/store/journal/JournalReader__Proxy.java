@@ -1,3 +1,10 @@
+// Copyright © 2012-2018 Vaughn Vernon. All rights reserved.
+//
+// This Source Code Form is subject to the terms of the
+// Mozilla Public License, v. 2.0. If a copy of the MPL
+// was not distributed with this file, You can obtain
+// one at https://mozilla.org/MPL/2.0/.
+
 package io.vlingo.symbio.store.journal;
 
 import io.vlingo.actors.Actor;
@@ -72,10 +79,10 @@ public class JournalReader__Proxy<T> implements io.vlingo.symbio.store.journal.J
     return null;
   }
   @SuppressWarnings("rawtypes")
-  public io.vlingo.common.Completes<io.vlingo.symbio.store.journal.Stream<T>> readNext(int arg0) {
+  public io.vlingo.common.Completes<java.util.List<io.vlingo.symbio.Entry<T>>> readNext(int arg0) {
     if (!actor.isStopped()) {
       final java.util.function.Consumer<JournalReader> consumer = (actor) -> actor.readNext(arg0);
-      final io.vlingo.common.Completes<io.vlingo.symbio.store.journal.Stream<T>> completes = new BasicCompletes<>(actor.scheduler());
+      final io.vlingo.common.Completes<java.util.List<io.vlingo.symbio.Entry<T>>> completes = new BasicCompletes<>(actor.scheduler());
       if (mailbox.isPreallocated()) { mailbox.send(actor, JournalReader.class, consumer, completes, readNextRepresentation5); }
       else { mailbox.send(new LocalMessage<JournalReader>(actor, JournalReader.class, consumer, completes, readNextRepresentation5)); }
       return completes;
