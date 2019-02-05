@@ -7,6 +7,8 @@
 
 package io.vlingo.symbio.store.journal;
 
+import java.util.List;
+
 import io.vlingo.common.Completes;
 import io.vlingo.symbio.Entry;
 
@@ -71,9 +73,9 @@ public interface JournalReader<T> {
    * 
    * @param maximumEntries the int indicating the maximum number of {@code Entry<T>} instances to read
    * 
-   * @return the {@code Completes<Stream<T>>} of at most maximumEntries or empty if none
+   * @return the {@code Completes<List<Entry<byte[]>>>} of at most maximumEntries or empty if none
    */
-  Completes<Stream<T>> readNext(final int maximumEntries);
+  Completes<List<Entry<T>>> readNext(final int maximumEntries);
 
   /**
    * Rewinds the reader so that the next available {@code Entry<T>} is the first one in the {@code Journal<T>}.
