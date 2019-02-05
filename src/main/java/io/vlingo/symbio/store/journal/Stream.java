@@ -66,4 +66,21 @@ public class Stream<T> {
   public boolean hasSnapshot() {
     return snapshot != null && !snapshot.isEmpty();
   }
+
+  /**
+   * Answer my size, which is the number of entries.
+   * @return int
+   */
+  public int size() {
+    return entries.size();
+  }
+
+  @Override
+  public String toString() {
+    return "Stream[streamName=" + streamName
+            + " streamVersion=" + streamVersion
+            + " entries=" + entries
+            + " snapshot=" + snapshot
+            + "]";
+  }
 }
