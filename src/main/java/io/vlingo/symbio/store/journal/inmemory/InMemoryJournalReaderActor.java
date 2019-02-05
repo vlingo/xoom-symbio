@@ -15,7 +15,6 @@ import io.vlingo.actors.Actor;
 import io.vlingo.common.Completes;
 import io.vlingo.symbio.Entry;
 import io.vlingo.symbio.store.journal.JournalReader;
-import io.vlingo.symbio.store.journal.Stream;
 
 public class InMemoryJournalReaderActor<T> extends Actor implements JournalReader<T> {
   private final ListIterator<Entry<T>> journalView;
@@ -40,19 +39,17 @@ public class InMemoryJournalReaderActor<T> extends Actor implements JournalReade
   }
 
   @Override
-  public Completes<Stream<T>> readNext(final int maximumEntries) {
+  public Completes<List<Entry<T>>> readNext(final int maximumEntries) {
     final List<Entry<T>> entries = new ArrayList<>(maximumEntries);
 
-    int streamVersion = journalView.nextIndex();
     for (int count = 0; count < maximumEntries; ++count) {
       if (journalView.hasNext()) {
-        ++streamVersion; // 1-based
         entries.add(journalView.next());
       } else {
         count = maximumEntries + 1;
       }
     }
-    return completes().with(new Stream<>(name, streamVersion, entries, null));
+    return completes().with(entries);
   }
 
   @Override
