@@ -81,9 +81,9 @@ public class InMemoryEventJournalActorTest {
     journal
       .journalReader("test")
       .andThenTo(reader -> reader.readNext(5))
-      .andThenConsume(eventStream -> {
-        assertEquals(3, eventStream.entries.size());
-        final Iterator<Entry<String>> iterator = eventStream.entries.iterator();
+      .andThenConsume(entries -> {
+        assertEquals(3, entries.size());
+        final Iterator<Entry<String>> iterator = entries.iterator();
         assertEquals("1", iterator.next().id());
         assertEquals("2", iterator.next().id());
         assertEquals("3", iterator.next().id());
@@ -172,6 +172,12 @@ public class InMemoryEventJournalActorTest {
       final String serialization = JsonSerialization.serialized(source);
       return new TextEntry(Test1Source.class, 1, serialization, Metadata.nullMetadata());
     }
+
+    @Override
+    public TextEntry toEntry(final Test1Source source, final String id) {
+      final String serialization = JsonSerialization.serialized(source);
+      return new TextEntry(id, Test1Source.class, 1, serialization, Metadata.nullMetadata());
+    }
   }
 
   private static final class Test2SourceAdapter implements EntryAdapter<Test2Source,TextEntry> {
@@ -184,6 +190,12 @@ public class InMemoryEventJournalActorTest {
     public TextEntry toEntry(final Test2Source source) {
       final String serialization = JsonSerialization.serialized(source);
       return new TextEntry(Test1Source.class, 1, serialization, Metadata.nullMetadata());
+    }
+
+    @Override
+    public TextEntry toEntry(Test2Source source, String id) {
+      final String serialization = JsonSerialization.serialized(source);
+      return new TextEntry(id, Test1Source.class, 1, serialization, Metadata.nullMetadata());
     }
   }
 }
