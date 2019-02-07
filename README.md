@@ -13,9 +13,24 @@ Interestingly too is that the name "symbio" ends with the letters, i and o, for 
 The `StateStorage`, introduced next, produces domain model output to disk, and input from disk back to
 the domain model.
 
+### Journal Storage
+The `Journal` and related protocols support simple-to-use Event Sourcing, including `JournalReader` for
+streaming across all entries in the journal, and `StreamReader` for reaching individual "sub-streams"
+belonging to entities/aggregates in your application. There is a growing number of implementations:
+
+    - JDBC over Postgres: PostgresJournalActor and supporting asynchronous readers
+    - FoundationDB support: FoundationDBJournalActor and supporting asynchronous readers
+
+### Object Storage
+The `ObjectStore` is a simple object-relational mapped storage mechanism that can be run against a number of
+persistence engines. These are the available implementations:
+
+    - Jdbi over JDBC: JdbiObjectStoreDelegate controlled under JDBCObjectStoreActor
+    - JPA standard: JPAObjectStoreDelegate for JPA implementations, including EclipseLink, OpenJPA, and Hibernate
+
 ### State Storage
-The `StateStore` is a simple object storage mechanism that can be run against a number of persistence engines.
-These are the available storage implementations:
+The `StateStore` is a simple CQRS Key-CLOB/BLOB storage mechanism that can be run against a number of persistence engines.
+Use it for both Command/Write Models and Query/Read Models. These are the available storage implementations:
 
    - In-memory binary: `InMemoryBinaryStateStoreActor`
    - In-memory text: `InMemoryTextStateStoreActor`
