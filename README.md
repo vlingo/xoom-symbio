@@ -18,15 +18,15 @@ The `Journal` and related protocols support simple-to-use Event Sourcing, includ
 streaming across all entries in the journal, and `StreamReader` for reaching individual "sub-streams"
 belonging to entities/aggregates in your application. There is a growing number of implementations:
 
-    - JDBC over Postgres: PostgresJournalActor and supporting asynchronous readers
-    - FoundationDB support: FoundationDBJournalActor and supporting asynchronous readers
+   - JDBC over Postgres: `PostgresJournalActor` and supporting asynchronous readers
+   - FoundationDB support: `FoundationDBJournalActor` and supporting asynchronous readers
 
 ### Object Storage
 The `ObjectStore` is a simple object-relational mapped storage mechanism that can be run against a number of
 persistence engines. These are the available implementations:
 
-    - Jdbi over JDBC: JdbiObjectStoreDelegate controlled under JDBCObjectStoreActor
-    - JPA standard: JPAObjectStoreDelegate for JPA implementations, including EclipseLink, OpenJPA, and Hibernate
+   - Jdbi over JDBC: `JdbiObjectStoreDelegate` controlled under `JDBCObjectStoreActor`
+   - JPA standard: `JPAObjectStoreDelegate` for JPA implementations, including EclipseLink, OpenJPA, and Hibernate
 
 ### State Storage
 The `StateStore` is a simple CQRS Key-CLOB/BLOB storage mechanism that can be run against a number of persistence engines.
