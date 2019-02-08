@@ -11,19 +11,17 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import io.vlingo.actors.testkit.TestUntil;
+import io.vlingo.actors.testkit.AccessSafely;
 import io.vlingo.common.Outcome;
 import io.vlingo.symbio.store.Result;
 import io.vlingo.symbio.store.StorageException;
 import io.vlingo.symbio.store.object.ObjectStore.PersistResultInterest;
 
 public class MockPersistResultInterest implements PersistResultInterest {
-  private final Object lock = new Object();
+  private AccessSafely access = AccessSafely.afterCompleting(1);
   private final List<Object> persistentObjects = new ArrayList<>();
-  private TestUntil until;
 
   @Override
-  @SuppressWarnings("unchecked")
   public void persistResultedIn(
           final Outcome<StorageException, Result> outcome,
           final Object persistentObject,
@@ -31,35 +29,25 @@ public class MockPersistResultInterest implements PersistResultInterest {
           final int actual,
           final Object object) {
 
-    synchronized (lock) {
-      if (actual == 1) {
-        persistentObjects.add(persistentObject);
-      } else if (actual > 1) {
-        persistentObjects.addAll((Collection<Object>) persistentObject);
-      } else {
-        throw new IllegalArgumentException("Possible is:" + possible + " Actual is: " + actual);
-      }
-      until.happened();
+    if (actual == 1) {
+      access.writeUsing("add", persistentObject);
+    } else if (actual > 1) {
+      access.writeUsing("addAll", persistentObject);
+    } else {
+      throw new IllegalArgumentException("Possible is:" + possible + " Actual is: " + actual);
     }
   }
 
   @SuppressWarnings("unchecked")
-  public <T> T persistentObject(final int index) {
-    synchronized (lock) {
-      return (T) persistentObjects.get(index);
-    }    
-  }
+  public AccessSafely afterCompleting(final int times) {
+    access =
+            AccessSafely
+              .afterCompleting(times)
+              .writingWith("add", (value) -> persistentObjects.add(value))
+              .writingWith("addAll", (values) -> persistentObjects.addAll((Collection<Object>) values))
+              .readingWith("object", (index) -> persistentObjects.get((int) index))
+              .readingWith("size", () -> persistentObjects.size());
 
-  public int size() {
-    synchronized (lock) {
-      return persistentObjects.size();
-    }    
-  }
-
-  public TestUntil untilHappenings(final int times) {
-    synchronized (lock) {
-      this.until = TestUntil.happenings(times);
-      return this.until;
-    }
+    return access;
   }
 }

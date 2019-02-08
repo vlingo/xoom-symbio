@@ -15,7 +15,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import io.vlingo.actors.World;
-import io.vlingo.actors.testkit.TestUntil;
+import io.vlingo.actors.testkit.AccessSafely;
 import io.vlingo.symbio.store.object.MapQueryExpression;
 import io.vlingo.symbio.store.object.ObjectStore;
 import io.vlingo.symbio.store.object.QueryExpression;
@@ -28,12 +28,12 @@ public class InMemoryObjectStoreActorTest {
 
   @Test
   public void testThatObjectPersistsQuerys() {
-    final TestUntil untilPersist = persistInterest.untilHappenings(1);
+    final AccessSafely persistAllAccess = persistInterest.afterCompleting(1);
     final Person person = new Person("Tom Jones", 85);
     objectStore.persist(person, persistInterest);
-    untilPersist.completes();
-    assertEquals(1, persistInterest.size());
-    assertEquals(person, persistInterest.persistentObject(0));
+    final int persistSize = persistAllAccess.readFrom("size");
+    assertEquals(1, persistSize);
+    assertEquals(person, persistAllAccess.readFrom("object", 0));
 
     final QueryExpression query =
             MapQueryExpression.using(
@@ -41,30 +41,30 @@ public class InMemoryObjectStoreActorTest {
                     "find",
                     MapQueryExpression.map("id", "" + person.persistenceId()));
 
-    final TestUntil untilQuery = queryResultInterest.untilHappenings(1);
-    objectStore.queryObject(query, queryResultInterest, untilQuery);
-    untilQuery.completes();
-    assertEquals(1, queryResultInterest.size());
-    assertEquals(person, queryResultInterest.persistentObject(0));
+    final AccessSafely queryAccess = queryResultInterest.afterCompleting(1);
+    objectStore.queryObject(query, queryResultInterest, null);
+    final int querySize = queryAccess.readFrom("size");
+    assertEquals(1, querySize);
+    assertEquals(person, queryAccess.readFrom("object", 0));
   }
 
   @Test
   public void testThatMultiPersistQueryResolves() {
-    final TestUntil untilPersist = persistInterest.untilHappenings(1);
+    final AccessSafely persistAllAccess = persistInterest.afterCompleting(1);
     final Person person1 = new Person("Tom Jones", 78);
     final Person person2 = new Person("Dean Martin", 78);
     final Person person3 = new Person("Sally Struthers", 71);
     objectStore.persistAll(Arrays.asList(person1, person2, person3), persistInterest);
-    untilPersist.completes();
-    assertEquals(3, persistInterest.size());
+    final int persistSize = persistAllAccess.readFrom("size");
+    assertEquals(3, persistSize);
 
-    final TestUntil untilQuery = queryResultInterest.untilHappenings(1);
-    objectStore.queryAll(QueryExpression.using(Person.class, "findAll"), queryResultInterest, untilQuery);
-    untilQuery.completes();
-    assertEquals(3, queryResultInterest.size());
-    assertEquals(person1, queryResultInterest.persistentObject(0));
-    assertEquals(person2, queryResultInterest.persistentObject(1));
-    assertEquals(person3, queryResultInterest.persistentObject(2));
+    final AccessSafely queryAllAccess = queryResultInterest.afterCompleting(1);
+    objectStore.queryAll(QueryExpression.using(Person.class, "findAll"), queryResultInterest, null);
+    final int querySize = queryAllAccess.readFrom("size");
+    assertEquals(3, querySize);
+    assertEquals(person1, queryAllAccess.readFrom("object", 0));
+    assertEquals(person2, queryAllAccess.readFrom("object", 1));
+    assertEquals(person3, queryAllAccess.readFrom("object", 2));
   }
 
   @Before
