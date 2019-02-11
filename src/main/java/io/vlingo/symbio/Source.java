@@ -25,6 +25,7 @@ public abstract class Source<T> {
 
   /**
    * Answer an instance of the {@code NullSource<T>}.
+   * @param <T> the type used in {@code Source<T>}
    * @return {@code Source<T>}
    */
   public static <T> Source<T> nulled() {
@@ -61,6 +62,7 @@ public abstract class Source<T> {
 
   /**
    * Answer an empty {@code List<Source<T>>}.
+   * @param <T> the type used in {@code Source<T>}
    * @return {@code List<Source<T>>}
    */
   public static <T> List<Source<T>> none() {
@@ -95,7 +97,7 @@ public abstract class Source<T> {
    * @param sourceTypeVersion the int type version of my concrete extender
    */
   protected Source(final int sourceTypeVersion) {
-    assert (sourceTypeVersion < 1);
+    assert (sourceTypeVersion > 0);
     this.dateTimeSourced = System.currentTimeMillis();
     this.sourceTypeVersion = sourceTypeVersion;
   }
