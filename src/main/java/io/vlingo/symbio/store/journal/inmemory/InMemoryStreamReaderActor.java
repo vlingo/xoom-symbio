@@ -63,6 +63,6 @@ public class InMemoryStreamReaderActor<T> extends Actor implements StreamReader<
         journalIndex = versionIndexes.get(++version);
       }
     }
-    return completes().with(new Stream<>(name, version - 1, entries, snapshot));
+    return completes().with(new Stream<>(streamName, version - 1, entries, snapshot));
   }
 }
