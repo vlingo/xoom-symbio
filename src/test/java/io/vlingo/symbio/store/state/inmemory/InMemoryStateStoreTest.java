@@ -39,7 +39,7 @@ public class InMemoryStateStoreTest {
   @Test
   public void testThatStateStoreWritesText() {
     final Entity1 entity = new Entity1("123", 5);
-    interest.until = TestUntil.happenings(1);
+    interest.until = TestUntil.happenings(2);
 
     store.write(entity.id, entity, 1, interest);
 
@@ -75,7 +75,7 @@ public class InMemoryStateStoreTest {
   @Test
   public void testThatStateStoreWritesAndReadsMetadataValue() {
     final Entity1 entity = new Entity1("123", 5);
-    interest.until = TestUntil.happenings(2);
+    interest.until = TestUntil.happenings(3);
 
     store.write(entity.id, entity, 1, interest);
     store.read(entity.id, Entity1.class, interest);
@@ -99,7 +99,7 @@ public class InMemoryStateStoreTest {
   @Test
   public void testThatStateStoreWritesAndReadsMetadataOperation() {
     final Entity1 entity = new Entity1("123", 5);
-    interest.until = TestUntil.happenings(2);
+    interest.until = TestUntil.happenings(3);
 
     store.write(entity.id, entity, 1, interest);
     store.read(entity.id, Entity1.class, interest);
@@ -147,7 +147,7 @@ public class InMemoryStateStoreTest {
 
   @Test
   public void testThatStateStoreDispatches() {
-    interest.until = TestUntil.happenings(3);
+    interest.until = TestUntil.happenings(6);
 
     dispatcher.until = TestUntil.happenings(3);
 
