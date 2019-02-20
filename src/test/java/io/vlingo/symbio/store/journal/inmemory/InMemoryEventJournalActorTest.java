@@ -11,15 +11,17 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
 
 import io.vlingo.actors.World;
-import io.vlingo.actors.testkit.TestUntil;
+import io.vlingo.actors.testkit.AccessSafely;
 import io.vlingo.common.serialization.JsonSerialization;
 import io.vlingo.symbio.Entry;
 import io.vlingo.symbio.Entry.TextEntry;
@@ -38,107 +40,105 @@ public class InMemoryEventJournalActorTest {
 
   @Test
   public void testThatJournalAppendsOneEvent() {
-    listener.until = TestUntil.happenings(1);
+    final AccessSafely access = listener.afterCompleting(1);
     journal.append("123", 1, new Test1Source(), interest, object);
-    listener.until.completes();
-    assertEquals(1, listener.entries.size());
-    assertEquals("1", listener.entries.get(0).id());
+    assertEquals(1, (int)access.readFrom("size"));
+    assertNotNull(access.readFrom("entry", 0));
+    assertEquals("1", access.readFrom("entryId", 0));
   }
 
   @Test
   public void testThatJournalAppendsOneEventWithSnapshot() {
-    listener.until = TestUntil.happenings(1);
+    final AccessSafely access = listener.afterCompleting(1);
     journal.appendWith("123", 1, new Test1Source(), new SnapshotState(), interest, object);
-    listener.until.completes();
-    assertEquals(1, listener.entries.size());
-    assertEquals("1", listener.entries.get(0).id());
-    assertNotNull(listener.snapshot);
+    assertEquals(1, (int)access.readFrom("size")); 
+    assertNotNull( access.readFrom("entry", 0));
+    assertEquals("1", access.readFrom("entryId", 0));
+    assertNotNull(access.readFrom("snapshot"));
   }
 
   @Test
   public void testThatJournalReaderReadsOneEvent() {
-    listener.until = TestUntil.happenings(1);
+    @SuppressWarnings("unused")
+    final AccessSafely access = listener.afterCompleting(1);
     journal.append("123", 1, new Test1Source(), interest, object);
-    listener.until.completes();
-    final TestUntil untilAsserted = TestUntil.happenings(1);
+
+    final AccessSafely accessResults = new TestResults().afterCompleting(1);
     journal
       .journalReader("test")
       .andThenTo(reader -> reader.readNext())
       .andThenConsume(event -> {
-        assertEquals("1", event.id());
-        untilAsserted.happened();
+        accessResults.writeUsing("addAll", Collections.singletonList(event));
+        assertNotNull(accessResults.readFrom("entry", 0));
+        assertEquals("1", accessResults.readFrom("entryId", 0));
       });
-    untilAsserted.completes();
   }
 
   @Test
   public void testThatJournalReaderReadsThreeEvents() {
-    listener.until = TestUntil.happenings(1);
+    @SuppressWarnings("unused")
+    final AccessSafely access = listener.afterCompleting(1);
     final List<Source<String>> three = Arrays.asList(new Test1Source(), new Test2Source(), new Test1Source());
     journal.appendAll("123", 1, three, interest, object);
-    listener.until.completes();
-    final TestUntil untilAsserted = TestUntil.happenings(1);
+
+    final AccessSafely accessResults = new TestResults().afterCompleting(1);
     journal
       .journalReader("test")
       .andThenTo(reader -> reader.readNext(5))
       .andThenConsume(entries -> {
-        assertEquals(3, entries.size());
-        final Iterator<Entry<String>> iterator = entries.iterator();
-        assertEquals("1", iterator.next().id());
-        assertEquals("2", iterator.next().id());
-        assertEquals("3", iterator.next().id());
-        untilAsserted.happened();
+        accessResults.writeUsing("addAll", entries);
+        assertEquals(3, (int)accessResults.readFrom("size"));
+        assertEquals("1", accessResults.readFrom("entryId", 0));
+        assertEquals("2", accessResults.readFrom("entryId", 1));
+        assertEquals("3", accessResults.readFrom("entryId", 2));
       });
-    untilAsserted.completes();
   }
 
   @Test
   public void testThatStreamReaderReadsFiveEventsWithSnapshot() {
-    listener.until = TestUntil.happenings(5);
+    @SuppressWarnings("unused")
+    AccessSafely access = listener.afterCompleting(5);
     journal.append("123", 1, new Test1Source(), interest, object);
     journal.append("123", 2, new Test1Source(), interest, object);
     journal.appendWith("123", 3, new Test1Source(), new SnapshotState(), interest, object);
     journal.append("123", 4, new Test1Source(), interest, object);
     journal.append("123", 5, new Test1Source(), interest, object);
-    listener.until.completes();
-    final TestUntil untilAsserted = TestUntil.happenings(1);
+
+    final AccessSafely accessResults = new TestResults().afterCompleting(1);
     journal
       .streamReader("test")
       .andThenTo(reader -> reader.streamFor("123"))
       .andThenConsume(eventStream -> {
-        assertEquals(3, eventStream.entries.size());
-        final Iterator<Entry<String>> iterator = eventStream.entries.iterator();
-        assertEquals("3", iterator.next().id());
-        assertEquals("4", iterator.next().id());
-        assertEquals("5", iterator.next().id());
-        assertNotNull(eventStream.snapshot);
-        untilAsserted.happened();
+        accessResults.writeUsing("addAll", eventStream.entries);
+        assertEquals(3, (int)accessResults.readFrom("size"));
+        assertEquals("3", accessResults.readFrom("entryId", 0));
+        assertEquals("4", accessResults.readFrom("entryId", 1));
+        assertEquals("5", accessResults.readFrom("entryId", 2));
+        assertNotNull(accessResults.readFrom("snapshot"));
       });
-    untilAsserted.completes();
   }
 
   @Test
   public void testThatStreamReaderReadsFromBeyondSnapshot() {
-    listener.until = TestUntil.happenings(5);
+    @SuppressWarnings("unused")
+    AccessSafely access = listener.afterCompleting(5);
     journal.append("123", 1, new Test1Source(), interest, object);
     journal.append("123", 2, new Test1Source(), interest, object);
     journal.appendWith("123", 3, new Test1Source(), new SnapshotState(), interest, object);
     journal.append("123", 4, new Test1Source(), interest, object);
     journal.append("123", 5, new Test1Source(), interest, object);
-    listener.until.completes();
-    final TestUntil untilAsserted = TestUntil.happenings(1);
+    
+    final AccessSafely accessResults = new TestResults().afterCompleting(1);
     journal
       .streamReader("test")
       .andThenTo(reader -> reader.streamFor("123", 4))
       .andThenConsume(eventStream -> {
-        assertEquals(2, eventStream.entries.size());
-        final Iterator<Entry<String>> iterator = eventStream.entries.iterator();
-        assertEquals("4", iterator.next().id());
-        assertEquals("5", iterator.next().id());
+        accessResults.writeUsing("addAll", eventStream.entries);
+        assertEquals(2, (int)accessResults.readFrom("size"));
+        assertEquals("4", accessResults.readFrom("entryId", 0));
+        assertEquals("5", accessResults.readFrom("entryId", 1));
         assertNull(eventStream.snapshot);
-        untilAsserted.happened();
       });
-    untilAsserted.completes();
   }
 
   @Before
@@ -196,6 +196,25 @@ public class InMemoryEventJournalActorTest {
     public TextEntry toEntry(Test2Source source, String id) {
       final String serialization = JsonSerialization.serialized(source);
       return new TextEntry(id, Test1Source.class, 1, serialization, Metadata.nullMetadata());
+    }
+  }
+  
+  private static final class TestResults
+  {
+    AccessSafely access;
+    public final List<Entry<String>> entries = new ArrayList<>();
+    
+    @SuppressWarnings("unchecked")
+    public AccessSafely afterCompleting( final int times )
+    {
+      access = 
+              AccessSafely.afterCompleting(times)
+              .writingWith("addAll", (values) -> this.entries.addAll((Collection<Entry<String>>)values ))
+              .readingWith("entry", (index) -> this.entries.get((int)index))
+              .readingWith("entryId", (index) -> this.entries.get((int)index).id())
+              .readingWith("size", () -> this.entries.size());
+      
+      return access;
     }
   }
 }
