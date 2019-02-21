@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 import io.vlingo.actors.Actor;
+import io.vlingo.actors.Definition;
 import io.vlingo.common.Failure;
 import io.vlingo.common.Success;
 import io.vlingo.symbio.Metadata;
@@ -20,6 +21,7 @@ import io.vlingo.symbio.State;
 import io.vlingo.symbio.StateAdapter;
 import io.vlingo.symbio.store.Result;
 import io.vlingo.symbio.store.StorageException;
+import io.vlingo.symbio.store.state.RedispatchControlActor;
 import io.vlingo.symbio.store.state.StateStore;
 import io.vlingo.symbio.store.state.StateStore.DispatcherControl;
 import io.vlingo.symbio.store.state.StateStoreAdapterAssistant;
@@ -32,20 +34,41 @@ public class InMemoryStateStoreActor<RS extends State<?>> extends Actor
   private final List<Dispatchable<RS>> dispatchables;
   private final Dispatcher dispatcher;
   private final Map<String, Map<String, RS>> store;
+  private final RedispatchControl redispatchControl;
 
   public InMemoryStateStoreActor(final Dispatcher dispatcher) {
+    this(dispatcher, 100L, 1000L);
+  }
+
+  public InMemoryStateStoreActor(final Dispatcher dispatcher, long checkConfirmationExpirationInterval, final long confirmationExpiration) {
     if (dispatcher == null) {
       throw new IllegalArgumentException("Dispatcher must not be null.");
     }
     this.dispatcher = dispatcher;
-
     this.adapterAssistant = new StateStoreAdapterAssistant();
     this.store = new HashMap<>();
     this.dispatchables = new ArrayList<>();
+    
+    final DispatcherControl control = selfAs(DispatcherControl.class);
+    
+    this.redispatchControl = stage().actorFor(
+      RedispatchControl.class,
+      Definition.has(
+        RedispatchControlActor.class,
+        Definition.parameters(control, checkConfirmationExpirationInterval, confirmationExpiration)
+      )
+    );
+    
+    dispatcher.controlWith(control);
+    control.dispatchUnconfirmed();
+  }
 
-    dispatcher.controlWith(selfAs(DispatcherControl.class));
-
-    selfAs(DispatcherControl.class).dispatchUnconfirmed();
+  /* @see io.vlingo.actors.Actor#afterStop() */
+  @Override
+  protected void afterStop() {
+    if (redispatchControl != null) {
+      redispatchControl.cancel();
+    }
   }
 
   @Override

@@ -24,6 +24,7 @@ public class MockDispatcher implements Dispatcher {
   private DispatcherControl control;
   private final Map<String,Object> dispatched = new HashMap<>();
   private final AtomicBoolean processDispatch = new AtomicBoolean(true);
+  private int dispatchAttemptCount = 0;
 
   public MockDispatcher(final ConfirmDispatchedResultInterest confirmDispatchedResultInterest) {
     this.confirmDispatchedResultInterest = confirmDispatchedResultInterest;
@@ -37,6 +38,7 @@ public class MockDispatcher implements Dispatcher {
 
   @Override
   public <S extends State<?>> void dispatch(final String dispatchId, final S state) {
+    dispatchAttemptCount++;
     if (processDispatch.get()) {
       access.writeUsing("dispatchedState", dispatchId, (State<?>) state);
       control.confirmDispatched(dispatchId, confirmDispatchedResultInterest);
@@ -52,6 +54,8 @@ public class MockDispatcher implements Dispatcher {
 
               .writingWith("processDispatch", (Boolean flag) -> processDispatch.set(flag))
               .readingWith("processDispatch", () -> processDispatch.get())
+              
+              .readingWith("dispatchAttemptCount", () -> dispatchAttemptCount)
 
               .readingWith("dispatched", () -> dispatched);
 
