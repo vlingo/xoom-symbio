@@ -23,12 +23,11 @@ import io.vlingo.symbio.store.Result;
 import io.vlingo.symbio.store.StorageException;
 import io.vlingo.symbio.store.state.RedispatchControlActor;
 import io.vlingo.symbio.store.state.StateStore;
-import io.vlingo.symbio.store.state.StateStore.DispatcherControl;
 import io.vlingo.symbio.store.state.StateStoreAdapterAssistant;
 import io.vlingo.symbio.store.state.StateTypeStateStoreMap;
 
 public class InMemoryStateStoreActor<RS extends State<?>> extends Actor
-    implements StateStore, DispatcherControl {
+    implements StateStore {
 
   private final StateStoreAdapterAssistant adapterAssistant;
   private final List<Dispatchable<RS>> dispatchables;
@@ -37,7 +36,7 @@ public class InMemoryStateStoreActor<RS extends State<?>> extends Actor
   private final RedispatchControl redispatchControl;
 
   public InMemoryStateStoreActor(final Dispatcher dispatcher) {
-    this(dispatcher, 100L, 1000L);
+    this(dispatcher, 1000L, 1000L);
   }
 
   public InMemoryStateStoreActor(final Dispatcher dispatcher, long checkConfirmationExpirationInterval, final long confirmationExpiration) {
@@ -49,8 +48,8 @@ public class InMemoryStateStoreActor<RS extends State<?>> extends Actor
     this.store = new HashMap<>();
     this.dispatchables = new ArrayList<>();
     
-    final DispatcherControl control = selfAs(DispatcherControl.class);
-    
+    final DispatcherControl control = dispatchControl();
+            
     this.redispatchControl = stage().actorFor(
       RedispatchControl.class,
       Definition.has(
@@ -63,25 +62,31 @@ public class InMemoryStateStoreActor<RS extends State<?>> extends Actor
     control.dispatchUnconfirmed();
   }
 
+  private DispatcherControl dispatchControl() {
+    return new DispatcherControl() {
+      
+      @Override
+      public void dispatchUnconfirmed() {
+        //System.out.println("InMemoryStateStoreActor.DispatcherControl::dispatchUnconfirmed - executing on " + Thread.currentThread().getName());
+        for (int idx = 0; idx < dispatchables.size(); ++idx) {
+          final Dispatchable<RS> dispatchable = dispatchables.get(idx);
+          dispatch(dispatchable.id, dispatchable.state);
+        }
+      }
+      
+      @Override
+      public void confirmDispatched(String dispatchId, ConfirmDispatchedResultInterest interest) {
+        dispatchables.remove(new Dispatchable<RS>(dispatchId, null));
+        interest.confirmDispatchedResultedIn(Result.Success, dispatchId);
+      }
+    };
+  }
+  
   /* @see io.vlingo.actors.Actor#afterStop() */
   @Override
   protected void afterStop() {
     if (redispatchControl != null) {
-      redispatchControl.cancel();
-    }
-  }
-
-  @Override
-  public void confirmDispatched(final String dispatchId, final ConfirmDispatchedResultInterest interest) {
-    dispatchables.remove(new Dispatchable<RS>(dispatchId, null));
-    interest.confirmDispatchedResultedIn(Result.Success, dispatchId);
-  }
-
-  @Override
-  public void dispatchUnconfirmed() {
-    for (int idx = 0; idx < dispatchables.size(); ++idx) {
-      final Dispatchable<RS> dispatchable = dispatchables.get(idx);
-      dispatch(dispatchable.id, dispatchable.state);
+      redispatchControl.stop();
     }
   }
 

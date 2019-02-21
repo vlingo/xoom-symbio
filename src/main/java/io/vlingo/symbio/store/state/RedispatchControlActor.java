@@ -25,9 +25,10 @@ public class RedispatchControlActor extends Actor implements RedispatchControl, 
     this.cancellable = scheduler().schedule(selfAs(Scheduled.class), null, confirmationExpiration, checkConfirmationExpirationInterval);
   }
   
-  /* @see io.vlingo.symbio.store.state.StateStore.RedispatchControl#cancel() */
+  /* @see io.vlingo.actors.Actor#afterStop() */
   @Override
-  public void cancel() {
+  protected void afterStop() {
+    super.afterStop();
     if (cancellable != null) {
       cancellable.cancel();
     }
@@ -36,7 +37,7 @@ public class RedispatchControlActor extends Actor implements RedispatchControl, 
   /* @see io.vlingo.common.Scheduled#intervalSignal(io.vlingo.common.Scheduled, java.lang.Object) */
   @Override
   public void intervalSignal(Scheduled<Object> scheduled, Object data) {
-//    System.out.println("RedispatchControlActor::redispatching at " + System.currentTimeMillis());
+    //System.out.println("RedispatchControlActor::redispatching at " + System.currentTimeMillis() + " on " + Thread.currentThread().getName());
     dispatcherControl.dispatchUnconfirmed();
   }
 }

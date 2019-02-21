@@ -248,7 +248,7 @@ public class InMemoryStateStoreTest {
     store.write(entity.id, entity, 1, interest);
 
     try {
-      Thread.sleep(2000);
+      Thread.sleep(3000);
     }
     catch (InterruptedException ex) {
       //ignored

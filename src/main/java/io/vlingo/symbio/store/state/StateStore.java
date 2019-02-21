@@ -152,7 +152,7 @@ public interface StateStore {
   }
   
   public static interface RedispatchControl {
-    void cancel();
+    void stop();
   }
 
   /**
