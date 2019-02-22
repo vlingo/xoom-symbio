@@ -237,33 +237,6 @@ public class InMemoryStateStoreTest {
     final Object objectState = access1.readFrom("objectState");
     assertNull(objectState);
   }
-  
-  @Test
-  public void testRedispatch() {
-    final AccessSafely accessDispatcher = dispatcher.afterCompleting(3);
-
-    final Entity1 entity = new Entity1("123", 5);
-
-    accessDispatcher.writeUsing("processDispatch", false);
-    store.write(entity.id, entity, 1, interest);
-
-    try {
-      Thread.sleep(3000);
-    }
-    catch (InterruptedException ex) {
-      //ignored
-    }
-    
-    accessDispatcher.writeUsing("processDispatch", true);
-
-    int dispatchCount = accessDispatcher.readFrom("dispatchedStateCount");
-    System.out.println("InMemoryStateStoreTest::testRedispatch - dispatchCount=" + dispatchCount);
-    assertTrue("dispatchCount", dispatchCount == 1);
-    
-    int dispatchAttemptCount = accessDispatcher.readFrom("dispatchAttemptCount");
-    System.out.println("InMemoryStateStoreTest::testRedispatch - dispatchAttemptCount=" + dispatchAttemptCount);
-    assertTrue("dispatchCount", dispatchAttemptCount > 1);
-  }
 
   @Before
   public void setUp() {
