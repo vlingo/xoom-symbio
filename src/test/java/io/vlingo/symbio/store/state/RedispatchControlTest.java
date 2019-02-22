@@ -48,11 +48,11 @@ public class RedispatchControlTest {
     accessDispatcher.writeUsing("processDispatch", true);
 
     int dispatchedStateCount = accessDispatcher.readFrom("dispatchedStateCount");
-    System.out.println("RedispatchControlTest::testRedispatch - dispatchedStateCount=" + dispatchedStateCount);
+    //System.out.println("RedispatchControlTest::testRedispatch - dispatchedStateCount=" + dispatchedStateCount);
     assertTrue("dispatchedStateCount", dispatchedStateCount == 1);
     
     int dispatchAttemptCount = accessDispatcher.readFrom("dispatchAttemptCount");
-    System.out.println("RedispatchControlTest::testRedispatch - dispatchAttemptCount=" + dispatchAttemptCount);
+    //System.out.println("RedispatchControlTest::testRedispatch - dispatchAttemptCount=" + dispatchAttemptCount);
     assertTrue("dispatchAttemptCount", dispatchAttemptCount > 1);
   }
 
