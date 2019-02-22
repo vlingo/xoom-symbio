@@ -150,6 +150,10 @@ public interface StateStore {
     void confirmDispatched(final String dispatchId, final ConfirmDispatchedResultInterest interest);
     void dispatchUnconfirmed();
   }
+  
+  public static interface RedispatchControl {
+    void stop();
+  }
 
   /**
    * Defines the data holder for identity and state that has been
