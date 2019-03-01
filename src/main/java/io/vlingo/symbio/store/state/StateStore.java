@@ -234,6 +234,7 @@ public interface StateStore {
     void beginRead() throws Exception;
     void beginWrite() throws Exception;
     void close();
+    boolean isClosed();
     void complete() throws Exception;
     void confirmDispatched(final String dispatchId);
     <C> C connection();
