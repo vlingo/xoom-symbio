@@ -20,6 +20,7 @@ public class RedispatchControlActor extends Actor implements RedispatchControl, 
   private final DispatcherControl dispatcherControl;
   private final Cancellable cancellable;
   
+  @SuppressWarnings("unchecked")
   public RedispatchControlActor(final DispatcherControl dispatcherControl, final long checkConfirmationExpirationInterval, long confirmationExpiration) {
     this.dispatcherControl = dispatcherControl;
     this.cancellable = scheduler().schedule(selfAs(Scheduled.class), null, confirmationExpiration, checkConfirmationExpirationInterval);
