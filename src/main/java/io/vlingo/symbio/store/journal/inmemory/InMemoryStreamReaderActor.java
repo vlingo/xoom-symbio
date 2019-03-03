@@ -37,6 +37,12 @@ public class InMemoryStreamReaderActor<T> extends Actor implements StreamReader<
   }
 
   @Override
+  public void start() {
+    logger().log("Starting InMemoryStreamReaderActor named: " + this.name);
+    super.start();
+  }
+
+  @Override
   public Completes<Stream<T>> streamFor(final String streamName) {
     return streamFor(streamName, 1);
   }
