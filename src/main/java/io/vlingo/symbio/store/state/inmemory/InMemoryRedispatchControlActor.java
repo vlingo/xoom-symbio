@@ -5,7 +5,7 @@
 // was not distributed with this file, You can obtain
 // one at https://mozilla.org/MPL/2.0/.
 
-package io.vlingo.symbio.store.state;
+package io.vlingo.symbio.store.state.inmemory;
 
 import io.vlingo.actors.Actor;
 import io.vlingo.common.Cancellable;
@@ -15,18 +15,25 @@ import io.vlingo.symbio.store.state.StateStore.RedispatchControl;
 /**
  * RedispatcherActor
  */
-public class RedispatchControlActor extends Actor implements RedispatchControl, Scheduled<Object> {
+public class InMemoryRedispatchControlActor extends Actor implements RedispatchControl, Scheduled<Object> {
   
+  public final static long DEFAULT_REDISPATCH_DELAY = 2000L;
+
   private final DispatcherControl dispatcherControl;
+  private final long confirmationExpiration;
   private final Cancellable cancellable;
   
   @SuppressWarnings("unchecked")
-  public RedispatchControlActor(final DispatcherControl dispatcherControl, final long checkConfirmationExpirationInterval, long confirmationExpiration) {
+  public InMemoryRedispatchControlActor(final DispatcherControl dispatcherControl, final long checkConfirmationExpirationInterval, long confirmationExpiration) {
     this.dispatcherControl = dispatcherControl;
-    this.cancellable = scheduler().schedule(selfAs(Scheduled.class), null, confirmationExpiration, checkConfirmationExpirationInterval);
+    this.confirmationExpiration = confirmationExpiration;
+    this.cancellable = scheduler().schedule(selfAs(Scheduled.class), null, DEFAULT_REDISPATCH_DELAY, checkConfirmationExpirationInterval);
   }
   
-  /* @see io.vlingo.actors.Actor#afterStop() */
+  public long confirmationException() {
+    return confirmationExpiration;
+  }
+  
   @Override
   protected void afterStop() {
     super.afterStop();
@@ -35,10 +42,8 @@ public class RedispatchControlActor extends Actor implements RedispatchControl, 
     }
   }
 
-  /* @see io.vlingo.common.Scheduled#intervalSignal(io.vlingo.common.Scheduled, java.lang.Object) */
   @Override
   public void intervalSignal(Scheduled<Object> scheduled, Object data) {
-    //System.out.println("RedispatchControlActor::redispatching at " + System.currentTimeMillis() + " on " + Thread.currentThread().getName());
     dispatcherControl.dispatchUnconfirmed();
   }
 }

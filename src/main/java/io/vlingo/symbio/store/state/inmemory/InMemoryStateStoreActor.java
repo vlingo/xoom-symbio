@@ -7,6 +7,7 @@
 
 package io.vlingo.symbio.store.state.inmemory;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -22,7 +23,6 @@ import io.vlingo.symbio.State;
 import io.vlingo.symbio.StateAdapter;
 import io.vlingo.symbio.store.Result;
 import io.vlingo.symbio.store.StorageException;
-import io.vlingo.symbio.store.state.RedispatchControlActor;
 import io.vlingo.symbio.store.state.StateStore;
 import io.vlingo.symbio.store.state.StateStoreAdapterAssistant;
 import io.vlingo.symbio.store.state.StateTypeStateStoreMap;
@@ -35,6 +35,7 @@ public class InMemoryStateStoreActor<RS extends State<?>> extends Actor
   private final Dispatcher dispatcher;
   private final Map<String, Map<String, RS>> store;
   private final RedispatchControl redispatchControl;
+  private final long confirmationExpiration;
 
   public InMemoryStateStoreActor(final Dispatcher dispatcher) {
     this(dispatcher, 1000L, 1000L);
@@ -48,13 +49,14 @@ public class InMemoryStateStoreActor<RS extends State<?>> extends Actor
     this.adapterAssistant = new StateStoreAdapterAssistant();
     this.store = new HashMap<>();
     this.dispatchables = new ArrayList<>();
+    this.confirmationExpiration = confirmationExpiration;
     
     final DispatcherControl control = dispatchControl();
             
     this.redispatchControl = stage().actorFor(
       RedispatchControl.class,
       Definition.has(
-        RedispatchControlActor.class,
+        InMemoryRedispatchControlActor.class,
         Definition.parameters(control, checkConfirmationExpirationInterval, confirmationExpiration)
       )
     );
@@ -68,10 +70,13 @@ public class InMemoryStateStoreActor<RS extends State<?>> extends Actor
       
       @Override
       public void dispatchUnconfirmed() {
-        //System.out.println("InMemoryStateStoreActor.DispatcherControl::dispatchUnconfirmed - executing on " + Thread.currentThread().getName());
-        for (int idx = 0; idx < dispatchables.size(); ++idx) {
-          final Dispatchable<RS> dispatchable = dispatchables.get(idx);
-          dispatch(dispatchable.id, dispatchable.state);
+        final LocalDateTime now = LocalDateTime.now();
+        for (Dispatchable<RS> dispatchable : dispatchables) {
+          final LocalDateTime then = dispatchable.createdAt;
+          Duration duration = Duration.between(then, now);
+          if (Math.abs(duration.toMillis()) > confirmationExpiration) {
+            dispatch(dispatchable.id, dispatchable.state);
+          }
         }
       }
       

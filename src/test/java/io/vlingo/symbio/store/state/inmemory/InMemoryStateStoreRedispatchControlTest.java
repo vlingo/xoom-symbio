@@ -4,7 +4,7 @@
 // Mozilla Public License, v. 2.0. If a copy of the MPL
 // was not distributed with this file, You can obtain
 // one at https://mozilla.org/MPL/2.0/.
-package io.vlingo.symbio.store.state;
+package io.vlingo.symbio.store.state.inmemory;
 
 import static org.junit.Assert.assertTrue;
 
@@ -14,13 +14,18 @@ import org.junit.Test;
 
 import io.vlingo.actors.World;
 import io.vlingo.actors.testkit.AccessSafely;
+import io.vlingo.symbio.store.state.Entity1;
+import io.vlingo.symbio.store.state.MockDispatcher;
+import io.vlingo.symbio.store.state.MockStateStoreResultInterest;
+import io.vlingo.symbio.store.state.StateStore;
+import io.vlingo.symbio.store.state.StateTypeStateStoreMap;
 import io.vlingo.symbio.store.state.Entity1.Entity1StateAdapter;
 import io.vlingo.symbio.store.state.inmemory.InMemoryStateStoreActor;
 
 /**
  * RedispatchControlTest
  */
-public class RedispatchControlTest {
+public class InMemoryStateStoreRedispatchControlTest {
 
   private final static String StoreName = Entity1.class.getSimpleName();
 
@@ -39,7 +44,7 @@ public class RedispatchControlTest {
     store.write(entity.id, entity, 1, interest);
 
     try {
-      Thread.sleep(3000);
+      Thread.sleep(6000);
     }
     catch (InterruptedException ex) {
       //ignored
@@ -48,11 +53,9 @@ public class RedispatchControlTest {
     accessDispatcher.writeUsing("processDispatch", true);
 
     int dispatchedStateCount = accessDispatcher.readFrom("dispatchedStateCount");
-    //System.out.println("RedispatchControlTest::testRedispatch - dispatchedStateCount=" + dispatchedStateCount);
     assertTrue("dispatchedStateCount", dispatchedStateCount == 1);
     
     int dispatchAttemptCount = accessDispatcher.readFrom("dispatchAttemptCount");
-    //System.out.println("RedispatchControlTest::testRedispatch - dispatchAttemptCount=" + dispatchAttemptCount);
     assertTrue("dispatchAttemptCount", dispatchAttemptCount > 1);
   }
 
