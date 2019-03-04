@@ -7,6 +7,7 @@
 
 package io.vlingo.symbio.store.state;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 
 import io.vlingo.common.Outcome;
@@ -167,6 +168,11 @@ public interface StateStore {
      * My String unique identity.
      */
     public final String id;
+    
+    /**
+     * The moment when I was persistently created.
+     */
+    public final LocalDateTime createdAt;
 
     /**
      * My R concrete {@code State<?>} type.
@@ -176,10 +182,12 @@ public interface StateStore {
     /**
      * Constructs my state.
      * @param id the String unique identity
+     * @param createdAt the persistence creation timestamp
      * @param state the R concrete {@code State<?>} type
      */
-    public Dispatchable(final String id, final R state) {
+    public Dispatchable(final String id, final LocalDateTime createdAt, final R state) {
       this.id = id;
+      this.createdAt = createdAt;
       this.state = state;
     }
 

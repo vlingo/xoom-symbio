@@ -7,6 +7,7 @@
 
 package io.vlingo.symbio.store.state.inmemory;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -76,7 +77,7 @@ public class InMemoryStateStoreActor<RS extends State<?>> extends Actor
       
       @Override
       public void confirmDispatched(String dispatchId, ConfirmDispatchedResultInterest interest) {
-        dispatchables.remove(new Dispatchable<RS>(dispatchId, null));
+        dispatchables.remove(new Dispatchable<RS>(dispatchId, null, null));
         interest.confirmDispatchedResultedIn(Result.Success, dispatchId);
       }
     };
@@ -202,7 +203,7 @@ public class InMemoryStateStoreActor<RS extends State<?>> extends Actor
             typeStore.put(id, raw);
           }
           final String dispatchId = storeName + ":" + id;
-          dispatchables.add(new Dispatchable<RS>(dispatchId, raw));
+          dispatchables.add(new Dispatchable<RS>(dispatchId, LocalDateTime.now(), raw));
           dispatch(dispatchId, raw);
 
           interest.writeResultedIn(Success.of(Result.Success), id, state, stateVersion, object);
