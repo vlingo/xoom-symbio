@@ -44,4 +44,13 @@ public class StateStoreDispatcherControl__Proxy implements io.vlingo.symbio.stor
       actor.deadLetters().failedDelivery(new DeadLetter(actor, confirmDispatchedRepresentation2));
     }
   }
+  public void stop() {
+    if (!actor.isStopped()) {
+      final java.util.function.Consumer<DispatcherControl> consumer = (actor) -> actor.stop();
+      if (mailbox.isPreallocated()) { mailbox.send(actor, DispatcherControl.class, consumer, null, dispatchUnconfirmedRepresentation1); }
+      else { mailbox.send(new LocalMessage<DispatcherControl>(actor, DispatcherControl.class, consumer, dispatchUnconfirmedRepresentation1)); }
+    } else {
+      actor.deadLetters().failedDelivery(new DeadLetter(actor, dispatchUnconfirmedRepresentation1));
+    }
+  }
 }

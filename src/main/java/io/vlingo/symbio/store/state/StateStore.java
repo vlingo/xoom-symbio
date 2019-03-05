@@ -149,10 +149,15 @@ public interface StateStore {
      * @param interest the ConfirmDispatchedResultInterest 
      */
     void confirmDispatched(final String dispatchId, final ConfirmDispatchedResultInterest interest);
+    
+    /**
+     * Attempt to dispatch any unconfirmed dispatchables.
+     */
     void dispatchUnconfirmed();
-  }
-  
-  public static interface RedispatchControl {
+    
+    /**
+     * Stop attempting to dispatch unconfirmed dispatchables.
+     */
     void stop();
   }
 

@@ -7,7 +7,6 @@
 
 package io.vlingo.symbio.store.state.inmemory;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,7 +14,6 @@ import java.util.List;
 import java.util.Map;
 
 import io.vlingo.actors.Actor;
-import io.vlingo.actors.Definition;
 import io.vlingo.common.Failure;
 import io.vlingo.common.Success;
 import io.vlingo.symbio.Metadata;
@@ -33,9 +31,8 @@ public class InMemoryStateStoreActor<RS extends State<?>> extends Actor
   private final StateStoreAdapterAssistant adapterAssistant;
   private final List<Dispatchable<RS>> dispatchables;
   private final Dispatcher dispatcher;
+  private final DispatcherControl dispatcherControl;
   private final Map<String, Map<String, RS>> store;
-  private final RedispatchControl redispatchControl;
-  private final long confirmationExpiration;
 
   public InMemoryStateStoreActor(final Dispatcher dispatcher) {
     this(dispatcher, 1000L, 1000L);
@@ -49,51 +46,23 @@ public class InMemoryStateStoreActor<RS extends State<?>> extends Actor
     this.adapterAssistant = new StateStoreAdapterAssistant();
     this.store = new HashMap<>();
     this.dispatchables = new ArrayList<>();
-    this.confirmationExpiration = confirmationExpiration;
     
-    final DispatcherControl control = dispatchControl();
-            
-    this.redispatchControl = stage().actorFor(
-      RedispatchControl.class,
-      Definition.has(
-        InMemoryRedispatchControlActor.class,
-        Definition.parameters(control, checkConfirmationExpirationInterval, confirmationExpiration)
-      )
-    );
+    this.dispatcherControl = new InMemoryDispatcherControl<RS>(
+      dispatcher,
+      dispatchables,
+      checkConfirmationExpirationInterval,
+      confirmationExpiration);
     
-    dispatcher.controlWith(control);
-    control.dispatchUnconfirmed();
-  }
-
-  private DispatcherControl dispatchControl() {
-    return new DispatcherControl() {
-      
-      @Override
-      public void dispatchUnconfirmed() {
-        final LocalDateTime now = LocalDateTime.now();
-        for (Dispatchable<RS> dispatchable : dispatchables) {
-          final LocalDateTime then = dispatchable.createdAt;
-          Duration duration = Duration.between(then, now);
-          if (Math.abs(duration.toMillis()) > confirmationExpiration) {
-            dispatch(dispatchable.id, dispatchable.state);
-          }
-        }
-      }
-      
-      @Override
-      public void confirmDispatched(String dispatchId, ConfirmDispatchedResultInterest interest) {
-        dispatchables.remove(new Dispatchable<RS>(dispatchId, null, null));
-        interest.confirmDispatchedResultedIn(Result.Success, dispatchId);
-      }
-    };
+    dispatcher.controlWith(dispatcherControl);
+    dispatcherControl.dispatchUnconfirmed();
   }
   
-  /* @see io.vlingo.actors.Actor#afterStop() */
   @Override
-  protected void afterStop() {
-    if (redispatchControl != null) {
-      redispatchControl.stop();
+  public void stop() {
+    if (dispatcherControl != null) {
+      dispatcherControl.stop();
     }
+    super.stop();
   }
 
   @Override
