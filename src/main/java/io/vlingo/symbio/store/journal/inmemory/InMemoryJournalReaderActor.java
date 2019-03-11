@@ -7,7 +7,6 @@
 
 package io.vlingo.symbio.store.journal.inmemory;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
 
@@ -17,95 +16,34 @@ import io.vlingo.symbio.Entry;
 import io.vlingo.symbio.store.journal.JournalReader;
 
 public class InMemoryJournalReaderActor<T> extends Actor implements JournalReader<T> {
-  private final ListIterator<Entry<T>> journalView;
-  private final String name;
+  private final InMemoryJournalReader<T> reader;
 
   public InMemoryJournalReaderActor(final ListIterator<Entry<T>> journalView, final String name) {
-    this.journalView = journalView;
-    this.name = name;
+    this.reader = new InMemoryJournalReader<>(journalView, name);
   }
 
   @Override
   public Completes<String> name() {
-    return completes().with(name);
+    return reader.name();
   }
 
   @Override
   public Completes<Entry<T>> readNext() {
-    if (journalView.hasNext()) {
-      return completes().with(journalView.next());
-    }
-    return null;
+    return reader.readNext();
   }
 
   @Override
   public Completes<List<Entry<T>>> readNext(final int maximumEntries) {
-    final List<Entry<T>> entries = new ArrayList<>(maximumEntries);
-
-    for (int count = 0; count < maximumEntries; ++count) {
-      if (journalView.hasNext()) {
-        entries.add(journalView.next());
-      } else {
-        count = maximumEntries + 1;
-      }
-    }
-    return completes().with(entries);
+    return reader.readNext(maximumEntries);
   }
 
   @Override
   public void rewind() {
-    while (journalView.hasPrevious()) {
-      journalView.previous();
-    }
+    reader.rewind();
   }
 
   @Override
   public Completes<String> seekTo(final String id) {
-    final String currentId;
-
-    switch (id) {
-    case Beginning:
-      rewind();
-      currentId = readCurrentId();
-      break;
-    case End:
-      end();
-      currentId = readCurrentId();
-      break;
-    case Query:
-      currentId = readCurrentId();
-      break;
-    default:
-      to(id);
-      currentId = readCurrentId();
-      break;
-    }
-
-    return completes().with(currentId);
-  }
-
-  private void end() {
-    while (journalView.hasNext()) {
-      journalView.next();
-    }
-  }
-
-  private String readCurrentId() {
-    if (journalView.hasNext()) {
-      final String currentId = journalView.next().id();
-      journalView.previous();
-      return currentId;
-    }
-    return "-1";
-  }
-
-  private void to(final String id) {
-    rewind();
-    while (journalView.hasNext()) {
-      final Entry<T> entry = journalView.next();
-      if (entry.id().equals(id)) {
-        return;
-      }
-    }
+    return reader.seekTo(id);
   }
 }
