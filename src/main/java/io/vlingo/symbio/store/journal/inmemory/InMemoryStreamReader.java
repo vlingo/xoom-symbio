@@ -65,4 +65,8 @@ public class InMemoryStreamReader<T> implements StreamReader<T> {
     }
     return Completes.withSuccess(new Stream<>(streamName, version - 1, entries, snapshot));
   }
+
+  String name() {
+    return name;
+  }
 }
