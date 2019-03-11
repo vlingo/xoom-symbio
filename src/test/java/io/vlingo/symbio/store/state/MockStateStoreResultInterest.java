@@ -25,7 +25,7 @@ public class MockStateStoreResultInterest
                WriteResultInterest,
                ConfirmDispatchedResultInterest {
 
-  private AccessSafely access;
+  private AccessSafely access = afterCompleting(0);
 
   public AtomicInteger confirmDispatchedResultedIn = new AtomicInteger(0);
   public AtomicInteger readObjectResultedIn = new AtomicInteger(0);
