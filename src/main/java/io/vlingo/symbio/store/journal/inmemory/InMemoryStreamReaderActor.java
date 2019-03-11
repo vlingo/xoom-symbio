@@ -7,7 +7,6 @@
 
 package io.vlingo.symbio.store.journal.inmemory;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -19,10 +18,7 @@ import io.vlingo.symbio.store.journal.Stream;
 import io.vlingo.symbio.store.journal.StreamReader;
 
 public class InMemoryStreamReaderActor<T> extends Actor implements StreamReader<T> {
-  private final List<Entry<T>> journalView;
-  private final Map<String, State<T>> snapshotsView;
-  private final Map<String, Map<Integer,Integer>> streamIndexesView;
-  private final String name;
+  private final InMemoryStreamReader<T> reader;
 
   public InMemoryStreamReaderActor(
           final List<Entry<T>> journalView,
@@ -30,45 +26,22 @@ public class InMemoryStreamReaderActor<T> extends Actor implements StreamReader<
           final Map<String, State<T>> snapshotsView,
           final String name) {
 
-    this.journalView = journalView;
-    this.streamIndexesView = streamIndexesView;
-    this.snapshotsView = snapshotsView;
-    this.name = name;
+    this.reader = new InMemoryStreamReader<>(journalView, streamIndexesView, snapshotsView, name);
   }
 
   @Override
   public void start() {
-    logger().log("Starting InMemoryStreamReaderActor named: " + this.name);
+    logger().log("Starting InMemoryStreamReaderActor named: " + reader.name());
     super.start();
   }
 
   @Override
   public Completes<Stream<T>> streamFor(final String streamName) {
-    return streamFor(streamName, 1);
+    return reader.streamFor(streamName);
   }
 
   @Override
   public Completes<Stream<T>> streamFor(final String streamName, final int fromStreamVersion) {
-    int version = fromStreamVersion;
-    State<T> snapshot = snapshotsView.get(streamName);
-    if (snapshot != null) {
-      if (snapshot.dataVersion > version) {
-        version = snapshot.dataVersion;
-      } else {
-        snapshot = null; // reading from beyond snapshot
-      }
-    }
-    final List<Entry<T>> entries = new ArrayList<>();
-    final Map<Integer,Integer> versionIndexes = streamIndexesView.get(streamName);
-    if (versionIndexes != null) {
-      Integer journalIndex = versionIndexes.get(version);
-  
-      while (journalIndex != null) {
-        final Entry<T> entry = journalView.get(journalIndex);
-        entries.add(entry);
-        journalIndex = versionIndexes.get(++version);
-      }
-    }
-    return completes().with(new Stream<>(streamName, version - 1, entries, snapshot));
+    return reader.streamFor(streamName, fromStreamVersion);
   }
 }
