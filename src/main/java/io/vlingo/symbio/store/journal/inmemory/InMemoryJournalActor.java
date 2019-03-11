@@ -7,182 +7,64 @@
 
 package io.vlingo.symbio.store.journal.inmemory;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
 import io.vlingo.actors.Actor;
-import io.vlingo.actors.Definition;
 import io.vlingo.common.Completes;
-import io.vlingo.common.Success;
 import io.vlingo.symbio.Entry;
 import io.vlingo.symbio.EntryAdapter;
 import io.vlingo.symbio.Source;
 import io.vlingo.symbio.State;
 import io.vlingo.symbio.StateAdapter;
-import io.vlingo.symbio.store.Result;
 import io.vlingo.symbio.store.journal.Journal;
 import io.vlingo.symbio.store.journal.JournalListener;
 import io.vlingo.symbio.store.journal.JournalReader;
 import io.vlingo.symbio.store.journal.StreamReader;
 
 public class InMemoryJournalActor<T,RS extends State<?>> extends Actor implements Journal<T> {
-  private final Map<Class<?>,EntryAdapter<? extends Source<?>,? extends Entry<?>>> entryAdapters;
-  private final Map<Class<?>,StateAdapter<?,?>> stateAdapters;
-  private final List<Entry<T>> journal;
-  private final JournalListener<T> listener;
-  private final Map<String,JournalReader<T>> journalReaders;
-  private final Map<String,StreamReader<T>> streamReaders;
-  private final Map<String, Map<Integer,Integer>> streamIndexes;
-  private final Map<String,RS> snapshots;
+  private final InMemoryJournal<T,RS> journal;
 
   public InMemoryJournalActor(final JournalListener<T> listener) {
-    this.listener = listener;
-    this.entryAdapters = new HashMap<>();
-    this.stateAdapters = new HashMap<>();
-    this.journal = new ArrayList<>();
-    this.journalReaders = new HashMap<>(1);
-    this.streamReaders = new HashMap<>(1);
-    this.streamIndexes = new HashMap<>();
-    this.snapshots = new HashMap<>();
+    this.journal = new InMemoryJournal<>(listener);
   }
 
   @Override
   public <S,ST> void append(final String streamName, final int streamVersion, final Source<S> source, final AppendResultInterest interest, final Object object) {
-    final Entry<T> entry = asEntry(source);
-    insert(streamName, streamVersion, entry);
-    listener.appended(entry);
-    interest.appendResultedIn(Success.of(Result.Success), streamName, streamVersion, source, Optional.empty(), object);
+    journal.append(streamName, streamVersion, source, interest, object);
   }
 
   @Override
-  @SuppressWarnings("unchecked")
   public <S,ST> void appendWith(final String streamName, final int streamVersion, final Source<S> source, final ST snapshot, final AppendResultInterest interest, final Object object) {
-    final Entry<T> entry = asEntry(source);
-    insert(streamName, streamVersion, entry);
-    final RS raw;
-    final Optional<ST> snapshotResult;
-    if (snapshot != null) {
-      final StateAdapter<ST,RS> adapter = (StateAdapter<ST,RS>) stateAdapters.get(snapshot.getClass());
-      raw = adapter.toRawState(snapshot, streamVersion);
-      snapshots.put(streamName, raw);
-      snapshotResult = Optional.of(snapshot);
-    } else {
-      raw = null;
-      snapshotResult = Optional.empty();
-    }
-    listener.appendedWith(entry, (State<T>) raw);
-    interest.appendResultedIn(Success.of(Result.Success), streamName, streamVersion, source, snapshotResult, object);
+    journal.appendWith(streamName, streamVersion, source, snapshot, interest, object);
   }
 
   @Override
   public <S,ST> void appendAll(final String streamName, final int fromStreamVersion, final List<Source<S>> sources, final AppendResultInterest interest, final Object object) {
-    final List<Entry<T>> entries = asEntries(sources);
-    insert(streamName, fromStreamVersion, entries);
-    listener.appendedAll(entries);
-    interest.appendAllResultedIn(Success.of(Result.Success), streamName, fromStreamVersion, sources, Optional.empty(), object);
+    journal.appendAll(streamName, fromStreamVersion, sources, interest, object);
   }
 
   @Override
-  @SuppressWarnings("unchecked")
   public <S,ST> void appendAllWith(final String streamName, final int fromStreamVersion, final List<Source<S>> sources, final ST snapshot, final AppendResultInterest interest, final Object object) {
-    final List<Entry<T>> entries = asEntries(sources);
-    insert(streamName, fromStreamVersion, entries);
-    final RS raw;
-    final Optional<ST> snapshotResult;
-    if (snapshot != null) {
-      final StateAdapter<ST,RS> adapter = (StateAdapter<ST,RS>) stateAdapters.get(snapshot.getClass());
-      raw = adapter.toRawState(snapshot, fromStreamVersion);
-      snapshots.put(streamName, raw);
-      snapshotResult = Optional.of(snapshot);
-    } else {
-      raw = null;
-      snapshotResult = Optional.empty();
-    }
-    listener.appendedAllWith(entries, (State<T>) raw);
-    interest.appendAllResultedIn(Success.of(Result.Success), streamName, fromStreamVersion, sources, snapshotResult, object);
+    journal.appendAllWith(streamName, fromStreamVersion, sources, snapshot, interest, object);
   }
 
   @Override
-  @SuppressWarnings("unchecked")
   public Completes<JournalReader<T>> journalReader(final String name) {
-    JournalReader<T> reader = journalReaders.get(name);
-    if (reader == null) {
-      reader = childActorFor(JournalReader.class, Definition.has(InMemoryJournalReaderActor.class, Definition.parameters(journal.listIterator(), name)));
-      journalReaders.put(name, reader);
-    }
-    return completes().with(reader);
+    return journal.journalReader(name);
   }
 
   @Override
-  @SuppressWarnings("unchecked")
   public Completes<StreamReader<T>> streamReader(final String name) {
-    StreamReader<T> reader = streamReaders.get(name);
-    if (reader == null) {
-      final List<Entry<T>> journalView = Collections.unmodifiableList(journal);
-      final Map<String, Map<Integer,Integer>> streamIndexesView = Collections.unmodifiableMap(streamIndexes);
-      final Map<String, RS> snapshotsView = Collections.unmodifiableMap(snapshots);
-      reader = childActorFor(StreamReader.class, Definition.has(InMemoryStreamReaderActor.class, Definition.parameters(journalView, streamIndexesView, snapshotsView, name)));
-      streamReaders.put(name, reader);
-    }
-    return completes().with(reader);
+    return journal.streamReader(name);
   }
 
   @Override
   public <S extends Source<?>,E extends Entry<?>> void registerEntryAdapter(final Class<S> sourceType, final EntryAdapter<S,E> adapter) {
-    entryAdapters.put(sourceType, adapter);
+    journal.registerEntryAdapter(sourceType, adapter);
   }
 
   @Override
   public <S,R extends State<?>> void registerStateAdapter(final Class<S> stateType, final StateAdapter<S,R> adapter) {
-    stateAdapters.put(stateType, adapter);
-  }
-
-  @SuppressWarnings("unchecked")
-  private <S extends Source<?>,E extends Entry<?>> EntryAdapter<S,E> adapter(final Class<S> sourceType) {
-    final EntryAdapter<S,E> adapter = (EntryAdapter<S,E>) entryAdapters.get(sourceType);
-    if (adapter != null) {
-      return adapter;
-    }
-    throw new IllegalStateException("Adapter not registrered for: " + sourceType.getName());
-  }
-
-  private <S> List<Entry<T>> asEntries(final List<Source<S>> sources) {
-    final List<Entry<T>> entries = new ArrayList<>();
-    for (final Source<?> source : sources) {
-      entries.add(asEntry(source));
-    }
-    return entries;
-  }
-
-  @SuppressWarnings("unchecked")
-  private Entry<T> asEntry(final Source<?> source) {
-    final EntryAdapter<Source<?>,Entry<?>>  adapter = (EntryAdapter<Source<?>,Entry<?>>) adapter(source.getClass());
-
-    return (Entry<T>) adapter.toEntry(source);
-  }
-
-  private void insert(final String streamName, final int streamVersion, final Entry<T> entry) {
-    final int entryIndex = journal.size();
-    final String id = "" + (entryIndex + 1);
-    entry.__internal__setId(id);
-    journal.add(entry);
-    Map<Integer,Integer> versionIndexes = streamIndexes.get(streamName);
-    if (versionIndexes == null) {
-      versionIndexes = new HashMap<>();
-      streamIndexes.put(streamName, versionIndexes);
-    }
-    versionIndexes.put(streamVersion, entryIndex);
-  }
-
-  private void insert(final String streamName, final int fromStreamVersion, final List<Entry<T>> entries) {
-    int index = 0;
-    for (final Entry<T> entry : entries) {
-      insert(streamName, fromStreamVersion + index, entry);
-      ++index;
-    }
+    journal.registerStateAdapter(stateType, adapter);
   }
 }
