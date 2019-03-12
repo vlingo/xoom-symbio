@@ -11,6 +11,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import io.vlingo.actors.Actor;
 import io.vlingo.common.Cancellable;
 import io.vlingo.common.Scheduled;
 import io.vlingo.common.Scheduler;
@@ -23,7 +24,7 @@ import io.vlingo.symbio.store.state.StateStore.DispatcherControl;
 /**
  * InMemoryDispatcherControl
  */
-public class InMemoryDispatcherControl<RS extends State<?>> implements DispatcherControl, Scheduled<Object> {
+public class InMemoryDispatcherControl<RS extends State<?>> extends Actor implements DispatcherControl, Scheduled<Object> {
   
   public final static long DEFAULT_REDISPATCH_DELAY = 2000L;
 

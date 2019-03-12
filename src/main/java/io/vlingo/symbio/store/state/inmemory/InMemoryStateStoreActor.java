@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 import io.vlingo.actors.Actor;
+import io.vlingo.actors.Definition;
 import io.vlingo.common.Failure;
 import io.vlingo.common.Success;
 import io.vlingo.symbio.Metadata;
@@ -47,11 +48,15 @@ public class InMemoryStateStoreActor<RS extends State<?>> extends Actor
     this.store = new HashMap<>();
     this.dispatchables = new ArrayList<>();
     
-    this.dispatcherControl = new InMemoryDispatcherControl<RS>(
-      dispatcher,
-      dispatchables,
-      checkConfirmationExpirationInterval,
-      confirmationExpiration);
+    this.dispatcherControl = stage().actorFor(
+      DispatcherControl.class,
+      Definition.has(
+        InMemoryDispatcherControl.class,
+        Definition.parameters(
+          dispatcher,
+          dispatchables,
+          checkConfirmationExpirationInterval,
+          confirmationExpiration)));
     
     dispatcher.controlWith(dispatcherControl);
     dispatcherControl.dispatchUnconfirmed();
