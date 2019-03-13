@@ -24,17 +24,17 @@ public class InMemoryJournalReaderActor<T> extends Actor implements JournalReade
 
   @Override
   public Completes<String> name() {
-    return reader.name();
+    return completes().with(reader.name().outcome());
   }
 
   @Override
   public Completes<Entry<T>> readNext() {
-    return reader.readNext();
+    return completes().with(reader.readNext().outcome());
   }
 
   @Override
   public Completes<List<Entry<T>>> readNext(final int maximumEntries) {
-    return reader.readNext(maximumEntries);
+    return completes().with(reader.readNext(maximumEntries).outcome());
   }
 
   @Override
@@ -44,6 +44,6 @@ public class InMemoryJournalReaderActor<T> extends Actor implements JournalReade
 
   @Override
   public Completes<String> seekTo(final String id) {
-    return reader.seekTo(id);
+    return completes().with(reader.seekTo(id).outcome());
   }
 }
