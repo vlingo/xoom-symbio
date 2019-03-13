@@ -37,11 +37,11 @@ public class InMemoryStreamReaderActor<T> extends Actor implements StreamReader<
 
   @Override
   public Completes<Stream<T>> streamFor(final String streamName) {
-    return reader.streamFor(streamName);
+    return completes().with(reader.streamFor(streamName).outcome());
   }
 
   @Override
   public Completes<Stream<T>> streamFor(final String streamName, final int fromStreamVersion) {
-    return reader.streamFor(streamName, fromStreamVersion);
+    return completes().with(reader.streamFor(streamName, fromStreamVersion).outcome());
   }
 }
