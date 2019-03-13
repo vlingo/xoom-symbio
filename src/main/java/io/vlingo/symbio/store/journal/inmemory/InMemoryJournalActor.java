@@ -50,12 +50,12 @@ public class InMemoryJournalActor<T,RS extends State<?>> extends Actor implement
 
   @Override
   public Completes<JournalReader<T>> journalReader(final String name) {
-    return journal.journalReader(name);
+    return completes().with(journal.journalReader(name).outcome());
   }
 
   @Override
   public Completes<StreamReader<T>> streamReader(final String name) {
-    return journal.streamReader(name);
+    return completes().with(journal.streamReader(name).outcome());
   }
 
   @Override
