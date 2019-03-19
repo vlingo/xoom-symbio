@@ -8,10 +8,13 @@
 package io.vlingo.symbio.store.state;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import io.vlingo.common.Outcome;
 import io.vlingo.symbio.Metadata;
+import io.vlingo.symbio.Source;
 import io.vlingo.symbio.State;
 import io.vlingo.symbio.StateAdapter;
 import io.vlingo.symbio.store.Result;
@@ -22,12 +25,19 @@ import io.vlingo.symbio.store.StorageException;
  */
 public interface StateStore {
   /**
+   * An empty collection of {@link Source}.
+   */
+  public static final List<Source<?>> EmptySources = new ArrayList<>();
+
+  /**
    * Read the state identified by {@code id} and dispatch the result to the {@code interest}.
    * @param id the String unique identity of the state to read
    * @param type the {@code Class<?>} type of the state to read
    * @param interest the ReadResultInterest to which the result is dispatched
    */
-  void read(final String id, final Class<?> type, final ReadResultInterest interest);
+  default void read(final String id, final Class<?> type, final ReadResultInterest interest) {
+    read(id, type, interest, null);
+  }
 
   /**
    * Read the state identified by {@code id} and dispatch the result to the {@code interest}.
@@ -46,7 +56,23 @@ public interface StateStore {
    * @param interest the WriteResultInterest to which the result is dispatched
    * @param <S> the concrete type of the state
    */
-  <S> void write(final String id, final S state, final int stateVersion, final WriteResultInterest interest);
+  default <S> void write(final String id, final S state, final int stateVersion, final WriteResultInterest interest) {
+    write(id, state, stateVersion, EmptySources, null, interest, null);
+  }
+
+  /**
+   * Write the {@code state} identified by {@code id} along with appending {@code sources}
+   * and dispatch the result to the {@code interest}.
+   * @param id the String unique identity of the state to read
+   * @param state the S typed state instance
+   * @param stateVersion the int version of the state
+   * @param sources the {@code List<Source<?>>} to append
+   * @param interest the WriteResultInterest to which the result is dispatched
+   * @param <S> the concrete type of the state
+   */
+  default <S> void write(final String id, final S state, final int stateVersion, final List<Source<?>> sources, final WriteResultInterest interest) {
+    write(id, state, stateVersion, sources, null, interest, null);
+  }
 
   /**
    * Write the {@code state} identified by {@code id} and dispatch the result to the {@code interest}.
@@ -57,7 +83,24 @@ public interface StateStore {
    * @param interest the WriteResultInterest to which the result is dispatched
    * @param <S> the concrete type of the state
    */
-  <S> void write(final String id, final S state, final int stateVersion, final Metadata metadata, final WriteResultInterest interest);
+  default <S> void write(final String id, final S state, final int stateVersion, final Metadata metadata, final WriteResultInterest interest) {
+    write(id, state, stateVersion, EmptySources, metadata, interest, null);
+  }
+
+  /**
+   * Write the {@code state} identified by {@code id} along with appending {@code sources}
+   * and dispatch the result to the {@code interest}.
+   * @param id the String unique identity of the state to read
+   * @param state the S typed state instance
+   * @param stateVersion the int version of the state
+   * @param sources the {@code List<Source<?>>} to append
+   * @param metadata the Metadata for the state
+   * @param interest the WriteResultInterest to which the result is dispatched
+   * @param <S> the concrete type of the state
+   */
+  default <S> void write(final String id, final S state, final int stateVersion, final List<Source<?>> sources, final Metadata metadata, final WriteResultInterest interest) {
+    write(id, state, stateVersion, sources, metadata, interest, null);
+  }
 
   /**
    * Write the {@code state} identified by {@code id} and dispatch the result to the {@code interest}.
@@ -68,8 +111,24 @@ public interface StateStore {
    * @param object an Object that will be sent to the WriteResultInterest when the write has succeeded or failed
    * @param <S> the concrete type of the state
    */
-  <S> void write(final String id, final S state, final int stateVersion, final WriteResultInterest interest, final Object object);
+  default <S> void write(final String id, final S state, final int stateVersion, final WriteResultInterest interest, final Object object) {
+    write(id, state, stateVersion, EmptySources, null, interest, object);
+  }
 
+  /**
+   * Write the {@code state} identified by {@code id} along with appending {@code sources}
+   * and dispatch the result to the {@code interest}.
+   * @param id the String unique identity of the state to read
+   * @param state the S typed state instance
+   * @param stateVersion the int version of the state
+   * @param sources the {@code List<Source<?>>} to append
+   * @param interest the WriteResultInterest to which the result is dispatched
+   * @param object an Object that will be sent to the WriteResultInterest when the write has succeeded or failed
+   * @param <S> the concrete type of the state
+   */
+  default <S> void write(final String id, final S state, final int stateVersion, final List<Source<?>> sources, final WriteResultInterest interest, final Object object) {
+    write(id, state, stateVersion, sources, null, interest, object);
+  }
 
   /**
    * Write the {@code state} identified by {@code id} and dispatch the result to the {@code interest}.
@@ -81,7 +140,23 @@ public interface StateStore {
    * @param object an Object that will be sent to the WriteResultInterest when the write has succeeded or failed
    * @param <S> the concrete type of the state
    */
-  <S> void write(final String id, final S state, final int stateVersion, final Metadata metadata, final WriteResultInterest interest, final Object object);
+  default <S> void write(final String id, final S state, final int stateVersion, final Metadata metadata, final WriteResultInterest interest, final Object object) {
+    write(id, state, stateVersion, EmptySources, metadata, interest, object);
+  }
+
+  /**
+   * Write the {@code state} identified by {@code id} along with appending {@code sources}
+   * and dispatch the result to the {@code interest}.
+   * @param id the String unique identity of the state to read
+   * @param state the S typed state instance
+   * @param stateVersion the int version of the state
+   * @param sources the {@code List<Source<?>>} to append
+   * @param metadata the Metadata for the state
+   * @param interest the WriteResultInterest to which the result is dispatched
+   * @param object an Object that will be sent to the WriteResultInterest when the write has succeeded or failed
+   * @param <S> the concrete type of the state
+   */
+  <S> void write(final String id, final S state, final int stateVersion, final List<Source<?>> sources, final Metadata metadata, final WriteResultInterest interest, final Object object);
 
   /**
    * Registers the {@code adapter} with the {@code StateStore} for {@code stateType}.
@@ -146,15 +221,15 @@ public interface StateStore {
     /**
      * Confirm that the {@code dispatchId} has been dispatched.
      * @param dispatchId the String unique identity of the dispatched state
-     * @param interest the ConfirmDispatchedResultInterest 
+     * @param interest the ConfirmDispatchedResultInterest
      */
     void confirmDispatched(final String dispatchId, final ConfirmDispatchedResultInterest interest);
-    
+
     /**
      * Attempt to dispatch any unconfirmed dispatchables.
      */
     void dispatchUnconfirmed();
-    
+
     /**
      * Stop attempting to dispatch unconfirmed dispatchables.
      */
@@ -173,7 +248,7 @@ public interface StateStore {
      * My String unique identity.
      */
     public final String id;
-    
+
     /**
      * The moment when I was persistently created.
      */
