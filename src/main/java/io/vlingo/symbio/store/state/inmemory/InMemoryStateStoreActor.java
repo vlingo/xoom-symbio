@@ -18,6 +18,7 @@ import io.vlingo.actors.Definition;
 import io.vlingo.common.Failure;
 import io.vlingo.common.Success;
 import io.vlingo.symbio.Metadata;
+import io.vlingo.symbio.Source;
 import io.vlingo.symbio.State;
 import io.vlingo.symbio.StateAdapter;
 import io.vlingo.symbio.store.Result;
@@ -47,7 +48,7 @@ public class InMemoryStateStoreActor<RS extends State<?>> extends Actor
     this.adapterAssistant = new StateStoreAdapterAssistant();
     this.store = new HashMap<>();
     this.dispatchables = new ArrayList<>();
-    
+
     this.dispatcherControl = stage().actorFor(
       DispatcherControl.class,
       Definition.has(
@@ -57,11 +58,11 @@ public class InMemoryStateStoreActor<RS extends State<?>> extends Actor
           dispatchables,
           checkConfirmationExpirationInterval,
           confirmationExpiration)));
-    
+
     dispatcher.controlWith(dispatcherControl);
     dispatcherControl.dispatchUnconfirmed();
   }
-  
+
   @Override
   public void stop() {
     if (dispatcherControl != null) {
@@ -71,33 +72,13 @@ public class InMemoryStateStoreActor<RS extends State<?>> extends Actor
   }
 
   @Override
-  public void read(final String id, Class<?> type, final ReadResultInterest interest) {
-    readFor(id, type, interest, null);
-  }
-
-  @Override
   public void read(final String id, Class<?> type, final ReadResultInterest interest, final Object object) {
     readFor(id, type, interest, object);
   }
 
   @Override
-  public <S> void write(final String id, final S state, final int stateVersion, final WriteResultInterest interest) {
-    writeWith(id, state, stateVersion, null, interest, null);
-  }
-
-  @Override
-  public <S> void write(final String id, final S state, final int stateVersion, final Metadata metadata, final WriteResultInterest interest) {
-    writeWith(id, state, stateVersion, metadata, interest, null);
-  }
-
-  @Override
-  public <S> void write(final String id, final S state, final int stateVersion, final WriteResultInterest interest, final Object object) {
-    writeWith(id, state, stateVersion, null, interest, object);
-  }
-
-  @Override
-  public <S> void write(final String id, final S state, final int stateVersion, final Metadata metadata, final WriteResultInterest interest, final Object object) {
-    writeWith(id, state, stateVersion, metadata, interest, object);
+  public <S> void write(final String id, final S state, final int stateVersion, final List<Source<?>> sources, final Metadata metadata, final WriteResultInterest interest, final Object object) {
+    writeWith(id, state, stateVersion, sources, metadata, interest, object);
   }
 
   @Override
@@ -146,7 +127,7 @@ public class InMemoryStateStoreActor<RS extends State<?>> extends Actor
     }
   }
 
-  protected <S> void writeWith(final String id, final S state, final int stateVersion, final Metadata metadata, final WriteResultInterest interest, final Object object) {
+  protected <S> void writeWith(final String id, final S state, final int stateVersion, final List<Source<?>> sources, final Metadata metadata, final WriteResultInterest interest, final Object object) {
     if (interest != null) {
       if (state == null) {
         interest.writeResultedIn(Failure.of(new StorageException(Result.Error, "The state is null.")), id, state, stateVersion, object);
