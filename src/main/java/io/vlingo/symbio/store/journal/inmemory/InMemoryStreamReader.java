@@ -33,7 +33,6 @@ public class InMemoryStreamReader<T> implements StreamReader<T> {
     this.streamIndexesView = streamIndexesView;
     this.snapshotsView = snapshotsView;
     this.name = name;
-    System.out.println("Started InMemoryStreamReader: " + this.name);
   }
 
   @Override
