@@ -8,10 +8,10 @@
 package io.vlingo.symbio.store.state.inmemory;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import io.vlingo.actors.Actor;
 import io.vlingo.actors.Definition;
@@ -47,7 +47,7 @@ public class InMemoryStateStoreActor<RS extends State<?>> extends Actor
     this.dispatcher = dispatcher;
     this.adapterAssistant = new StateStoreAdapterAssistant();
     this.store = new HashMap<>();
-    this.dispatchables = new ArrayList<>();
+    this.dispatchables = new CopyOnWriteArrayList<>();
 
     this.dispatcherControl = stage().actorFor(
       DispatcherControl.class,
