@@ -26,6 +26,11 @@ public class SnapshotStateAdapter implements StateAdapter<SnapshotState,TextStat
   }
 
   @Override
+  public <ST> ST fromRawState(final TextState raw, final Class<ST> stateType) {
+    return JsonSerialization.deserialized(raw.data, stateType);
+  }
+
+  @Override
   public TextState toRawState(final SnapshotState state, final int stateVersion, final Metadata metadata) {
     final String serialization = JsonSerialization.serialized(state);
     return new TextState(TextState.NoOp, SnapshotState.class, typeVersion(), serialization, stateVersion, metadata);
