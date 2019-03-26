@@ -30,6 +30,15 @@ public interface StateAdapter<S,RS extends State<?>> {
   S fromRawState(final RS raw);
 
   /**
+   * Answer the {@code ST} native state instance.
+   * @param raw the {@code State<?>} instance from which the native state is derived
+   * @param stateType the {@code Class<ST>} type to which to convert
+   * @param <ST> the state type to which to convert
+   * @return {@code ST}
+   */
+  <ST> ST fromRawState(final RS raw, Class<ST> stateType);
+
+  /**
    * Answer the {@code RS} raw {@code State<?>} instance of the {@code S} instance.
    * @param state the {@code S} native state instance
    * @param stateVersion the int state version
