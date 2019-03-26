@@ -86,7 +86,7 @@ public class InMemoryStateStoreActor<RS extends State<?>> extends Actor
     adapterAssistant.registerAdapter(stateType, adapter);
   }
 
-  protected void readFor(final String id, final Class<?> type, final ReadResultInterest interest, final Object object) {
+  private void readFor(final String id, final Class<?> type, final ReadResultInterest interest, final Object object) {
     if (interest != null) {
       if (id == null || type == null) {
         interest.readResultedIn(Failure.of(new StorageException(Result.Error, id == null ? "The id is null." : "The type is null.")), id, null, -1, null, object);
@@ -127,7 +127,7 @@ public class InMemoryStateStoreActor<RS extends State<?>> extends Actor
     }
   }
 
-  protected <S> void writeWith(final String id, final S state, final int stateVersion, final List<Source<?>> sources, final Metadata metadata, final WriteResultInterest interest, final Object object) {
+  private <S> void writeWith(final String id, final S state, final int stateVersion, final List<Source<?>> sources, final Metadata metadata, final WriteResultInterest interest, final Object object) {
     if (interest != null) {
       if (state == null) {
         interest.writeResultedIn(Failure.of(new StorageException(Result.Error, "The state is null.")), id, state, stateVersion, object);
