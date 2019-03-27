@@ -24,13 +24,15 @@ import io.vlingo.symbio.State;
 import io.vlingo.symbio.store.Result;
 import io.vlingo.symbio.store.state.Entity1;
 import io.vlingo.symbio.store.state.Entity1.Entity1StateAdapter;
+import io.vlingo.symbio.store.state.Entity2;
 import io.vlingo.symbio.store.state.MockDispatcher;
 import io.vlingo.symbio.store.state.MockStateStoreResultInterest;
 import io.vlingo.symbio.store.state.StateStore;
 import io.vlingo.symbio.store.state.StateTypeStateStoreMap;
 
 public class InMemoryStateStoreTest {
-  private final static String StoreName = Entity1.class.getSimpleName();
+  private final static String StoreName1 = Entity1.class.getSimpleName();
+  private final static String StoreName2 = Entity2.class.getSimpleName();
 
   private MockDispatcher dispatcher;
   private MockStateStoreResultInterest interest;
@@ -238,6 +240,21 @@ public class InMemoryStateStoreTest {
     assertNull(objectState);
   }
 
+  @Test
+  public void testThatStateStoreWritesTextWithDefaultAdapter() {
+    final AccessSafely access1 = interest.afterCompleting(1);
+    dispatcher.afterCompleting(1);
+
+    final Entity2 entity = new Entity2("123", "5");
+
+    store.write(entity.id, entity, 1, interest);
+
+    assertEquals(0, (int) access1.readFrom("readObjectResultedIn"));
+    assertEquals(1, (int) access1.readFrom("writeObjectResultedIn"));
+    assertEquals(Result.Success, access1.readFrom("objectWriteResult"));
+    assertEquals(entity, access1.readFrom("objectState"));
+  }
+
   @Before
   public void setUp() {
     testWorld = TestWorld.startWithDefaults("test-store");
@@ -249,7 +266,8 @@ public class InMemoryStateStoreTest {
     store = world.actorFor(StateStore.class, InMemoryStateStoreActor.class, dispatcher);
     store.registerAdapter(Entity1.class, new Entity1StateAdapter());
 
-    StateTypeStateStoreMap.stateTypeToStoreName(Entity1.class, StoreName);
+    StateTypeStateStoreMap.stateTypeToStoreName(Entity1.class, StoreName1);
+    StateTypeStateStoreMap.stateTypeToStoreName(Entity2.class, StoreName2);
   }
 
   @After
@@ -258,6 +276,6 @@ public class InMemoryStateStoreTest {
   }
 
   private String dispatchId(final String entityId) {
-    return StoreName + ":" + entityId;
+    return StoreName1 + ":" + entityId;
   }
 }
