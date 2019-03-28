@@ -13,8 +13,8 @@ import java.util.Comparator;
  * The abstract base class of all journal entry types.
  *
  * @param <T> the concrete type of {@code Entry<T>} stored and read, which maybe be String, byte[], or Object
- * 
- * @see BinaryEntry ObjectEvent TextEntry NullEntry
+ *
+ * @see BinaryEntry ObjectEntry TextEntry NullEntry
  */
 public abstract class Entry<T> implements Comparable<Entry<T>> {
   private static final byte[] EmptyBytesData = new byte[0];
@@ -169,9 +169,9 @@ public abstract class Entry<T> implements Comparable<Entry<T>> {
 
   /**
    * Answers the difference between me and other per {@code Comparable<Entry<T>>}.
-   * 
+   *
    * @param other the {@code Entry<T>} to compare to myself
-   * 
+   *
    * @return int
    */
   @Override
@@ -293,7 +293,7 @@ public abstract class Entry<T> implements Comparable<Entry<T>> {
 
     @SuppressWarnings("unchecked")
     public ObjectEntry() {
-      super(UnknownId, Object.class, 1, (T) Entry.EmptyObjectData, Metadata.nullMetadata());
+      super(UnknownId, Object.class, 1, Entry.EmptyObjectData, Metadata.nullMetadata());
     }
 
     @Override
