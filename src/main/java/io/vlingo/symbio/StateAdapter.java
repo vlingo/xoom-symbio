@@ -40,12 +40,26 @@ public interface StateAdapter<S,RS extends State<?>> {
 
   /**
    * Answer the {@code RS} raw {@code State<?>} instance of the {@code S} instance.
+   * @param id the String identity of the state
    * @param state the {@code S} native state instance
    * @param stateVersion the int state version
    * @param metadata the Metadata for this state
    * @return RS
    */
-  RS toRawState(final S state, final int stateVersion, final Metadata metadata);
+  default RS toRawState(final String id, final S state, final int stateVersion, final Metadata metadata) {
+    throw new UnsupportedOperationException("Must override.");
+  }
+
+  /**
+   * Answer the {@code RS} raw {@code State<?>} instance of the {@code S} instance.
+   * @param state the {@code S} native state instance
+   * @param stateVersion the int state version
+   * @param metadata the Metadata for this state
+   * @return RS
+   */
+  default RS toRawState(final S state, final int stateVersion, final Metadata metadata) {
+    return toRawState(State.NoOp, state, stateVersion, metadata);
+  }
 
   /**
    * Answer the {@code RS} raw {@code State<?>} instance of the {@code S} instance
