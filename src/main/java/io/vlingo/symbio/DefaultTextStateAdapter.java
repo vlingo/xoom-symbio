@@ -32,8 +32,8 @@ public class DefaultTextStateAdapter implements StateAdapter<Object, TextState> 
   }
 
   @Override
-  public TextState toRawState(final Object state, final int stateVersion, final Metadata metadata) {
+  public TextState toRawState(final String id, final Object state, final int stateVersion, final Metadata metadata) {
     final String serialization = JsonSerialization.serialized(state);
-    return new TextState(State.NoOp, state.getClass(), typeVersion(), serialization, stateVersion);
+    return new TextState(id, state.getClass(), typeVersion(), serialization, stateVersion, metadata);
   }
 }
