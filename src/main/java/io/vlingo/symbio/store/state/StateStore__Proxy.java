@@ -19,7 +19,6 @@ public class StateStore__Proxy implements io.vlingo.symbio.store.state.StateStor
 
   private static final String writeRepresentation1 = "write(java.lang.String, S, int, java.util.List<Source<?>>, io.vlingo.symbio.Metadata, io.vlingo.symbio.store.state.StateStore.WriteResultInterest, java.lang.Object)";
   private static final String readRepresentation2 = "read(java.lang.String, java.lang.Class<?>, io.vlingo.symbio.store.state.StateStore.ReadResultInterest, java.lang.Object)";
-  private static final String registerAdapterRepresentation3 = "registerAdapter(java.lang.Class<S>, io.vlingo.symbio.StateAdapter<S, R>)";
 
   private final Actor actor;
   private final Mailbox mailbox;
@@ -30,7 +29,7 @@ public class StateStore__Proxy implements io.vlingo.symbio.store.state.StateStor
   }
 
   @Override
-  public <S>void write(java.lang.String arg0, S arg1, int arg2, final List<Source<?>> arg3, io.vlingo.symbio.Metadata arg4, io.vlingo.symbio.store.state.StateStore.WriteResultInterest arg5, java.lang.Object arg6) {
+  public <S,C> void write(java.lang.String arg0, S arg1, int arg2, final List<Source<C>> arg3, io.vlingo.symbio.Metadata arg4, io.vlingo.symbio.store.state.StateStore.WriteResultInterest arg5, java.lang.Object arg6) {
     if (!actor.isStopped()) {
       final java.util.function.Consumer<StateStore> consumer = (actor) -> actor.write(arg0, arg1, arg2, arg3, arg4, arg5, arg6);
       if (mailbox.isPreallocated()) { mailbox.send(actor, StateStore.class, consumer, null, writeRepresentation1); }
@@ -47,16 +46,6 @@ public class StateStore__Proxy implements io.vlingo.symbio.store.state.StateStor
       else { mailbox.send(new LocalMessage<StateStore>(actor, StateStore.class, consumer, readRepresentation2)); }
     } else {
       actor.deadLetters().failedDelivery(new DeadLetter(actor, readRepresentation2));
-    }
-  }
-  @Override
-  public <S, R extends io.vlingo.symbio.State<?>> void registerAdapter(java.lang.Class<S> arg0, io.vlingo.symbio.StateAdapter<S, R> arg1) {
-    if (!actor.isStopped()) {
-      final java.util.function.Consumer<StateStore> consumer = (actor) -> actor.registerAdapter(arg0, arg1);
-      if (mailbox.isPreallocated()) { mailbox.send(actor, StateStore.class, consumer, null, registerAdapterRepresentation3); }
-      else { mailbox.send(new LocalMessage<StateStore>(actor, StateStore.class, consumer, registerAdapterRepresentation3)); }
-    } else {
-      actor.deadLetters().failedDelivery(new DeadLetter(actor, registerAdapterRepresentation3));
     }
   }
 }
