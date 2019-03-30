@@ -291,7 +291,6 @@ public abstract class Entry<T> implements Comparable<Entry<T>> {
       super(UnknownId, type, typeVersion, entryData, metadata);
     }
 
-    @SuppressWarnings("unchecked")
     public ObjectEntry() {
       super(UnknownId, Object.class, 1, Entry.EmptyObjectData, Metadata.nullMetadata());
     }
