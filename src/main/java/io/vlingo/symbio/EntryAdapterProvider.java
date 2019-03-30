@@ -11,15 +11,38 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.function.BiConsumer;
 
+import io.vlingo.actors.World;
+import io.vlingo.symbio.DefaultTextEntryAdapter.ObjectSource;
+import io.vlingo.symbio.Entry.TextEntry;
+
 public class EntryAdapterProvider {
+  static final String INTERNAL_NAME = UUID.randomUUID().toString();
+
   private final Map<Class<?>,EntryAdapter<?,?>> adapters;
   private final Map<String,EntryAdapter<?,?>> namedAdapters;
+  private final EntryAdapter<ObjectSource,TextEntry> defaultTextEntryAdapter;
+
+  /**
+   * Answer the {@code EntryAdapterProvider} held by the {@code world}.
+   * @param world the World where the EntryAdapterProvider is held
+   * @return EntryAdapterProvider
+   */
+  public static EntryAdapterProvider instance(final World world) {
+    return world.resolveDynamic(INTERNAL_NAME, EntryAdapterProvider.class);
+  }
+
+  public EntryAdapterProvider(final World world) {
+    this();
+    world.registerDynamic(INTERNAL_NAME, this);
+  }
 
   public EntryAdapterProvider() {
     this.adapters = new HashMap<>();
     this.namedAdapters = new HashMap<>();
+    this.defaultTextEntryAdapter = new DefaultTextEntryAdapter();
   }
 
   public <S extends Source<?>,E extends Entry<?>> void registerAdapter(final Class<S> sourceType, final EntryAdapter<S,E> adapter) {
@@ -44,7 +67,10 @@ public class EntryAdapterProvider {
   @SuppressWarnings("unchecked")
   public <S extends Source<?>,E extends Entry<?>> E asEntry(final S source) {
     final EntryAdapter<S,E>  adapter = (EntryAdapter<S,E>) adapter((Class<S>) source.getClass());
-    return adapter.toEntry(source);
+    if (adapter != null) {
+      return adapter.toEntry(source);
+    }
+    return (E) defaultTextEntryAdapter.toEntry((ObjectSource) source);
   }
 
   public <S extends Source<?>,E extends Entry<?>> List<S> asSources(final List<E> entries) {
@@ -55,9 +81,13 @@ public class EntryAdapterProvider {
     return sources;
   }
 
+  @SuppressWarnings("unchecked")
   public <S extends Source<?>,E extends Entry<?>> S asSource(final E entry) {
     EntryAdapter<S,E> adapter = namedAdapter(entry);
-    return (S) adapter.fromEntry(entry);
+    if (adapter != null) {
+      return adapter.fromEntry(entry);
+    }
+    return (S) defaultTextEntryAdapter.fromEntry((TextEntry) entry);
   }
 
   @SuppressWarnings("unchecked")
