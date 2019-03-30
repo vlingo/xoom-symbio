@@ -8,6 +8,8 @@
 package io.vlingo.symbio.store.state.inmemory;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,23 +19,26 @@ import io.vlingo.actors.Actor;
 import io.vlingo.actors.Definition;
 import io.vlingo.common.Failure;
 import io.vlingo.common.Success;
+import io.vlingo.symbio.Entry;
+import io.vlingo.symbio.EntryAdapterProvider;
 import io.vlingo.symbio.Metadata;
 import io.vlingo.symbio.Source;
 import io.vlingo.symbio.State;
-import io.vlingo.symbio.StateAdapter;
+import io.vlingo.symbio.StateAdapterProvider;
 import io.vlingo.symbio.store.Result;
 import io.vlingo.symbio.store.StorageException;
 import io.vlingo.symbio.store.state.StateStore;
-import io.vlingo.symbio.store.state.StateStoreAdapterAssistant;
 import io.vlingo.symbio.store.state.StateTypeStateStoreMap;
 
 public class InMemoryStateStoreActor<RS extends State<?>> extends Actor
     implements StateStore {
 
-  private final StateStoreAdapterAssistant adapterAssistant;
   private final List<Dispatchable<RS>> dispatchables;
   private final Dispatcher dispatcher;
   private final DispatcherControl dispatcherControl;
+  private final List<Entry<?>> entries;
+  private final EntryAdapterProvider entryAdapterProvider;
+  private final StateAdapterProvider stateAdapterProvider;
   private final Map<String, Map<String, RS>> store;
 
   public InMemoryStateStoreActor(final Dispatcher dispatcher) {
@@ -45,7 +50,9 @@ public class InMemoryStateStoreActor<RS extends State<?>> extends Actor
       throw new IllegalArgumentException("Dispatcher must not be null.");
     }
     this.dispatcher = dispatcher;
-    this.adapterAssistant = new StateStoreAdapterAssistant();
+    this.entryAdapterProvider = EntryAdapterProvider.instance(stage().world());
+    this.stateAdapterProvider = StateAdapterProvider.instance(stage().world());
+    this.entries = new ArrayList<>();
     this.store = new HashMap<>();
     this.dispatchables = new CopyOnWriteArrayList<>();
 
@@ -77,13 +84,8 @@ public class InMemoryStateStoreActor<RS extends State<?>> extends Actor
   }
 
   @Override
-  public <S> void write(final String id, final S state, final int stateVersion, final List<Source<?>> sources, final Metadata metadata, final WriteResultInterest interest, final Object object) {
+  public <S,C> void write(final String id, final S state, final int stateVersion, final List<Source<C>> sources, final Metadata metadata, final WriteResultInterest interest, final Object object) {
     writeWith(id, state, stateVersion, sources, metadata, interest, object);
-  }
-
-  @Override
-  public <S, R extends State<?>> void registerAdapter(Class<S> stateType, StateAdapter<S, R> adapter) {
-    adapterAssistant.registerAdapter(stateType, adapter);
   }
 
   private void readFor(final String id, final Class<?> type, final ReadResultInterest interest, final Object object) {
@@ -110,7 +112,7 @@ public class InMemoryStateStoreActor<RS extends State<?>> extends Actor
       final RS raw = typeStore.get(id);
 
       if (raw != null) {
-        final Object state = adapterAssistant.adaptFromRawState(raw);
+        final Object state = stateAdapterProvider.fromRaw(raw);
         interest.readResultedIn(Success.of(Result.Success), id, state, raw.dataVersion, raw.metadata, object);
       } else {
         for (String storeId : typeStore.keySet()) {
@@ -127,16 +129,16 @@ public class InMemoryStateStoreActor<RS extends State<?>> extends Actor
     }
   }
 
-  private <S> void writeWith(final String id, final S state, final int stateVersion, final List<Source<?>> sources, final Metadata metadata, final WriteResultInterest interest, final Object object) {
+  private <S,C> void writeWith(final String id, final S state, final int stateVersion, final List<Source<C>> sources, final Metadata metadata, final WriteResultInterest interest, final Object object) {
     if (interest != null) {
       if (state == null) {
-        interest.writeResultedIn(Failure.of(new StorageException(Result.Error, "The state is null.")), id, state, stateVersion, object);
+        interest.writeResultedIn(Failure.of(new StorageException(Result.Error, "The state is null.")), id, state, stateVersion, sources, object);
       } else {
         try {
           final String storeName = StateTypeStateStoreMap.storeNameFrom(state.getClass());
 
           if (storeName == null) {
-            interest.writeResultedIn(Failure.of(new StorageException(Result.NoTypeStore, "No type store for: " + state.getClass())), id, state, stateVersion, object);
+            interest.writeResultedIn(Failure.of(new StorageException(Result.NoTypeStore, "No type store for: " + state.getClass())), id, state, stateVersion, sources, object);
             return;
           }
 
@@ -151,25 +153,26 @@ public class InMemoryStateStoreActor<RS extends State<?>> extends Actor
           }
 
           final RS raw = metadata == null ?
-                  adapterAssistant.adaptToRawState(state, stateVersion) :
-                  adapterAssistant.adaptToRawState(state, stateVersion, metadata);
+                  stateAdapterProvider.asRaw(id, state, stateVersion) :
+                  stateAdapterProvider.asRaw(id, state, stateVersion, metadata);
 
           final RS persistedState = typeStore.putIfAbsent(raw.id, raw);
           if (persistedState != null) {
             if (persistedState.dataVersion >= raw.dataVersion) {
-              interest.writeResultedIn(Failure.of(new StorageException(Result.ConcurrentyViolation, "Version conflict.")), id, state, stateVersion, object);
+              interest.writeResultedIn(Failure.of(new StorageException(Result.ConcurrentyViolation, "Version conflict.")), id, state, stateVersion, sources, object);
               return;
             }
-            typeStore.put(id, raw);
           }
+          typeStore.put(id, raw);
+          appendEntries(sources);
           final String dispatchId = storeName + ":" + id;
           dispatchables.add(new Dispatchable<RS>(dispatchId, LocalDateTime.now(), raw));
-          dispatch(dispatchId, raw);
+          dispatch(dispatchId, raw, sources);
 
-          interest.writeResultedIn(Success.of(Result.Success), id, state, stateVersion, object);
+          interest.writeResultedIn(Success.of(Result.Success), id, state, stateVersion, sources, object);
         } catch (Exception e) {
           logger().log(getClass().getSimpleName() + " writeText() error because: " + e.getMessage(), e);
-          interest.writeResultedIn(Failure.of(new StorageException(Result.Error, e.getMessage(), e)), id, state, stateVersion, object);
+          interest.writeResultedIn(Failure.of(new StorageException(Result.Error, e.getMessage(), e)), id, state, stateVersion, sources, object);
         }
       }
     } else {
@@ -180,7 +183,12 @@ public class InMemoryStateStoreActor<RS extends State<?>> extends Actor
     }
   }
 
-  private <ST extends State<?>> void dispatch(final String dispatchId, final ST state) {
-    dispatcher.dispatch(dispatchId, state);
+  private <C> void appendEntries(final List<Source<C>> sources) {
+    final Collection<Entry<?>> all = entryAdapterProvider.asEntries(sources);
+    entries.addAll(all);
+  }
+
+  private <ST extends State<?>,C> void dispatch(final String dispatchId, final ST state, final Collection<Source<C>> sources) {
+    dispatcher.dispatch(dispatchId, state, sources);
   }
 }
