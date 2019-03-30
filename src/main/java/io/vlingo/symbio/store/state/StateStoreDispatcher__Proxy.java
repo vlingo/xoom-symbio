@@ -7,15 +7,18 @@
 
 package io.vlingo.symbio.store.state;
 
+import java.util.Collection;
+
 import io.vlingo.actors.Actor;
 import io.vlingo.actors.DeadLetter;
 import io.vlingo.actors.LocalMessage;
 import io.vlingo.actors.Mailbox;
+import io.vlingo.symbio.Source;
 import io.vlingo.symbio.store.state.StateStore.Dispatcher;
 
 public class StateStoreDispatcher__Proxy implements io.vlingo.symbio.store.state.StateStore.Dispatcher {
 
-  private static final String dispatchRepresentation1 = "dispatch(java.lang.String, S)";
+  private static final String dispatchRepresentation1 = "dispatch(java.lang.String, S, Collection<C>)";
   private static final String controlWithRepresentation2 = "controlWith(io.vlingo.symbio.store.state.StateStore.DispatcherControl)";
 
   private final Actor actor;
@@ -26,15 +29,17 @@ public class StateStoreDispatcher__Proxy implements io.vlingo.symbio.store.state
     this.mailbox = mailbox;
   }
 
-  public <S extends io.vlingo.symbio.State<?>>void dispatch(java.lang.String arg0, S arg1) {
+  @Override
+  public <S extends io.vlingo.symbio.State<?>, C extends Source<?>> void dispatch(java.lang.String arg0, S arg1, final Collection<C> arg2) {
     if (!actor.isStopped()) {
-      final java.util.function.Consumer<Dispatcher> consumer = (actor) -> actor.dispatch(arg0, arg1);
+      final java.util.function.Consumer<Dispatcher> consumer = (actor) -> actor.dispatch(arg0, arg1, arg2);
       if (mailbox.isPreallocated()) { mailbox.send(actor, Dispatcher.class, consumer, null, dispatchRepresentation1); }
       else { mailbox.send(new LocalMessage<Dispatcher>(actor, Dispatcher.class, consumer, dispatchRepresentation1)); }
     } else {
       actor.deadLetters().failedDelivery(new DeadLetter(actor, dispatchRepresentation1));
     }
   }
+  @Override
   public void controlWith(io.vlingo.symbio.store.state.StateStore.DispatcherControl arg0) {
     if (!actor.isStopped()) {
       final java.util.function.Consumer<Dispatcher> consumer = (actor) -> actor.controlWith(arg0);
