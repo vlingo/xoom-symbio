@@ -19,8 +19,10 @@ import org.junit.Test;
 import io.vlingo.actors.World;
 import io.vlingo.actors.testkit.AccessSafely;
 import io.vlingo.actors.testkit.TestWorld;
+import io.vlingo.symbio.EntryAdapterProvider;
 import io.vlingo.symbio.Metadata;
 import io.vlingo.symbio.State;
+import io.vlingo.symbio.StateAdapterProvider;
 import io.vlingo.symbio.store.Result;
 import io.vlingo.symbio.store.state.Entity1;
 import io.vlingo.symbio.store.state.Entity1.Entity1StateAdapter;
@@ -82,8 +84,9 @@ public class InMemoryStateStoreTest {
     dispatcher.afterCompleting(2);
 
     final Entity1 entity = new Entity1("123", 5);
+    final Metadata sourceMetadata = Metadata.withValue("value");
 
-    store.write(entity.id, entity, 1, interest);
+    store.write(entity.id, entity, 1, sourceMetadata, interest);
     store.read(entity.id, Entity1.class, interest);
 
     assertEquals(1, (int) access1.readFrom("readObjectResultedIn"));
@@ -107,8 +110,9 @@ public class InMemoryStateStoreTest {
     dispatcher.afterCompleting(2);
 
     final Entity1 entity = new Entity1("123", 5);
+    final Metadata sourceMetadata = Metadata.with("value", "operation");
 
-    store.write(entity.id, entity, 1, interest);
+    store.write(entity.id, entity, 1, sourceMetadata, interest);
     store.read(entity.id, Entity1.class, interest);
 
     assertEquals(1, (int) access1.readFrom("readObjectResultedIn"));
@@ -118,7 +122,7 @@ public class InMemoryStateStoreTest {
     final Metadata metadata = access1.readFrom("metadataHolder");
     assertNotNull(metadata);
     assertTrue(metadata.hasOperation());
-    assertEquals("op", metadata.operation);
+    assertEquals("operation", metadata.operation);
 
     final Entity1 readEntity = (Entity1) access1.readFrom("objectState");
 
@@ -263,8 +267,13 @@ public class InMemoryStateStoreTest {
     interest = new MockStateStoreResultInterest();
     dispatcher = new MockDispatcher(interest);
 
+    final StateAdapterProvider stateAdapterProvider = new StateAdapterProvider(world);
+    new EntryAdapterProvider(world);
+
+    stateAdapterProvider.registerAdapter(Entity1.class, new Entity1StateAdapter());
+    // NOTE: No adapter registered for Entity2.class because it will use the default
+
     store = world.actorFor(StateStore.class, InMemoryStateStoreActor.class, dispatcher);
-    store.registerAdapter(Entity1.class, new Entity1StateAdapter());
 
     StateTypeStateStoreMap.stateTypeToStoreName(Entity1.class, StoreName1);
     StateTypeStateStoreMap.stateTypeToStoreName(Entity2.class, StoreName2);
