@@ -7,15 +7,18 @@
 
 package io.vlingo.symbio.store.state;
 
+import java.util.List;
+
 import io.vlingo.actors.Actor;
 import io.vlingo.actors.DeadLetter;
 import io.vlingo.actors.LocalMessage;
 import io.vlingo.actors.Mailbox;
+import io.vlingo.symbio.Source;
 import io.vlingo.symbio.store.state.StateStore.WriteResultInterest;
 
 public class StateStoreWriteResultInterest__Proxy implements io.vlingo.symbio.store.state.StateStore.WriteResultInterest {
 
-  private static final String writeResultedInRepresentation1 = "writeResultedIn(io.vlingo.common.Outcome<io.vlingo.symbio.store.StorageException, io.vlingo.symbio.store.Result>, java.lang.String, S, int, java.lang.Object)";
+  private static final String writeResultedInRepresentation1 = "writeResultedIn(io.vlingo.common.Outcome<io.vlingo.symbio.store.StorageException, io.vlingo.symbio.store.Result>, java.lang.String, S, int, List<Source<C>>, java.lang.Object)";
 
   private final Actor actor;
   private final Mailbox mailbox;
@@ -25,9 +28,10 @@ public class StateStoreWriteResultInterest__Proxy implements io.vlingo.symbio.st
     this.mailbox = mailbox;
   }
 
-  public <S>void writeResultedIn(io.vlingo.common.Outcome<io.vlingo.symbio.store.StorageException, io.vlingo.symbio.store.Result> arg0, java.lang.String arg1, S arg2, int arg3, java.lang.Object arg4) {
+  @Override
+  public <S,C> void writeResultedIn(io.vlingo.common.Outcome<io.vlingo.symbio.store.StorageException, io.vlingo.symbio.store.Result> arg0, java.lang.String arg1, S arg2, int arg3, final List<Source<C>> arg4, java.lang.Object arg5) {
     if (!actor.isStopped()) {
-      final java.util.function.Consumer<WriteResultInterest> consumer = (actor) -> actor.writeResultedIn(arg0, arg1, arg2, arg3, arg4);
+      final java.util.function.Consumer<WriteResultInterest> consumer = (actor) -> actor.writeResultedIn(arg0, arg1, arg2, arg3, arg4, arg5);
       if (mailbox.isPreallocated()) { mailbox.send(actor, WriteResultInterest.class, consumer, null, writeResultedInRepresentation1); }
       else { mailbox.send(new LocalMessage<WriteResultInterest>(actor, WriteResultInterest.class, consumer, writeResultedInRepresentation1)); }
     } else {
