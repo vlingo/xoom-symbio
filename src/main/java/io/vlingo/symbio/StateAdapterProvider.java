@@ -9,15 +9,32 @@ package io.vlingo.symbio;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.function.BiConsumer;
 
+import io.vlingo.actors.World;
+import io.vlingo.symbio.State.TextState;
+
 public class StateAdapterProvider {
+  static final String INTERNAL_NAME = UUID.randomUUID().toString();
+
   private final Map<Class<?>,StateAdapter<?,?>> adapters;
   private final Map<String,StateAdapter<?,?>> namedAdapters;
+  private final StateAdapter<Object,TextState> defaultTextStateAdapter;
+
+  public static StateAdapterProvider instance(final World world) {
+    return world.resolveDynamic(INTERNAL_NAME, StateAdapterProvider.class);
+  }
+
+  public StateAdapterProvider(final World world) {
+    this();
+    world.registerDynamic(INTERNAL_NAME, this);
+  }
 
   public StateAdapterProvider() {
     this.adapters = new HashMap<>();
     this.namedAdapters = new HashMap<>();
+    this.defaultTextStateAdapter = new DefaultTextStateAdapter();
   }
 
   public <S,ST extends State<?>> void registerAdapter(final Class<S> stateType, final StateAdapter<S,ST> adapter) {
@@ -31,32 +48,37 @@ public class StateAdapterProvider {
     consumer.accept(stateType, adapter);
   }
 
-  @SuppressWarnings("unchecked")
-  public <S,ST extends State<?>> ST asRaw(final S state, final int stateVersion) {
-    final StateAdapter<S,ST>  adapter = (StateAdapter<S,ST>) adapter((Class<S>) state.getClass());
-    return adapter.toRawState(state, stateVersion);
+  public <S,ST extends State<?>> ST asRaw(final String id, final S state, final int stateVersion) {
+    return asRaw(id, state, stateVersion, Metadata.nullMetadata());
   }
 
+  @SuppressWarnings("unchecked")
+  public <S,ST extends State<?>> ST asRaw(final String id, final S state, final int stateVersion, final Metadata metadata) {
+    final StateAdapter<S,ST>  adapter = (StateAdapter<S,ST>) adapter((Class<S>) state.getClass());
+    if (adapter != null) {
+      return adapter.toRawState(id, state, stateVersion, metadata);
+    }
+    return (ST) defaultTextStateAdapter.toRawState(id, state, stateVersion, metadata);
+  }
+
+  @SuppressWarnings("unchecked")
   public <S,ST extends State<?>> S fromRaw(final ST state) {
     StateAdapter<S,ST> adapter = namedAdapter(state);
-    return (S) adapter.fromRawState(state);
+    if (adapter != null) {
+      return adapter.fromRawState(state);
+    }
+    return (S) defaultTextStateAdapter.fromRawState((TextState) state);
   }
 
   @SuppressWarnings("unchecked")
   private <S,ST extends State<?>> StateAdapter<S,ST> adapter(final Class<?> stateType) {
     final StateAdapter<S,ST> adapter = (StateAdapter<S,ST>) adapters.get(stateType);
-    if (adapter != null) {
-      return adapter;
-    }
-    throw new IllegalStateException("Adapter not registrered for: " + stateType.getName());
+    return adapter;
   }
 
   @SuppressWarnings("unchecked")
   private <S,ST extends State<?>> StateAdapter<S,ST> namedAdapter(final ST state) {
     final StateAdapter<S,ST> adapter = (StateAdapter<S,ST>) namedAdapters.get(state.type);
-    if (adapter != null) {
-      return adapter;
-    }
-    throw new IllegalStateException("Adapter not registrered for: " + state.type);
+    return adapter;
   }
 }
