@@ -34,8 +34,7 @@ public abstract class State<T> implements Comparable<State<T>> {
     this.data = data;
     if (dataVersion <= 0) throw new IllegalArgumentException("State dataVersion must be greater than 0.");
     this.dataVersion = dataVersion;
-    if (metadata == null) throw new IllegalArgumentException("State metadata must not be null.");
-    this.metadata = metadata;
+    this.metadata = metadata == null ? Metadata.nullMetadata() : metadata;
   }
 
   protected State(final String id, final Class<?> type, final int typeVersion, final T data, final int dataVersion) {
@@ -184,9 +183,8 @@ public abstract class State<T> implements Comparable<State<T>> {
       super(id, type, typeVersion, data, dataVersion);
     }
 
-    @SuppressWarnings("unchecked")
     public ObjectState() {
-      super(NoOp, Object.class, 1, (T) State.EmptyObjectData, 1, Metadata.nullMetadata());
+      super(NoOp, Object.class, 1, State.EmptyObjectData, 1, Metadata.nullMetadata());
     }
 
     @Override
