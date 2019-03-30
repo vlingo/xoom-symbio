@@ -14,13 +14,14 @@ import org.junit.Test;
 
 import io.vlingo.actors.World;
 import io.vlingo.actors.testkit.AccessSafely;
+import io.vlingo.symbio.EntryAdapterProvider;
+import io.vlingo.symbio.StateAdapterProvider;
 import io.vlingo.symbio.store.state.Entity1;
+import io.vlingo.symbio.store.state.Entity1.Entity1StateAdapter;
 import io.vlingo.symbio.store.state.MockDispatcher;
 import io.vlingo.symbio.store.state.MockStateStoreResultInterest;
 import io.vlingo.symbio.store.state.StateStore;
 import io.vlingo.symbio.store.state.StateTypeStateStoreMap;
-import io.vlingo.symbio.store.state.Entity1.Entity1StateAdapter;
-import io.vlingo.symbio.store.state.inmemory.InMemoryStateStoreActor;
 
 /**
  * RedispatchControlTest
@@ -33,7 +34,7 @@ public class InMemoryStateStoreRedispatchControlTest {
   private MockStateStoreResultInterest interest;
   private StateStore store;
   private World world;
-  
+
   @Test
   public void testRedispatch() {
     final AccessSafely accessDispatcher = dispatcher.afterCompleting(3);
@@ -49,12 +50,12 @@ public class InMemoryStateStoreRedispatchControlTest {
     catch (InterruptedException ex) {
       //ignored
     }
-    
+
     accessDispatcher.writeUsing("processDispatch", true);
 
     int dispatchedStateCount = accessDispatcher.readFrom("dispatchedStateCount");
     assertTrue("dispatchedStateCount", dispatchedStateCount == 1);
-    
+
     int dispatchAttemptCount = accessDispatcher.readFrom("dispatchAttemptCount");
     assertTrue("dispatchAttemptCount", dispatchAttemptCount > 1);
   }
@@ -66,10 +67,15 @@ public class InMemoryStateStoreRedispatchControlTest {
     interest = new MockStateStoreResultInterest();
     dispatcher = new MockDispatcher(interest);
 
-    store = world.actorFor(StateStore.class, InMemoryStateStoreActor.class, dispatcher);
-    store.registerAdapter(Entity1.class, new Entity1StateAdapter());
+    final StateAdapterProvider stateAdapterProvider = new StateAdapterProvider(world);
+    new EntryAdapterProvider(world);
+
+    stateAdapterProvider.registerAdapter(Entity1.class, new Entity1StateAdapter());
+    // NOTE: No adapter registered for Entity2.class because it will use the default
 
     StateTypeStateStoreMap.stateTypeToStoreName(Entity1.class, StoreName);
+
+    store = world.actorFor(StateStore.class, InMemoryStateStoreActor.class, dispatcher);
   }
 
   @After
