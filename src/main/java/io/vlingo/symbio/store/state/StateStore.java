@@ -8,7 +8,6 @@
 package io.vlingo.symbio.store.state;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -16,157 +15,13 @@ import io.vlingo.common.Outcome;
 import io.vlingo.symbio.Metadata;
 import io.vlingo.symbio.Source;
 import io.vlingo.symbio.State;
-import io.vlingo.symbio.StateAdapter;
 import io.vlingo.symbio.store.Result;
 import io.vlingo.symbio.store.StorageException;
 
 /**
  * The basic State Store interface, defining standard dispatching and control types.
  */
-public interface StateStore {
-  /**
-   * An empty collection of {@link Source}.
-   */
-  public static final List<Source<?>> EmptySources = new ArrayList<>();
-
-  /**
-   * Read the state identified by {@code id} and dispatch the result to the {@code interest}.
-   * @param id the String unique identity of the state to read
-   * @param type the {@code Class<?>} type of the state to read
-   * @param interest the ReadResultInterest to which the result is dispatched
-   */
-  default void read(final String id, final Class<?> type, final ReadResultInterest interest) {
-    read(id, type, interest, null);
-  }
-
-  /**
-   * Read the state identified by {@code id} and dispatch the result to the {@code interest}.
-   * @param id the String unique identity of the state to read
-   * @param type the {@code Class<?>} type of the state to read
-   * @param interest the ReadResultInterest to which the result is dispatched
-   * @param object an Object that will be sent to the ReadResultInterest when the read has succeeded or failed
-   */
-  void read(final String id, final Class<?> type, final ReadResultInterest interest, final Object object);
-
-  /**
-   * Write the {@code state} identified by {@code id} and dispatch the result to the {@code interest}.
-   * @param id the String unique identity of the state to read
-   * @param state the S typed state instance
-   * @param stateVersion the int version of the state
-   * @param interest the WriteResultInterest to which the result is dispatched
-   * @param <S> the concrete type of the state
-   */
-  default <S> void write(final String id, final S state, final int stateVersion, final WriteResultInterest interest) {
-    write(id, state, stateVersion, EmptySources, null, interest, null);
-  }
-
-  /**
-   * Write the {@code state} identified by {@code id} along with appending {@code sources}
-   * and dispatch the result to the {@code interest}.
-   * @param id the String unique identity of the state to read
-   * @param state the S typed state instance
-   * @param stateVersion the int version of the state
-   * @param sources the {@code List<Source<?>>} to append
-   * @param interest the WriteResultInterest to which the result is dispatched
-   * @param <S> the concrete type of the state
-   */
-  default <S> void write(final String id, final S state, final int stateVersion, final List<Source<?>> sources, final WriteResultInterest interest) {
-    write(id, state, stateVersion, sources, null, interest, null);
-  }
-
-  /**
-   * Write the {@code state} identified by {@code id} and dispatch the result to the {@code interest}.
-   * @param id the String unique identity of the state to read
-   * @param state the S typed state instance
-   * @param stateVersion the int version of the state
-   * @param metadata the Metadata for the state
-   * @param interest the WriteResultInterest to which the result is dispatched
-   * @param <S> the concrete type of the state
-   */
-  default <S> void write(final String id, final S state, final int stateVersion, final Metadata metadata, final WriteResultInterest interest) {
-    write(id, state, stateVersion, EmptySources, metadata, interest, null);
-  }
-
-  /**
-   * Write the {@code state} identified by {@code id} along with appending {@code sources}
-   * and dispatch the result to the {@code interest}.
-   * @param id the String unique identity of the state to read
-   * @param state the S typed state instance
-   * @param stateVersion the int version of the state
-   * @param sources the {@code List<Source<?>>} to append
-   * @param metadata the Metadata for the state
-   * @param interest the WriteResultInterest to which the result is dispatched
-   * @param <S> the concrete type of the state
-   */
-  default <S> void write(final String id, final S state, final int stateVersion, final List<Source<?>> sources, final Metadata metadata, final WriteResultInterest interest) {
-    write(id, state, stateVersion, sources, metadata, interest, null);
-  }
-
-  /**
-   * Write the {@code state} identified by {@code id} and dispatch the result to the {@code interest}.
-   * @param id the String unique identity of the state to read
-   * @param state the S typed state instance
-   * @param stateVersion the int version of the state
-   * @param interest the WriteResultInterest to which the result is dispatched
-   * @param object an Object that will be sent to the WriteResultInterest when the write has succeeded or failed
-   * @param <S> the concrete type of the state
-   */
-  default <S> void write(final String id, final S state, final int stateVersion, final WriteResultInterest interest, final Object object) {
-    write(id, state, stateVersion, EmptySources, null, interest, object);
-  }
-
-  /**
-   * Write the {@code state} identified by {@code id} along with appending {@code sources}
-   * and dispatch the result to the {@code interest}.
-   * @param id the String unique identity of the state to read
-   * @param state the S typed state instance
-   * @param stateVersion the int version of the state
-   * @param sources the {@code List<Source<?>>} to append
-   * @param interest the WriteResultInterest to which the result is dispatched
-   * @param object an Object that will be sent to the WriteResultInterest when the write has succeeded or failed
-   * @param <S> the concrete type of the state
-   */
-  default <S> void write(final String id, final S state, final int stateVersion, final List<Source<?>> sources, final WriteResultInterest interest, final Object object) {
-    write(id, state, stateVersion, sources, null, interest, object);
-  }
-
-  /**
-   * Write the {@code state} identified by {@code id} and dispatch the result to the {@code interest}.
-   * @param id the String unique identity of the state to read
-   * @param state the S typed state instance
-   * @param stateVersion the int version of the state
-   * @param metadata the Metadata for the state
-   * @param interest the WriteResultInterest to which the result is dispatched
-   * @param object an Object that will be sent to the WriteResultInterest when the write has succeeded or failed
-   * @param <S> the concrete type of the state
-   */
-  default <S> void write(final String id, final S state, final int stateVersion, final Metadata metadata, final WriteResultInterest interest, final Object object) {
-    write(id, state, stateVersion, EmptySources, metadata, interest, object);
-  }
-
-  /**
-   * Write the {@code state} identified by {@code id} along with appending {@code sources}
-   * and dispatch the result to the {@code interest}.
-   * @param id the String unique identity of the state to read
-   * @param state the S typed state instance
-   * @param stateVersion the int version of the state
-   * @param sources the {@code List<Source<?>>} to append
-   * @param metadata the Metadata for the state
-   * @param interest the WriteResultInterest to which the result is dispatched
-   * @param object an Object that will be sent to the WriteResultInterest when the write has succeeded or failed
-   * @param <S> the concrete type of the state
-   */
-  <S> void write(final String id, final S state, final int stateVersion, final List<Source<?>> sources, final Metadata metadata, final WriteResultInterest interest, final Object object);
-
-  /**
-   * Registers the {@code adapter} with the {@code StateStore} for {@code stateType}.
-   * @param stateType the {@code Class<S>} for which to register the adapter
-   * @param adapter the {@code StateAdapter<S,R>} used to adapt from state type {@code S} to raw type {@code R}
-   * @param <S> the type of the natural state
-   * @param <R> the raw {@code State<?>} type
-   */
-  public <S,R extends State<?>> void registerAdapter(final Class<S> stateType, final StateAdapter<S,R> adapter);
-
+public interface StateStore extends StateStoreReader, StateStoreWriter {
   /**
    * Defines the result of reading the state with the specific id to the store.
    */
@@ -194,10 +49,12 @@ public interface StateStore {
      * @param id the String unique identity of the state to attempted write
      * @param state the S native state that was possibly written
      * @param stateVersion the int version of the state that was possibly written
+     * @param sources the {@code List<Source<C>>} if any
      * @param object the Object passed to write() that is sent back to the receiver
      * @param <S> the native state type
+     * @param <C> the native source type
      */
-    <S> void writeResultedIn(final Outcome<StorageException,Result> outcome, final String id, final S state, final int stateVersion, final Object object);
+    <S,C> void writeResultedIn(final Outcome<StorageException,Result> outcome, final String id, final S state, final int stateVersion, final List<Source<C>> sources, final Object object);
   }
 
   /**
@@ -305,10 +162,22 @@ public interface StateStore {
     /**
      * Dispatch the {@code state} with the uniquely assigned {@code dispatchId}.
      * @param dispatchId the String id assigned to this dispatch
-     * @param state the {@code BinaryState} to dispatch
+     * @param state the {@code S} state to dispatch
      * @param <S> the type of {@code State<?>}, being BinaryState, ObjectState, or TextState
      */
-    <S extends State<?>> void dispatch(final String dispatchId, final S state);
+    default <S extends State<?>> void dispatch(final String dispatchId, final S state) {
+      dispatch(dispatchId, state, Source.none());
+    }
+
+    /**
+     * Dispatch the {@code source} with the uniquely assigned {@code dispatchId}.
+     * @param dispatchId the String id assigned to this dispatch
+     * @param state the {@code BinaryState} to dispatch
+     * @param sources the {@code List<Source<?>>} to dispatch
+     * @param <S> the type of {@code State<?>}, being BinaryState, ObjectState, or TextState
+     * @param <C> the type of {@code Source<?>}
+     */
+    <S extends State<?>, C extends Source<?>> void dispatch(final String dispatchId, final S state, final Collection<C> sources);
   }
 
   /**
