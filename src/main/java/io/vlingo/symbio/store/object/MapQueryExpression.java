@@ -10,7 +10,7 @@ package io.vlingo.symbio.store.object;
 import java.util.HashMap;
 import java.util.Map;
 
-import io.vlingo.symbio.store.object.ObjectStore.QueryMode;
+import io.vlingo.symbio.store.object.ObjectStoreReader.QueryMode;
 
 /**
  * A query expression whose parameters are provided in a {@code Map} of name-value pairs.

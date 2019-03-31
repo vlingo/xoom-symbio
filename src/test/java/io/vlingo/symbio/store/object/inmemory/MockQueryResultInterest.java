@@ -15,9 +15,9 @@ import io.vlingo.actors.testkit.AccessSafely;
 import io.vlingo.common.Outcome;
 import io.vlingo.symbio.store.Result;
 import io.vlingo.symbio.store.StorageException;
-import io.vlingo.symbio.store.object.ObjectStore.QueryMultiResults;
-import io.vlingo.symbio.store.object.ObjectStore.QueryResultInterest;
-import io.vlingo.symbio.store.object.ObjectStore.QuerySingleResult;
+import io.vlingo.symbio.store.object.ObjectStoreReader.QueryMultiResults;
+import io.vlingo.symbio.store.object.ObjectStoreReader.QueryResultInterest;
+import io.vlingo.symbio.store.object.ObjectStoreReader.QuerySingleResult;
 
 public class MockQueryResultInterest implements QueryResultInterest {
   private AccessSafely access = AccessSafely.afterCompleting(1);

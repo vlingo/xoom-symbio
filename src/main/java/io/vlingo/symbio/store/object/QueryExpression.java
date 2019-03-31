@@ -7,7 +7,7 @@
 
 package io.vlingo.symbio.store.object;
 
-import io.vlingo.symbio.store.object.ObjectStore.QueryMode;
+import io.vlingo.symbio.store.object.ObjectStoreReader.QueryMode;
 
 /**
  * The base query expression.

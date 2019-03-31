@@ -15,7 +15,7 @@ import io.vlingo.actors.testkit.AccessSafely;
 import io.vlingo.common.Outcome;
 import io.vlingo.symbio.store.Result;
 import io.vlingo.symbio.store.StorageException;
-import io.vlingo.symbio.store.object.ObjectStore.PersistResultInterest;
+import io.vlingo.symbio.store.object.ObjectStoreWriter.PersistResultInterest;
 
 public class MockPersistResultInterest implements PersistResultInterest {
   private AccessSafely access = AccessSafely.afterCompleting(1);

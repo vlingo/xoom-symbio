@@ -10,7 +10,7 @@ package io.vlingo.symbio.store.object;
 import java.util.Arrays;
 import java.util.List;
 
-import io.vlingo.symbio.store.object.ObjectStore.QueryMode;
+import io.vlingo.symbio.store.object.ObjectStoreReader.QueryMode;
 
 /**
  * A query expression whose parameters are provided in a {@code List}.

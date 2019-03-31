@@ -11,7 +11,7 @@ import io.vlingo.actors.Actor;
 import io.vlingo.actors.DeadLetter;
 import io.vlingo.actors.LocalMessage;
 import io.vlingo.actors.Mailbox;
-import io.vlingo.symbio.store.object.ObjectStore.PersistResultInterest;
+import io.vlingo.symbio.store.object.ObjectStoreWriter.PersistResultInterest;
 
 public class ObjectStorePersistResultInterest__Proxy implements io.vlingo.symbio.store.object.ObjectStore.PersistResultInterest {
 
