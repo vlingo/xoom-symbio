@@ -7,6 +7,7 @@
 
 package io.vlingo.symbio.store.object.inmemory;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -18,6 +19,8 @@ import io.vlingo.actors.Actor;
 import io.vlingo.common.Failure;
 import io.vlingo.common.Success;
 import io.vlingo.common.serialization.JsonSerialization;
+import io.vlingo.symbio.Entry;
+import io.vlingo.symbio.EntryAdapterProvider;
 import io.vlingo.symbio.Source;
 import io.vlingo.symbio.store.Result;
 import io.vlingo.symbio.store.StorageException;
@@ -33,6 +36,8 @@ import io.vlingo.symbio.store.object.QueryExpression;
 public class InMemoryObjectStoreActor extends Actor implements ObjectStore {
   private final Map<Long,SerializedPersistentObject> store;
   private final Map<Class<?>,PersistentObjectMapper> mappers;
+  private final List<Entry<?>> entries;
+  private final EntryAdapterProvider entryAdapterProvider;
 
   /**
    * Construct my default state.
@@ -40,6 +45,8 @@ public class InMemoryObjectStoreActor extends Actor implements ObjectStore {
   public InMemoryObjectStoreActor() {
     this.store = new HashMap<>();
     this.mappers = new HashMap<>();
+    this.entries = new ArrayList<>();
+    this.entryAdapterProvider = EntryAdapterProvider.instance(stage().world());
   }
 
   /*
@@ -54,7 +61,7 @@ public class InMemoryObjectStoreActor extends Actor implements ObjectStore {
   @Override
   public <E> void persist(Object persistentObject, final List<Source<E>> sources, long updateId, PersistResultInterest interest, Object object) {
     persistEach(persistentObject);
-    //TODO: persist sources
+    appendEntries(sources);
     interest.persistResultedIn(Success.of(Result.Success), persistentObject, 1, 1, object);
   }
 
@@ -64,7 +71,7 @@ public class InMemoryObjectStoreActor extends Actor implements ObjectStore {
     for (final Object persistentObject : persistentObjects) {
       persistEach(persistentObject);
     }
-    //TODO: persist sources
+    appendEntries(sources);
     interest.persistResultedIn(Success.of(Result.Success), persistentObjects, persistentObjects.size(), persistentObjects.size(), object);
   }
 
@@ -131,6 +138,11 @@ public class InMemoryObjectStoreActor extends Actor implements ObjectStore {
   private <E> void persistEach(final Object persistentObject) {
     final SerializedPersistentObject persistable = new SerializedPersistentObject((PersistentObject) persistentObject);
     store.put(persistable.id, persistable);
+  }
+
+  private <E> void appendEntries(List<Source<E>> sources) {
+    final Collection<Entry<?>> all = entryAdapterProvider.asEntries(sources);
+    entries.addAll(all);
   }
 
   private static class SerializedPersistentObject {

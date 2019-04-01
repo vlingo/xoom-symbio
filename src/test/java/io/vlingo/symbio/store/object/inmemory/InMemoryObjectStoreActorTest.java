@@ -16,7 +16,11 @@ import org.junit.Test;
 
 import io.vlingo.actors.World;
 import io.vlingo.actors.testkit.AccessSafely;
-import io.vlingo.symbio.store.journal.inmemory.InMemoryEventJournalActorTest.Test1Source;
+import io.vlingo.symbio.Entry.ObjectEntry;
+import io.vlingo.symbio.EntryAdapter;
+import io.vlingo.symbio.EntryAdapterProvider;
+import io.vlingo.symbio.Metadata;
+import io.vlingo.symbio.Source;
 import io.vlingo.symbio.store.object.MapQueryExpression;
 import io.vlingo.symbio.store.object.ObjectStore;
 import io.vlingo.symbio.store.object.QueryExpression;
@@ -29,12 +33,12 @@ public class InMemoryObjectStoreActorTest {
 
   @Test
   public void testThatObjectPersistsQuerys() {
-    final AccessSafely persistAllAccess = persistInterest.afterCompleting(1);
+    final AccessSafely persistAccess = persistInterest.afterCompleting(1);
     final Person person = new Person("Tom Jones", 85);
     objectStore.persist(person, Arrays.asList(new Test1Source()), persistInterest);
-    final int persistSize = persistAllAccess.readFrom("size");
+    final int persistSize = persistAccess.readFrom("size");
     assertEquals(1, persistSize);
-    assertEquals(person, persistAllAccess.readFrom("object", 0));
+    assertEquals(person, persistAccess.readFrom("object", 0));
 
     final QueryExpression query =
             MapQueryExpression.using(
@@ -73,6 +77,30 @@ public class InMemoryObjectStoreActorTest {
     persistInterest = new MockPersistResultInterest();
     queryResultInterest = new MockQueryResultInterest();
     world = World.startWithDefaults("test-object-store");
+    final EntryAdapterProvider entryAdapterProvider = new EntryAdapterProvider(world);
+    entryAdapterProvider.registerAdapter(Test1Source.class, new Test1SourceAdapter());
     objectStore = world.actorFor(ObjectStore.class, InMemoryObjectStoreActor.class);
+  }
+
+  public static final class Test1Source extends Source<String> {
+    private final int one = 1;
+    public int one() { return one; }
+  }
+  
+  private static final class Test1SourceAdapter implements EntryAdapter<Test1Source,ObjectEntry<Test1Source>> {
+    @Override
+    public Test1Source fromEntry(final ObjectEntry<Test1Source> entry) {
+      return (Test1Source) entry.entryData;
+    }
+
+    @Override
+    public ObjectEntry<Test1Source> toEntry(final Test1Source source) {
+      return new ObjectEntry<Test1Source>(Test1Source.class, 1, source, Metadata.nullMetadata());
+    }
+
+    @Override
+    public ObjectEntry<Test1Source> toEntry(final Test1Source source, final String id) {
+      return new ObjectEntry<Test1Source>(id, Test1Source.class, 1, source, Metadata.nullMetadata());
+    }
   }
 }
