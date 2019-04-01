@@ -20,7 +20,12 @@ import io.vlingo.symbio.State;
  * @param <T> the concrete type of {@code Entry<T>} stored and read, which maybe be String, byte[], or Object
  */
 public interface JournalListener<T> {
-
+  
+  /**
+   * NoListener is a {@link JournalListener} that ignores all notifications.
+   */
+  public static JournalListener<?> NoListener = new NoListener<>();
+  
   /**
    * Indicates that entry was just successfully appended.
    * 
@@ -52,4 +57,22 @@ public interface JournalListener<T> {
    * @param snapshot the current {@code State<T>} of the stream for which the entry was appended
    */
   void appendedAllWith(final List<Entry<T>> entries, final State<T> snapshot);
+  
+  /**
+   * NoListener is a {@link JournalListener} that ignores all notifications.
+   */
+  static class NoListener<T> implements JournalListener<T> {
+
+    @Override
+    public void appended(Entry<T> entry) {}
+
+    @Override
+    public void appendedWith(Entry<T> entry, State<T> snapshot) {}
+
+    @Override
+    public void appendedAll(List<Entry<T>> entries) {}
+
+    @Override
+    public void appendedAllWith(List<Entry<T>> entries, State<T> snapshot) {}
+  }
 }

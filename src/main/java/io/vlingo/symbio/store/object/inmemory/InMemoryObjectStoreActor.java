@@ -9,6 +9,7 @@ package io.vlingo.symbio.store.object.inmemory;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -17,6 +18,7 @@ import io.vlingo.actors.Actor;
 import io.vlingo.common.Failure;
 import io.vlingo.common.Success;
 import io.vlingo.common.serialization.JsonSerialization;
+import io.vlingo.symbio.Source;
 import io.vlingo.symbio.store.Result;
 import io.vlingo.symbio.store.StorageException;
 import io.vlingo.symbio.store.object.ObjectStore;
@@ -48,23 +50,21 @@ public class InMemoryObjectStoreActor extends Actor implements ObjectStore {
     store.clear();
   }
 
-  /*
-   * @see io.vlingo.symbio.store.object.ObjectStore#persist(java.lang.Object, long, io.vlingo.symbio.store.object.ObjectStore.PersistResultInterest, java.lang.Object)
-   */
+  /* @see io.vlingo.symbio.store.object.ObjectStore#persist(java.lang.Object, java.util.List, long, io.vlingo.symbio.store.object.ObjectStore.PersistResultInterest, java.lang.Object) */
   @Override
-  public void persist(final Object persistentObject, final long updateId, final PersistResultInterest interest, final Object object) {
+  public <E> void persist(Object persistentObject, final List<Source<E>> sources, long updateId, PersistResultInterest interest, Object object) {
     persistEach(persistentObject);
+    //TODO: persist sources
     interest.persistResultedIn(Success.of(Result.Success), persistentObject, 1, 1, object);
   }
 
-  /*
-   * @see io.vlingo.symbio.store.object.ObjectStore#persistAll(java.util.Collection, long, io.vlingo.symbio.store.object.ObjectStore.PersistResultInterest, java.lang.Object)
-   */
+  /* @see io.vlingo.symbio.store.object.ObjectStore#persistAll(java.util.Collection, java.util.List, long, io.vlingo.symbio.store.object.ObjectStore.PersistResultInterest, java.lang.Object) */
   @Override
-  public void persistAll(final Collection<Object> persistentObjects, final long updateId, final PersistResultInterest interest, final Object object) {
+  public <E> void persistAll(Collection<Object> persistentObjects, final List<Source<E>> sources, long updateId, PersistResultInterest interest, Object object) {
     for (final Object persistentObject : persistentObjects) {
       persistEach(persistentObject);
     }
+    //TODO: persist sources
     interest.persistResultedIn(Success.of(Result.Success), persistentObjects, persistentObjects.size(), persistentObjects.size(), object);
   }
 
@@ -116,7 +116,7 @@ public class InMemoryObjectStoreActor extends Actor implements ObjectStore {
   public void registerMapper(final PersistentObjectMapper mapper) {
     mappers.put(mapper.type(), mapper);
   }
-
+  
   private String idParameterAsString(final Object id) {
     if (id instanceof String) {
       return (String) id;
@@ -128,7 +128,7 @@ public class InMemoryObjectStoreActor extends Actor implements ObjectStore {
     return String.valueOf(id);
   }
 
-  private void persistEach(final Object persistentObject) {
+  private <E> void persistEach(final Object persistentObject) {
     final SerializedPersistentObject persistable = new SerializedPersistentObject((PersistentObject) persistentObject);
     store.put(persistable.id, persistable);
   }

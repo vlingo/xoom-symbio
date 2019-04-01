@@ -6,9 +6,12 @@
 // one at https://mozilla.org/MPL/2.0/.
 package io.vlingo.symbio.store.object;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import io.vlingo.common.Outcome;
+import io.vlingo.symbio.Source;
 import io.vlingo.symbio.store.Result;
 import io.vlingo.symbio.store.StorageException;
 /**
@@ -17,12 +20,28 @@ import io.vlingo.symbio.store.StorageException;
 public interface ObjectStoreWriter {
   
   /**
+   * An empty collection of {@link Source}.
+   */
+  public static final ArrayList<Source<Object>> EmptySources = new ArrayList<>();
+  
+  /**
    * Persists the new {@code persistentObject}.
    * @param persistentObject the Object to persist
    * @param interest the PersistResultInterest to which the result is dispatched
    */
   default void persist(final Object persistentObject, final PersistResultInterest interest) {
-    persist(persistentObject, -1, interest, null);
+    persist(persistentObject, EmptySources, -1, interest, null);
+  }
+
+  /**
+   * Persists the new {@code persistentObject}.
+   * @param <E> the concrete type of the {@link Source}
+   * @param persistentObject the Object to persist
+   * @param sources the domain events to journal related to <code>persistentObject</code>
+   * @param interest the PersistResultInterest to which the result is dispatched
+   */
+  default <E> void persist(final Object persistentObject, final List<Source<E>> sources, final PersistResultInterest interest) {
+    persist(persistentObject, sources, -1, interest, null);
   }
 
   /**
@@ -32,7 +51,19 @@ public interface ObjectStoreWriter {
    * @param object an Object sent to the PersistResultInterest when the persist has succeeded or failed
    */
   default void persist(final Object persistentObject, final PersistResultInterest interest, final Object object) {
-    persist(persistentObject, -1, interest, object);
+    persist(persistentObject, EmptySources, -1, interest, object);
+  }
+
+  /**
+   * Persists the new {@code persistentObject}.
+   * @param <E> the concrete type of the {@link Source}
+   * @param persistentObject the Object to persist
+   * @param sources the domain events to journal related to <code>persistentObject</code>
+   * @param interest the PersistResultInterest to which the result is dispatched
+   * @param object an Object sent to the PersistResultInterest when the persist has succeeded or failed
+   */
+  default <E> void persist(final Object persistentObject, final List<Source<E>> sources, final PersistResultInterest interest, final Object object) {
+    persist(persistentObject, sources, -1, interest, object);
   }
 
   /**
@@ -42,7 +73,19 @@ public interface ObjectStoreWriter {
    * @param interest the PersistResultInterest to which the result is dispatched
    */
   default void persist(final Object persistentObject, final long updateId, final PersistResultInterest interest) {
-    persist(persistentObject, updateId, interest, null);
+    persist(persistentObject, EmptySources, updateId, interest, null);
+  }
+
+  /**
+   * Persists the {@code persistentObject} as new or updated depending on the value of {@code updateId}.
+   * @param <E> the concrete type of the {@link Source}
+   * @param persistentObject the Object to persist
+   * @param sources the domain events to journal related to <code>persistentObject</code>
+   * @param updateId the long identity to facilitate update; &lt; 0 for create &gt; 0 for update
+   * @param interest the PersistResultInterest to which the result is dispatched
+   */
+  default <E> void persist(final Object persistentObject, final List<Source<E>> sources, final long updateId, final PersistResultInterest interest) {
+    persist(persistentObject, sources, updateId, interest, null);
   }
 
   /**
@@ -52,7 +95,20 @@ public interface ObjectStoreWriter {
    * @param interest the PersistResultInterest to which the result is dispatched
    * @param object an Object sent to the PersistResultInterest when the persist has succeeded or failed
    */
-  void persist(final Object persistentObject, final long updateId, final PersistResultInterest interest, final Object object);
+  default void persist(final Object persistentObject, final long updateId, final PersistResultInterest interest, final Object object) {
+    persist(persistentObject, EmptySources, updateId, interest, object);
+  }
+
+  /**
+   * Persists the {@code persistentObject}.
+   * @param <E> the concrete type of the {@link Source}
+   * @param persistentObject the Object to persist
+   * @param sources the domain events to journal related to <code>persistentObject</code>
+   * @param updateId the long identity to facilitate update; &lt; 0 for create &gt; 0 for update
+   * @param interest the PersistResultInterest to which the result is dispatched
+   * @param object an Object sent to the PersistResultInterest when the persist has succeeded or failed
+   */
+  <E> void persist(final Object persistentObject, final List<Source<E>> sources, final long updateId, final PersistResultInterest interest, final Object object);
 
 
   /**
@@ -61,7 +117,18 @@ public interface ObjectStoreWriter {
    * @param interest the PersistResultInterest to which the result is dispatched
    */
   default void persistAll(final Collection<Object> persistentObjects, final PersistResultInterest interest) {
-    persistAll(persistentObjects, -1, interest, null);
+    persistAll(persistentObjects, EmptySources, -1, interest, null);
+  }
+
+  /**
+   * Persists the new {@code persistentObjects}.
+   * @param <E> the concrete type of the {@link Source}
+   * @param persistentObjects the {@code Collection<Object>} to persist
+   * @param sources the domain events to journal related to <code>persistentObjects</code>
+   * @param interest the PersistResultInterest to which the result is dispatched
+   */
+  default <E> void persistAll(final Collection<Object> persistentObjects, final List<Source<E>> sources, final PersistResultInterest interest) {
+    persistAll(persistentObjects, sources, -1, interest, null);
   }
 
   /**
@@ -71,7 +138,19 @@ public interface ObjectStoreWriter {
    * @param object an Object sent to the PersistResultInterest when the persist has succeeded or failed
    */
   default void persistAll(final Collection<Object> persistentObjects, final PersistResultInterest interest, final Object object) {
-    persistAll(persistentObjects, -1, interest, object);
+    persistAll(persistentObjects, EmptySources, -1, interest, object);
+  }
+
+  /**
+   * Persists the new {@code persistentObjects}.
+   * @param <E> the concrete type of the {@link Source}
+   * @param persistentObjects the {@code Collection<Object>} to persist
+   * @param sources the domain events to journal related to <code>persistentObjects</code>
+   * @param interest the PersistResultInterest to which the result is dispatched
+   * @param object an Object sent to the PersistResultInterest when the persist has succeeded or failed
+   */
+  default <E> void persistAll(final Collection<Object> persistentObjects, final List<Source<E>> sources, final PersistResultInterest interest, final Object object) {
+    persistAll(persistentObjects, sources, -1, interest, object);
   }
 
   /**
@@ -81,7 +160,19 @@ public interface ObjectStoreWriter {
    * @param interest the PersistResultInterest to which the result is dispatched
    */
   default void persistAll(final Collection<Object> persistentObjects, final long updateId, final PersistResultInterest interest) {
-    persistAll(persistentObjects, updateId, interest, null);
+    persistAll(persistentObjects, EmptySources, updateId, interest, null);
+  }
+
+  /**
+   * Persists the {@code persistentObjects} as new or updated depending on the value of {@code updateId}.
+   * @param <E> the concrete type of the {@link Source}
+   * @param persistentObjects the {@code Collection<Object>} to persist
+   * @param sources the domain events to journal related to <code>persistentObjects</code>
+   * @param updateId the long identity to facilitate update; &lt; 0 for create &gt; 0 for update
+   * @param interest the PersistResultInterest to which the result is dispatched
+   */
+  default <E> void persistAll(final Collection<Object> persistentObjects, final List<Source<E>> sources, final long updateId, final PersistResultInterest interest) {
+    persistAll(persistentObjects, sources, updateId, interest, null);
   }
 
   /**
@@ -91,7 +182,20 @@ public interface ObjectStoreWriter {
    * @param interest the PersistResultInterest to which the result is dispatched
    * @param object an Object sent to the PersistResultInterest when the persist has succeeded or failed
    */
-  void persistAll(final Collection<Object> persistentObjects, final long updateId, final PersistResultInterest interest, final Object object);
+  default void persistAll(final Collection<Object> persistentObjects, final long updateId, final PersistResultInterest interest, final Object object) {
+    persistAll(persistentObjects, EmptySources, updateId, interest, object);
+  }
+
+  /**
+   * Persists the {@code persistentObjects}.
+   * @param <E> the concrete type of the {@link Source}
+   * @param persistentObjects the {@code Collection<Object>} to persist
+   * @param sources the domain events to journal related to <code>persistentObjects</code>
+   * @param updateId the long identity to facilitate update; &lt; 0 for create &gt; 0 for update
+   * @param interest the PersistResultInterest to which the result is dispatched
+   * @param object an Object sent to the PersistResultInterest when the persist has succeeded or failed
+   */
+  <E> void persistAll(final Collection<Object> persistentObjects, final List<Source<E>> sources, final long updateId, final PersistResultInterest interest, final Object object);
 
   /**
    * Defines the result of persisting to the store with a persistent object.

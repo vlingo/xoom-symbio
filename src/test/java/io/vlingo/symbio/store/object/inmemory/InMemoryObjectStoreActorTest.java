@@ -16,6 +16,7 @@ import org.junit.Test;
 
 import io.vlingo.actors.World;
 import io.vlingo.actors.testkit.AccessSafely;
+import io.vlingo.symbio.store.journal.inmemory.InMemoryEventJournalActorTest.Test1Source;
 import io.vlingo.symbio.store.object.MapQueryExpression;
 import io.vlingo.symbio.store.object.ObjectStore;
 import io.vlingo.symbio.store.object.QueryExpression;
@@ -30,7 +31,7 @@ public class InMemoryObjectStoreActorTest {
   public void testThatObjectPersistsQuerys() {
     final AccessSafely persistAllAccess = persistInterest.afterCompleting(1);
     final Person person = new Person("Tom Jones", 85);
-    objectStore.persist(person, persistInterest);
+    objectStore.persist(person, Arrays.asList(new Test1Source()), persistInterest);
     final int persistSize = persistAllAccess.readFrom("size");
     assertEquals(1, persistSize);
     assertEquals(person, persistAllAccess.readFrom("object", 0));
