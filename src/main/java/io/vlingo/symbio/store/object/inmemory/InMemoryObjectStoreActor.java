@@ -19,7 +19,7 @@ import io.vlingo.actors.Actor;
 import io.vlingo.common.Failure;
 import io.vlingo.common.Success;
 import io.vlingo.common.serialization.JsonSerialization;
-import io.vlingo.symbio.Entry;
+import io.vlingo.symbio.BaseEntry;
 import io.vlingo.symbio.EntryAdapterProvider;
 import io.vlingo.symbio.Source;
 import io.vlingo.symbio.store.Result;
@@ -36,7 +36,7 @@ import io.vlingo.symbio.store.object.QueryExpression;
 public class InMemoryObjectStoreActor extends Actor implements ObjectStore {
   private final Map<Long,SerializedPersistentObject> store;
   private final Map<Class<?>,PersistentObjectMapper> mappers;
-  private final List<Entry<?>> entries;
+  private final List<BaseEntry<?>> entries;
   private final EntryAdapterProvider entryAdapterProvider;
 
   /**
@@ -141,7 +141,7 @@ public class InMemoryObjectStoreActor extends Actor implements ObjectStore {
   }
 
   private <E> void appendEntries(List<Source<E>> sources) {
-    final Collection<Entry<?>> all = entryAdapterProvider.asEntries(sources);
+    final Collection<BaseEntry<?>> all = entryAdapterProvider.asEntries(sources);
     entries.addAll(all);
   }
 

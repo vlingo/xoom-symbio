@@ -9,17 +9,17 @@ package io.vlingo.symbio;
 
 import io.vlingo.common.serialization.JsonSerialization;
 import io.vlingo.symbio.DefaultTextEntryAdapter.ObjectSource;
-import io.vlingo.symbio.Entry.TextEntry;
+import io.vlingo.symbio.BaseEntry.TextEntry;
 
 public final class DefaultTextEntryAdapter implements EntryAdapter<ObjectSource,TextEntry> {
 
   @Override
   public ObjectSource fromEntry(final TextEntry entry) {
     try {
-      final Class<?> sourceType = Class.forName(entry.type);
-      return (ObjectSource) JsonSerialization.deserialized(entry.entryData, sourceType);
+      final Class<?> sourceType = Class.forName(entry.type());
+      return (ObjectSource) JsonSerialization.deserialized(entry.entryData(), sourceType);
     } catch (Exception e) {
-      throw new IllegalStateException("Cannot convert to type: " + entry.type);
+      throw new IllegalStateException("Cannot convert to type: " + entry.type());
     }
   }
 

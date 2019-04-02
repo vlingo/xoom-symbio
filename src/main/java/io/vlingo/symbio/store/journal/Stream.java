@@ -9,7 +9,7 @@ package io.vlingo.symbio.store.journal;
 
 import java.util.List;
 
-import io.vlingo.symbio.Entry;
+import io.vlingo.symbio.BaseEntry;
 import io.vlingo.symbio.State;
 
 /**
@@ -27,7 +27,7 @@ public class Stream<T> {
   /**
    * The {@code List<Entry<T>>} of the entries of the named stream, and possibly just a sub-stream.
    */
-  public final List<Entry<T>> entries;
+  public final List<BaseEntry<T>> entries;
 
   /**
    * The String name of the stream, which is generally a global unique identity
@@ -51,7 +51,7 @@ public class Stream<T> {
    * @param entries the {@code List<Entry<T>>} of all entries in the named stream or some sub-stream
    * @param snapshot the {@code State<T>} of a persisted state, or an empty {@code State<T>} if none
    */
-  public Stream(final String streamName, final int streamVersion, final List<Entry<T>> entries, final State<T> snapshot) {
+  public Stream(final String streamName, final int streamVersion, final List<BaseEntry<T>> entries, final State<T> snapshot) {
     this.streamName = streamName;
     this.streamVersion = streamVersion;
     this.entries = entries;

@@ -23,8 +23,8 @@ import org.junit.Test;
 import io.vlingo.actors.World;
 import io.vlingo.actors.testkit.AccessSafely;
 import io.vlingo.common.serialization.JsonSerialization;
-import io.vlingo.symbio.Entry;
-import io.vlingo.symbio.Entry.TextEntry;
+import io.vlingo.symbio.BaseEntry;
+import io.vlingo.symbio.BaseEntry.TextEntry;
 import io.vlingo.symbio.EntryAdapter;
 import io.vlingo.symbio.Metadata;
 import io.vlingo.symbio.Source;
@@ -164,7 +164,7 @@ public class InMemoryEventJournalActorTest {
   private static final class Test1SourceAdapter implements EntryAdapter<Test1Source,TextEntry> {
     @Override
     public Test1Source fromEntry(final TextEntry entry) {
-      return JsonSerialization.deserialized(entry.entryData, Test1Source.class);
+      return JsonSerialization.deserialized(entry.entryData(), Test1Source.class);
     }
 
     @Override
@@ -183,7 +183,7 @@ public class InMemoryEventJournalActorTest {
   private static final class Test2SourceAdapter implements EntryAdapter<Test2Source,TextEntry> {
     @Override
     public Test2Source fromEntry(final TextEntry entry) {
-      return JsonSerialization.deserialized(entry.entryData, Test2Source.class);
+      return JsonSerialization.deserialized(entry.entryData(), Test2Source.class);
     }
 
     @Override
@@ -202,14 +202,14 @@ public class InMemoryEventJournalActorTest {
   private static final class TestResults
   {
     AccessSafely access;
-    public final List<Entry<String>> entries = new ArrayList<>();
+    public final List<BaseEntry<String>> entries = new ArrayList<>();
     
     @SuppressWarnings("unchecked")
     public AccessSafely afterCompleting( final int times )
     {
       access = 
               AccessSafely.afterCompleting(times)
-              .writingWith("addAll", (values) -> this.entries.addAll((Collection<Entry<String>>)values ))
+              .writingWith("addAll", (values) -> this.entries.addAll((Collection<BaseEntry<String>>)values ))
               .readingWith("entry", (index) -> this.entries.get((int)index))
               .readingWith("entryId", (index) -> this.entries.get((int)index).id())
               .readingWith("size", () -> this.entries.size());

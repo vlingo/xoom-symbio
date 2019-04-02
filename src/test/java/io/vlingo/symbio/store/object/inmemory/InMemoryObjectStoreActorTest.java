@@ -16,7 +16,7 @@ import org.junit.Test;
 
 import io.vlingo.actors.World;
 import io.vlingo.actors.testkit.AccessSafely;
-import io.vlingo.symbio.Entry.ObjectEntry;
+import io.vlingo.symbio.BaseEntry.ObjectEntry;
 import io.vlingo.symbio.EntryAdapter;
 import io.vlingo.symbio.EntryAdapterProvider;
 import io.vlingo.symbio.Metadata;
@@ -90,7 +90,7 @@ public class InMemoryObjectStoreActorTest {
   private static final class Test1SourceAdapter implements EntryAdapter<Test1Source,ObjectEntry<Test1Source>> {
     @Override
     public Test1Source fromEntry(final ObjectEntry<Test1Source> entry) {
-      return (Test1Source) entry.entryData;
+      return (Test1Source) entry.entryData();
     }
 
     @Override

@@ -16,6 +16,7 @@ import java.util.Optional;
 
 import io.vlingo.common.Completes;
 import io.vlingo.common.Success;
+import io.vlingo.symbio.BaseEntry;
 import io.vlingo.symbio.Entry;
 import io.vlingo.symbio.EntryAdapter;
 import io.vlingo.symbio.Source;
@@ -165,7 +166,7 @@ public class InMemoryJournal<T,RS extends State<?>> implements Journal<T> {
   private void insert(final String streamName, final int streamVersion, final Entry<T> entry) {
     final int entryIndex = journal.size();
     final String id = "" + (entryIndex + 1);
-    entry.__internal__setId(id);
+    ((BaseEntry<T>) entry).__internal__setId(id); //questionable cast
     journal.add(entry);
     Map<Integer,Integer> versionIndexes = streamIndexes.get(streamName);
     if (versionIndexes == null) {
