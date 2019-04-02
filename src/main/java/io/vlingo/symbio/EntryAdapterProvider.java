@@ -15,8 +15,8 @@ import java.util.UUID;
 import java.util.function.BiConsumer;
 
 import io.vlingo.actors.World;
+import io.vlingo.symbio.BaseEntry.TextEntry;
 import io.vlingo.symbio.DefaultTextEntryAdapter.ObjectSource;
-import io.vlingo.symbio.Entry.TextEntry;
 
 public class EntryAdapterProvider {
   static final String INTERNAL_NAME = UUID.randomUUID().toString();
@@ -27,13 +27,19 @@ public class EntryAdapterProvider {
 
   /**
    * Answer the {@code EntryAdapterProvider} held by the {@code world}.
+   * If no such instance exists, create and answer a new instance of
+   * {@link EntryAdapterProvider} registered with {@code world}.
    * @param world the World where the EntryAdapterProvider is held
    * @return EntryAdapterProvider
    */
   public static EntryAdapterProvider instance(final World world) {
-    return world.resolveDynamic(INTERNAL_NAME, EntryAdapterProvider.class);
+    EntryAdapterProvider instance = world.resolveDynamic(INTERNAL_NAME, EntryAdapterProvider.class);
+    if (instance == null) {
+      instance = new EntryAdapterProvider(world);
+    }
+    return instance;
   }
-
+  
   public EntryAdapterProvider(final World world) {
     this();
     world.registerDynamic(INTERNAL_NAME, this);
@@ -101,10 +107,10 @@ public class EntryAdapterProvider {
 
   @SuppressWarnings("unchecked")
   private <S extends Source<?>,E extends Entry<?>> EntryAdapter<S,E> namedAdapter(final E entry) {
-    final EntryAdapter<S,E> adapter = (EntryAdapter<S,E>) namedAdapters.get(entry.type);
+    final EntryAdapter<S,E> adapter = (EntryAdapter<S,E>) namedAdapters.get(entry.type());
     if (adapter != null) {
       return adapter;
     }
-    throw new IllegalStateException("Adapter not registrered for: " + entry.type);
+    throw new IllegalStateException("Adapter not registrered for: " + entry.type());
   }
 }

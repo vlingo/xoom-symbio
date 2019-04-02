@@ -19,7 +19,7 @@ import io.vlingo.actors.Actor;
 import io.vlingo.actors.Definition;
 import io.vlingo.common.Failure;
 import io.vlingo.common.Success;
-import io.vlingo.symbio.Entry;
+import io.vlingo.symbio.BaseEntry;
 import io.vlingo.symbio.EntryAdapterProvider;
 import io.vlingo.symbio.Metadata;
 import io.vlingo.symbio.Source;
@@ -36,7 +36,7 @@ public class InMemoryStateStoreActor<RS extends State<?>> extends Actor
   private final List<Dispatchable<RS>> dispatchables;
   private final Dispatcher dispatcher;
   private final DispatcherControl dispatcherControl;
-  private final List<Entry<?>> entries;
+  private final List<BaseEntry<?>> entries;
   private final EntryAdapterProvider entryAdapterProvider;
   private final StateAdapterProvider stateAdapterProvider;
   private final Map<String, Map<String, RS>> store;
@@ -184,7 +184,7 @@ public class InMemoryStateStoreActor<RS extends State<?>> extends Actor
   }
 
   private <C> void appendEntries(final List<Source<C>> sources) {
-    final Collection<Entry<?>> all = entryAdapterProvider.asEntries(sources);
+    final Collection<BaseEntry<?>> all = entryAdapterProvider.asEntries(sources);
     entries.addAll(all);
   }
 

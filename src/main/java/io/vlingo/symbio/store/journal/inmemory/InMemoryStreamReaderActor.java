@@ -12,7 +12,7 @@ import java.util.Map;
 
 import io.vlingo.actors.Actor;
 import io.vlingo.common.Completes;
-import io.vlingo.symbio.Entry;
+import io.vlingo.symbio.BaseEntry;
 import io.vlingo.symbio.State;
 import io.vlingo.symbio.store.journal.Stream;
 import io.vlingo.symbio.store.journal.StreamReader;
@@ -21,7 +21,7 @@ public class InMemoryStreamReaderActor<T> extends Actor implements StreamReader<
   private final InMemoryStreamReader<T> reader;
 
   public InMemoryStreamReaderActor(
-          final List<Entry<T>> journalView,
+          final List<BaseEntry<T>> journalView,
           final Map<String, Map<Integer,Integer>> streamIndexesView,
           final Map<String, State<T>> snapshotsView,
           final String name) {

@@ -12,19 +12,19 @@ import java.util.List;
 import java.util.Map;
 
 import io.vlingo.common.Completes;
-import io.vlingo.symbio.Entry;
+import io.vlingo.symbio.BaseEntry;
 import io.vlingo.symbio.State;
 import io.vlingo.symbio.store.journal.Stream;
 import io.vlingo.symbio.store.journal.StreamReader;
 
 public class InMemoryStreamReader<T> implements StreamReader<T> {
-  private final List<Entry<T>> journalView;
+  private final List<BaseEntry<T>> journalView;
   private final Map<String, State<T>> snapshotsView;
   private final Map<String, Map<Integer,Integer>> streamIndexesView;
   private final String name;
 
   public InMemoryStreamReader(
-          final List<Entry<T>> journalView,
+          final List<BaseEntry<T>> journalView,
           final Map<String, Map<Integer,Integer>> streamIndexesView,
           final Map<String, State<T>> snapshotsView,
           final String name) {
@@ -51,13 +51,13 @@ public class InMemoryStreamReader<T> implements StreamReader<T> {
         snapshot = null; // reading from beyond snapshot
       }
     }
-    final List<Entry<T>> entries = new ArrayList<>();
+    final List<BaseEntry<T>> entries = new ArrayList<>();
     final Map<Integer,Integer> versionIndexes = streamIndexesView.get(streamName);
     if (versionIndexes != null) {
       Integer journalIndex = versionIndexes.get(version);
 
       while (journalIndex != null) {
-        final Entry<T> entry = journalView.get(journalIndex);
+        final BaseEntry<T> entry = journalView.get(journalIndex);
         entries.add(entry);
         journalIndex = versionIndexes.get(++version);
       }
