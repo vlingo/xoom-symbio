@@ -17,7 +17,7 @@ import java.util.Comparator;
  * @see BinaryEntry ObjectEntry TextEntry NullEntry
  */
 public abstract class BaseEntry<T> implements Entry<T> {
-  
+
   private static final byte[] EmptyBytesData = new byte[0];
   private static final Object EmptyObjectData = new Object() { @Override public String toString() { return "(empty)"; } };
   private static final String EmptyTextData = "";
@@ -276,6 +276,11 @@ public abstract class BaseEntry<T> implements Entry<T> {
     public boolean isEmpty() {
       return entryData().length == 0;
     }
+
+    @Override
+    public Entry<byte[]> withId(final String id) {
+      return new BinaryEntry(id, typed(), typeVersion(), entryData());
+    }
   }
 
   /**
@@ -306,6 +311,11 @@ public abstract class BaseEntry<T> implements Entry<T> {
     @Override
     public boolean isObject() {
       return true;
+    }
+
+    @Override
+    public Entry<Object> withId(final String id) {
+      return new ObjectEntry<>(id, typed(), typeVersion(), entryData(), 1);
     }
   }
 
@@ -338,6 +348,11 @@ public abstract class BaseEntry<T> implements Entry<T> {
     public boolean isText() {
       return true;
     }
+
+    @Override
+    public Entry<String> withId(final String id) {
+      return new TextEntry(id, typed(), typeVersion(), entryData());
+    }
   }
 
   /**
@@ -360,6 +375,11 @@ public abstract class BaseEntry<T> implements Entry<T> {
     @Override
     public boolean isNull() {
       return true;
+    }
+
+    @Override
+    public Entry<T> withId(final String id) {
+      return this;
     }
   }
 }
