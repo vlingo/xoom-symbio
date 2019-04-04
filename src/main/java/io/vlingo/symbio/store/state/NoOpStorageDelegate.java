@@ -8,8 +8,11 @@
 package io.vlingo.symbio.store.state;
 
 import java.util.Collection;
+import java.util.List;
 
+import io.vlingo.symbio.Entry;
 import io.vlingo.symbio.State;
+import io.vlingo.symbio.store.EntryReader.Advice;
 import io.vlingo.symbio.store.state.StateStore.Dispatchable;
 import io.vlingo.symbio.store.state.StateStore.StorageDelegate;
 
@@ -21,7 +24,7 @@ public class NoOpStorageDelegate implements StorageDelegate {
   @Override public void beginWrite() {  }
 
   @Override public void close() { }
-  
+
   @Override public boolean isClosed() { return true; }
 
   @Override public void complete() { }
@@ -31,6 +34,10 @@ public class NoOpStorageDelegate implements StorageDelegate {
   @Override public <C> C connection() { return null; }
 
   @Override public <W, S> W dispatchableWriteExpressionFor(final String dispatchId, final State<S> state) { return null; }
+
+  @Override public <A, E> A appendExpressionFor(List<Entry<E>> entries) throws Exception { return null; }
+
+  @Override public Advice entryReaderAdvice() { return null; }
 
   @Override public void fail() { }
 
