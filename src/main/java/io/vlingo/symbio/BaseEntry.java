@@ -103,21 +103,15 @@ public abstract class BaseEntry<T> implements Entry<T> {
     return typeVersion;
   }
 
-  /* @see io.vlingo.symbio.Entry#asBinaryEntry() */
-  @Override
   public BinaryEntry asBinaryEntry() {
     return (BinaryEntry) this;
   }
 
-  /* @see io.vlingo.symbio.Entry#asObjectEntry() */
-  @Override
   @SuppressWarnings("unchecked")
   public ObjectEntry<T> asObjectEntry() {
     return (ObjectEntry<T>) this;
   }
 
-  /* @see io.vlingo.symbio.Entry#asTextEntry() */
-  @Override
   public TextEntry asTextEntry() {
     return (TextEntry) this;
   }
@@ -128,8 +122,12 @@ public abstract class BaseEntry<T> implements Entry<T> {
     return !metadata.isEmpty();
   }
 
-  /* @see io.vlingo.symbio.Entry#isBinary() */
-  @Override
+  /**
+   * Returns true if I am an instance of {@link BinaryEntry}.
+   * The default is to answer false.
+   * 
+   * @return true if I am an instance of {@link BinaryEntry}
+   */
   public boolean isBinary() {
     return false;
   }
@@ -146,14 +144,22 @@ public abstract class BaseEntry<T> implements Entry<T> {
     return false;
   }
 
-  /* @see io.vlingo.symbio.Entry#isObject() */
-  @Override
+  /**
+   * Returns true if I am an instance of {@link ObjectEntry}.
+   * The default is to answer false.
+   * 
+   * @return true if I am an instance of {@link ObjectEntry}
+   */
   public boolean isObject() {
     return false;
   }
 
-  /* @see io.vlingo.symbio.Entry#isText() */
-  @Override
+  /**
+   * Returns true if I am an instance of {@link TextEntry}.
+   * The default is to answer false.
+   * 
+   * @return true if I am an instance of {@link TextEntry}
+   */
   public boolean isText() {
     return false;
   }
