@@ -17,13 +17,12 @@ import java.util.function.BiConsumer;
 import io.vlingo.actors.World;
 import io.vlingo.symbio.BaseEntry.TextEntry;
 
-@SuppressWarnings("rawtypes")
 public class EntryAdapterProvider {
   static final String INTERNAL_NAME = UUID.randomUUID().toString();
 
   private final Map<Class<?>,EntryAdapter<?,?>> adapters;
   private final Map<String,EntryAdapter<?,?>> namedAdapters;
-  private final EntryAdapter<Source,TextEntry> defaultTextEntryAdapter;
+  private final EntryAdapter<Source<?>,TextEntry> defaultTextEntryAdapter;
 
   /**
    * Answer the {@code EntryAdapterProvider} held by the {@code world}.
