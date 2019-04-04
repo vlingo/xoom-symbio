@@ -7,9 +7,6 @@
 
 package io.vlingo.symbio;
 
-import io.vlingo.symbio.BaseEntry.BinaryEntry;
-import io.vlingo.symbio.BaseEntry.ObjectEntry;
-import io.vlingo.symbio.BaseEntry.TextEntry;
 /**
  * Entry represents a journal entry
  *
@@ -53,34 +50,10 @@ public interface Entry<T> extends Comparable<Entry<T>> {
   int typeVersion();
 
   /**
-   * Answers myself as a BinaryEntry.
-   * @return BinaryEntry
-   */
-  BinaryEntry asBinaryEntry();
-
-  /**
-   * Answers myself as an ObjectEntry.
-   * @return ObjectEntry
-   */
-  ObjectEntry<T> asObjectEntry();
-
-  /**
-   * Answers myself as a TextEntry.
-   * @return TextEntry
-   */
-  TextEntry asTextEntry();
-
-  /**
    * Answers whether or not I have non-empty Metadata.
    * @return boolean
    */
   boolean hasMetadata();
-
-  /**
-   * Answers whether or not I am a BinaryEntry.
-   * @return boolean
-   */
-  boolean isBinary();
 
   /**
    * Answers whether or not I am a completely empty Entry.
@@ -93,18 +66,6 @@ public interface Entry<T> extends Comparable<Entry<T>> {
    * @return boolean
    */
   boolean isNull();
-
-  /**
-   * Answers whether or not I am an ObjectEntry.
-   * @return boolean
-   */
-  boolean isObject();
-
-  /**
-   * Answers whether or not I am a TextEntry.
-   * @return boolean
-   */
-  boolean isText();
 
   /**
    * Answers the Class&lt;C&gt; of my type.

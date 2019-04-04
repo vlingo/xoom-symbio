@@ -6,7 +6,6 @@
 // one at https://mozilla.org/MPL/2.0/.
 package io.vlingo.symbio.store.object;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -20,17 +19,12 @@ import io.vlingo.symbio.store.StorageException;
 public interface ObjectStoreWriter {
   
   /**
-   * An empty collection of {@link Source}.
-   */
-  public static final ArrayList<Source<Object>> EmptySources = new ArrayList<>();
-  
-  /**
    * Persists the new {@code persistentObject}.
    * @param persistentObject the Object to persist
    * @param interest the PersistResultInterest to which the result is dispatched
    */
   default void persist(final Object persistentObject, final PersistResultInterest interest) {
-    persist(persistentObject, EmptySources, -1, interest, null);
+    persist(persistentObject, Source.none(), -1, interest, null);
   }
 
   /**
@@ -51,7 +45,7 @@ public interface ObjectStoreWriter {
    * @param object an Object sent to the PersistResultInterest when the persist has succeeded or failed
    */
   default void persist(final Object persistentObject, final PersistResultInterest interest, final Object object) {
-    persist(persistentObject, EmptySources, -1, interest, object);
+    persist(persistentObject, Source.none(), -1, interest, object);
   }
 
   /**
@@ -73,7 +67,7 @@ public interface ObjectStoreWriter {
    * @param interest the PersistResultInterest to which the result is dispatched
    */
   default void persist(final Object persistentObject, final long updateId, final PersistResultInterest interest) {
-    persist(persistentObject, EmptySources, updateId, interest, null);
+    persist(persistentObject, Source.none(), updateId, interest, null);
   }
 
   /**
@@ -96,7 +90,7 @@ public interface ObjectStoreWriter {
    * @param object an Object sent to the PersistResultInterest when the persist has succeeded or failed
    */
   default void persist(final Object persistentObject, final long updateId, final PersistResultInterest interest, final Object object) {
-    persist(persistentObject, EmptySources, updateId, interest, object);
+    persist(persistentObject, Source.none(), updateId, interest, object);
   }
 
   /**
@@ -117,7 +111,7 @@ public interface ObjectStoreWriter {
    * @param interest the PersistResultInterest to which the result is dispatched
    */
   default void persistAll(final Collection<Object> persistentObjects, final PersistResultInterest interest) {
-    persistAll(persistentObjects, EmptySources, -1, interest, null);
+    persistAll(persistentObjects, Source.none(), -1, interest, null);
   }
 
   /**
@@ -138,7 +132,7 @@ public interface ObjectStoreWriter {
    * @param object an Object sent to the PersistResultInterest when the persist has succeeded or failed
    */
   default void persistAll(final Collection<Object> persistentObjects, final PersistResultInterest interest, final Object object) {
-    persistAll(persistentObjects, EmptySources, -1, interest, object);
+    persistAll(persistentObjects, Source.none(), -1, interest, object);
   }
 
   /**
@@ -160,7 +154,7 @@ public interface ObjectStoreWriter {
    * @param interest the PersistResultInterest to which the result is dispatched
    */
   default void persistAll(final Collection<Object> persistentObjects, final long updateId, final PersistResultInterest interest) {
-    persistAll(persistentObjects, EmptySources, updateId, interest, null);
+    persistAll(persistentObjects, Source.none(), updateId, interest, null);
   }
 
   /**
@@ -183,7 +177,7 @@ public interface ObjectStoreWriter {
    * @param object an Object sent to the PersistResultInterest when the persist has succeeded or failed
    */
   default void persistAll(final Collection<Object> persistentObjects, final long updateId, final PersistResultInterest interest, final Object object) {
-    persistAll(persistentObjects, EmptySources, updateId, interest, object);
+    persistAll(persistentObjects, Source.none(), updateId, interest, object);
   }
 
   /**
