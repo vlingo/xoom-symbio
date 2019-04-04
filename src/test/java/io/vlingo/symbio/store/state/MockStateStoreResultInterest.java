@@ -7,6 +7,7 @@
 
 package io.vlingo.symbio.store.state;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -39,6 +40,7 @@ public class MockStateStoreResultInterest
   public AtomicReference<Metadata> metadataHolder = new AtomicReference<>();
   public AtomicReference<Object> objectState = new AtomicReference<>();
   public ConcurrentLinkedQueue<Exception> errorCauses = new ConcurrentLinkedQueue<>();
+  public ConcurrentLinkedQueue<Source<?>> sources = new ConcurrentLinkedQueue<>();
 
   public MockStateStoreResultInterest() { }
 
@@ -51,11 +53,11 @@ public class MockStateStoreResultInterest
   public <S> void readResultedIn(final Outcome<StorageException, Result> outcome, final String id, final S state, final int stateVersion, final Metadata metadata, final Object object) {
     outcome
       .andThen(result -> {
-        access.writeUsing("readStoreData", new StoreData(1, result, state, metadata, null));
+        access.writeUsing("readStoreData", new StoreData<>(1, result, state, Arrays.asList(), metadata, null));
         return result;
       })
       .otherwise(cause -> {
-        access.writeUsing("readStoreData", new StoreData(1, cause.result, state, metadata, cause));
+        access.writeUsing("readStoreData", new StoreData<>(1, cause.result, state, Arrays.asList(), metadata, cause));
         return cause.result;
       });
   }
@@ -64,11 +66,11 @@ public class MockStateStoreResultInterest
   public <S,C> void writeResultedIn(final Outcome<StorageException, Result> outcome, final String id, final S state, final int stateVersion, final List<Source<C>> sources, final Object object) {
     outcome
       .andThen(result -> {
-        access.writeUsing("writeStoreData", new StoreData(1, result, state, null, null));
+        access.writeUsing("writeStoreData", new StoreData<C>(1, result, state, sources, null, null));
         return result;
       })
       .otherwise(cause -> {
-        access.writeUsing("writeStoreData", new StoreData(1, cause.result, state, null, cause));
+        access.writeUsing("writeStoreData", new StoreData<C>(1, cause.result, state, sources, null, cause));
         return cause.result;
       });
   }
@@ -80,21 +82,23 @@ public class MockStateStoreResultInterest
       .writingWith("confirmDispatchedResultedIn", (Integer increment) -> confirmDispatchedResultedIn.addAndGet(increment))
       .readingWith("confirmDispatchedResultedIn", () -> confirmDispatchedResultedIn.get())
 
-      .writingWith("writeStoreData", (StoreData data) -> {
+      .writingWith("writeStoreData", (StoreData<?> data) -> {
         writeObjectResultedIn.addAndGet(data.resultedIn);
         objectWriteResult.set(data.result);
         objectWriteAccumulatedResults.add(data.result);
         objectState.set(data.state);
+        sources.addAll(data.sources);
         metadataHolder.set(data.metadata);
         if (data.errorCauses != null) {
           errorCauses.add(data.errorCauses);
         }
       })
-      .writingWith("readStoreData", (StoreData data) -> {
+      .writingWith("readStoreData", (StoreData<?> data) -> {
         readObjectResultedIn.addAndGet(data.resultedIn);
         objectReadResult.set(data.result);
         objectWriteAccumulatedResults.add(data.result);
         objectState.set(data.state);
+        sources.addAll(data.sources);
         metadataHolder.set(data.metadata);
         if (data.errorCauses != null) {
           errorCauses.add(data.errorCauses);
@@ -108,6 +112,7 @@ public class MockStateStoreResultInterest
       .readingWith("objectWriteAccumulatedResultsCount", () -> objectWriteAccumulatedResults.size())
       .readingWith("metadataHolder", () -> metadataHolder.get())
       .readingWith("objectState", () -> objectState.get())
+      .readingWith("sources", () -> sources.poll())
       .readingWith("errorCauses", () -> errorCauses.poll())
       .readingWith("errorCausesCount", () -> errorCauses.size())
       .readingWith("writeObjectResultedIn", () -> writeObjectResultedIn.get());
@@ -115,17 +120,19 @@ public class MockStateStoreResultInterest
     return access;
   }
 
-  public class StoreData {
+  public class StoreData<C> {
     public final Exception errorCauses;
     public final Metadata metadata;
     public final Result result;
+    public final List<Source<C>> sources;
     public final Object state;
     public final int resultedIn;
 
-    public StoreData(final int resultedIn, final Result objectResult, final Object state, final Metadata metadata, final Exception errorCauses) {
+    public StoreData(final int resultedIn, final Result objectResult, final Object state, final List<Source<C>> sources, final Metadata metadata, final Exception errorCauses) {
       this.resultedIn = resultedIn;
       this.result = objectResult;
       this.state = state;
+      this.sources = sources;
       this.metadata = metadata;
       this.errorCauses = errorCauses;
     }

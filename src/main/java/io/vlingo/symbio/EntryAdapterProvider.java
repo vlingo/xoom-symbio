@@ -16,14 +16,14 @@ import java.util.function.BiConsumer;
 
 import io.vlingo.actors.World;
 import io.vlingo.symbio.BaseEntry.TextEntry;
-import io.vlingo.symbio.DefaultTextEntryAdapter.ObjectSource;
 
+@SuppressWarnings("rawtypes")
 public class EntryAdapterProvider {
   static final String INTERNAL_NAME = UUID.randomUUID().toString();
 
   private final Map<Class<?>,EntryAdapter<?,?>> adapters;
   private final Map<String,EntryAdapter<?,?>> namedAdapters;
-  private final EntryAdapter<ObjectSource,TextEntry> defaultTextEntryAdapter;
+  private final EntryAdapter<Source,TextEntry> defaultTextEntryAdapter;
 
   /**
    * Answer the {@code EntryAdapterProvider} held by the {@code world}.
@@ -39,12 +39,13 @@ public class EntryAdapterProvider {
     }
     return instance;
   }
-  
+
   public EntryAdapterProvider(final World world) {
     this();
     world.registerDynamic(INTERNAL_NAME, this);
   }
 
+  @SuppressWarnings("unchecked")
   public EntryAdapterProvider() {
     this.adapters = new HashMap<>();
     this.namedAdapters = new HashMap<>();
@@ -76,7 +77,7 @@ public class EntryAdapterProvider {
     if (adapter != null) {
       return adapter.toEntry(source);
     }
-    return (E) defaultTextEntryAdapter.toEntry((ObjectSource) source);
+    return (E) defaultTextEntryAdapter.toEntry(source);
   }
 
   public <S extends Source<?>,E extends Entry<?>> List<S> asSources(final List<E> entries) {
@@ -99,18 +100,12 @@ public class EntryAdapterProvider {
   @SuppressWarnings("unchecked")
   private <S extends Source<?>,E extends Entry<?>> EntryAdapter<S,E> adapter(final Class<?> sourceType) {
     final EntryAdapter<S,E> adapter = (EntryAdapter<S,E>) adapters.get(sourceType);
-    if (adapter != null) {
-      return adapter;
-    }
-    throw new IllegalStateException("Adapter not registrered for: " + sourceType.getName());
+    return adapter;
   }
 
   @SuppressWarnings("unchecked")
   private <S extends Source<?>,E extends Entry<?>> EntryAdapter<S,E> namedAdapter(final E entry) {
     final EntryAdapter<S,E> adapter = (EntryAdapter<S,E>) namedAdapters.get(entry.type());
-    if (adapter != null) {
-      return adapter;
-    }
-    throw new IllegalStateException("Adapter not registrered for: " + entry.type());
+    return adapter;
   }
 }

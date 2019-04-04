@@ -12,7 +12,7 @@ import io.vlingo.symbio.BaseEntry.ObjectEntry;
 import io.vlingo.symbio.BaseEntry.TextEntry;
 /**
  * Entry represents a journal entry
- * 
+ *
  * @param <T> the concrete type of {@code Entry<T>} stored and read,
  * which may be a String, byte[] or Object
  */
@@ -23,35 +23,35 @@ public interface Entry<T> extends Comparable<Entry<T>> {
    * @return String
    */
   String id();
-  
+
   /**
    * Answers my entry data
-   * 
+   *
    * @return T my entry data
    */
   T entryData();
-  
+
   /**
    * Returns my associated (possibly null) Metadata
-   * 
+   *
    * @return my associated Metadata or null
    */
   Metadata metadata();
-  
+
   /**
    * Returns my type.
-   * 
+   *
    * @return my type
    */
   String type();
-  
+
   /**
    * Returns my type version.
-   * 
+   *
    * @return my type version
    */
   int typeVersion();
-  
+
   /**
    * Answers myself as a BinaryEntry.
    * @return BinaryEntry
@@ -113,4 +113,10 @@ public interface Entry<T> extends Comparable<Entry<T>> {
    */
   <C> Class<C> typed();
 
+  /**
+   * Answer a copy of myself with the {@code id}.
+   * @param id the String identity to assign to my copy
+   * @return {@code Entry<T>}
+   */
+  public abstract Entry<T> withId(final String id);
 }

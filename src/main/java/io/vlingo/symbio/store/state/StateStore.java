@@ -11,10 +11,13 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 
+import io.vlingo.common.Completes;
 import io.vlingo.common.Outcome;
+import io.vlingo.symbio.Entry;
 import io.vlingo.symbio.Metadata;
 import io.vlingo.symbio.Source;
 import io.vlingo.symbio.State;
+import io.vlingo.symbio.store.EntryReader;
 import io.vlingo.symbio.store.Result;
 import io.vlingo.symbio.store.StorageException;
 
@@ -22,6 +25,14 @@ import io.vlingo.symbio.store.StorageException;
  * The basic State Store interface, defining standard dispatching and control types.
  */
 public interface StateStore extends StateStoreReader, StateStoreWriter {
+  /**
+   * Answer the {@code StateStoreEntriesReader<ET>} identified by the {@code name}.
+   * @param name the String name of the reader
+   * @param <ET> the specific type of {@code Entry<?>} that will be read
+   * @return {@code Completes<StateStoreEntriesReader<ET>>}
+   */
+  public <ET> Completes<StateStoreEntryReader<ET>> entryReader(final String name);
+
   /**
    * Defines the result of reading the state with the specific id to the store.
    */
@@ -188,6 +199,7 @@ public interface StateStore extends StateStoreReader, StateStoreWriter {
    */
   public static interface StorageDelegate {
     <S extends State<?>> Collection<Dispatchable<S>> allUnconfirmedDispatchableStates() throws Exception;
+    <A,E> A appendExpressionFor(final List<Entry<E>> entries) throws Exception;
     void beginRead() throws Exception;
     void beginWrite() throws Exception;
     void close();
@@ -196,6 +208,7 @@ public interface StateStore extends StateStoreReader, StateStoreWriter {
     void confirmDispatched(final String dispatchId);
     <C> C connection();
     <W,S> W dispatchableWriteExpressionFor(final String dispatchId, final State<S> state) throws Exception;
+    EntryReader.Advice entryReaderAdvice();
     void fail();
     String originatorId();
     <R> R readExpressionFor(final String storeName, final String id) throws Exception;

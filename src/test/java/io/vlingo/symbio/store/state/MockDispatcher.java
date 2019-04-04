@@ -20,7 +20,7 @@ import io.vlingo.symbio.store.state.StateStore.Dispatcher;
 import io.vlingo.symbio.store.state.StateStore.DispatcherControl;
 
 public class MockDispatcher implements Dispatcher {
-  private AccessSafely access;
+  private AccessSafely access = AccessSafely.afterCompleting(0);
 
   private final ConfirmDispatchedResultInterest confirmDispatchedResultInterest;
   private DispatcherControl control;

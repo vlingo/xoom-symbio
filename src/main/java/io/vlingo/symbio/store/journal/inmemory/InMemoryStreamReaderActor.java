@@ -7,26 +7,16 @@
 
 package io.vlingo.symbio.store.journal.inmemory;
 
-import java.util.List;
-import java.util.Map;
-
 import io.vlingo.actors.Actor;
 import io.vlingo.common.Completes;
-import io.vlingo.symbio.BaseEntry;
-import io.vlingo.symbio.State;
 import io.vlingo.symbio.store.journal.Stream;
 import io.vlingo.symbio.store.journal.StreamReader;
 
 public class InMemoryStreamReaderActor<T> extends Actor implements StreamReader<T> {
   private final InMemoryStreamReader<T> reader;
 
-  public InMemoryStreamReaderActor(
-          final List<BaseEntry<T>> journalView,
-          final Map<String, Map<Integer,Integer>> streamIndexesView,
-          final Map<String, State<T>> snapshotsView,
-          final String name) {
-
-    this.reader = new InMemoryStreamReader<>(journalView, streamIndexesView, snapshotsView, name);
+  public InMemoryStreamReaderActor(final InMemoryStreamReader<T> reader) {
+    this.reader = reader;
   }
 
   @Override

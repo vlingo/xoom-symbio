@@ -13,12 +13,15 @@ import io.vlingo.actors.Actor;
 import io.vlingo.actors.DeadLetter;
 import io.vlingo.actors.LocalMessage;
 import io.vlingo.actors.Mailbox;
+import io.vlingo.common.BasicCompletes;
+import io.vlingo.common.Completes;
 import io.vlingo.symbio.Source;
 
 public class StateStore__Proxy implements io.vlingo.symbio.store.state.StateStore {
 
   private static final String writeRepresentation1 = "write(java.lang.String, S, int, java.util.List<Source<?>>, io.vlingo.symbio.Metadata, io.vlingo.symbio.store.state.StateStore.WriteResultInterest, java.lang.Object)";
   private static final String readRepresentation2 = "read(java.lang.String, java.lang.Class<?>, io.vlingo.symbio.store.state.StateStore.ReadResultInterest, java.lang.Object)";
+  private static final String entryReaderRepresentation3 = "entryReader(java.lang.String)";
 
   private final Actor actor;
   private final Mailbox mailbox;
@@ -47,5 +50,18 @@ public class StateStore__Proxy implements io.vlingo.symbio.store.state.StateStor
     } else {
       actor.deadLetters().failedDelivery(new DeadLetter(actor, readRepresentation2));
     }
+  }
+  @Override
+  public <ET> Completes<StateStoreEntryReader<ET>> entryReader(String arg0) {
+    if (!actor.isStopped()) {
+      final java.util.function.Consumer<StateStore> consumer = (actor) -> actor.entryReader(arg0);
+      final Completes<StateStoreEntryReader<ET>> completes = new BasicCompletes<>(actor.scheduler());
+      if (mailbox.isPreallocated()) { mailbox.send(actor, StateStore.class, consumer, completes, entryReaderRepresentation3); }
+      else { mailbox.send(new LocalMessage<StateStore>(actor, StateStore.class, consumer, completes, entryReaderRepresentation3)); }
+      return completes;
+    } else {
+      actor.deadLetters().failedDelivery(new DeadLetter(actor, entryReaderRepresentation3));
+    }
+    return null;
   }
 }

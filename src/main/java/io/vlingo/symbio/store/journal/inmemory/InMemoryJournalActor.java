@@ -10,6 +10,7 @@ package io.vlingo.symbio.store.journal.inmemory;
 import java.util.List;
 
 import io.vlingo.actors.Actor;
+import io.vlingo.actors.Definition;
 import io.vlingo.common.Completes;
 import io.vlingo.symbio.Entry;
 import io.vlingo.symbio.EntryAdapter;
@@ -50,12 +51,18 @@ public class InMemoryJournalActor<T,RS extends State<?>> extends Actor implement
 
   @Override
   public Completes<JournalReader<T>> journalReader(final String name) {
-    return completes().with(journal.journalReader(name).outcome());
+    final JournalReader<T> inmemory = journal.journalReader(name).outcome();
+    @SuppressWarnings("unchecked")
+    final JournalReader<T> actor = childActorFor(JournalReader.class, Definition.has(InMemoryJournalReaderActor.class, Definition.parameters(inmemory)));
+    return completes().with(actor);
   }
 
   @Override
   public Completes<StreamReader<T>> streamReader(final String name) {
-    return completes().with(journal.streamReader(name).outcome());
+    final StreamReader<T> inmemory = journal.streamReader(name).outcome();
+    @SuppressWarnings("unchecked")
+    final StreamReader<T> actor = childActorFor(StreamReader.class, Definition.has(InMemoryStreamReaderActor.class, Definition.parameters(inmemory)));
+    return completes().with(actor);
   }
 
   @Override

@@ -8,7 +8,6 @@
 package io.vlingo.symbio.store.state.inmemory;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -17,9 +16,11 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import io.vlingo.actors.Actor;
 import io.vlingo.actors.Definition;
+import io.vlingo.common.Completes;
 import io.vlingo.common.Failure;
 import io.vlingo.common.Success;
 import io.vlingo.symbio.BaseEntry;
+import io.vlingo.symbio.Entry;
 import io.vlingo.symbio.EntryAdapterProvider;
 import io.vlingo.symbio.Metadata;
 import io.vlingo.symbio.Source;
@@ -28,6 +29,7 @@ import io.vlingo.symbio.StateAdapterProvider;
 import io.vlingo.symbio.store.Result;
 import io.vlingo.symbio.store.StorageException;
 import io.vlingo.symbio.store.state.StateStore;
+import io.vlingo.symbio.store.state.StateStoreEntryReader;
 import io.vlingo.symbio.store.state.StateTypeStateStoreMap;
 
 public class InMemoryStateStoreActor<RS extends State<?>> extends Actor
@@ -36,7 +38,8 @@ public class InMemoryStateStoreActor<RS extends State<?>> extends Actor
   private final List<Dispatchable<RS>> dispatchables;
   private final Dispatcher dispatcher;
   private final DispatcherControl dispatcherControl;
-  private final List<BaseEntry<?>> entries;
+  private final List<Entry<?>> entries;
+  private final Map<String,StateStoreEntryReader<?>> entryReaders;
   private final EntryAdapterProvider entryAdapterProvider;
   private final StateAdapterProvider stateAdapterProvider;
   private final Map<String, Map<String, RS>> store;
@@ -52,7 +55,8 @@ public class InMemoryStateStoreActor<RS extends State<?>> extends Actor
     this.dispatcher = dispatcher;
     this.entryAdapterProvider = EntryAdapterProvider.instance(stage().world());
     this.stateAdapterProvider = StateAdapterProvider.instance(stage().world());
-    this.entries = new ArrayList<>();
+    this.entries = new CopyOnWriteArrayList<>();
+    this.entryReaders = new HashMap<>();
     this.store = new HashMap<>();
     this.dispatchables = new CopyOnWriteArrayList<>();
 
@@ -76,6 +80,17 @@ public class InMemoryStateStoreActor<RS extends State<?>> extends Actor
       dispatcherControl.stop();
     }
     super.stop();
+  }
+
+  @Override
+  @SuppressWarnings("unchecked")
+  public <ET> Completes<StateStoreEntryReader<ET>> entryReader(final String name) {
+    StateStoreEntryReader<?> reader = entryReaders.get(name);
+    if (reader == null) {
+      reader = childActorFor(StateStoreEntryReader.class, Definition.has(InMemoryStateStoreEntryReaderActor.class, Definition.parameters(entries, name)));
+      entryReaders.put(name, reader);
+    }
+    return completes().with((StateStoreEntryReader<ET>) reader);
   }
 
   @Override
@@ -184,8 +199,10 @@ public class InMemoryStateStoreActor<RS extends State<?>> extends Actor
   }
 
   private <C> void appendEntries(final List<Source<C>> sources) {
-    final Collection<BaseEntry<?>> all = entryAdapterProvider.asEntries(sources);
-    entries.addAll(all);
+    for (Entry<?> each : entryAdapterProvider.asEntries(sources)) {
+      ((BaseEntry<?>) each).__internal__setId(String.valueOf(entries.size()));
+      entries.add(each);
+    }
   }
 
   private <ST extends State<?>,C> void dispatch(final String dispatchId, final ST state, final Collection<Source<C>> sources) {

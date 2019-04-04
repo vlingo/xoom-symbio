@@ -9,19 +9,20 @@ package io.vlingo.symbio.store.journal.inmemory;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.ListIterator;
 
 import io.vlingo.common.Completes;
 import io.vlingo.symbio.Entry;
 import io.vlingo.symbio.store.journal.JournalReader;
 
 public class InMemoryJournalReader<T> implements JournalReader<T> {
-  private final ListIterator<Entry<T>> journalView;
+  private int currentIndex;
+  private final List<Entry<T>> journalView;
   private final String name;
 
-  public InMemoryJournalReader(final ListIterator<Entry<T>> journalView, final String name) {
+  public InMemoryJournalReader(final List<Entry<T>> journalView, final String name) {
     this.journalView = journalView;
     this.name = name;
+    this.currentIndex = 0;
   }
 
   @Override
@@ -31,8 +32,8 @@ public class InMemoryJournalReader<T> implements JournalReader<T> {
 
   @Override
   public Completes<Entry<T>> readNext() {
-    if (journalView.hasNext()) {
-      return Completes.withSuccess(journalView.next());
+    if (currentIndex < journalView.size()) {
+      return Completes.withSuccess(journalView.get(currentIndex++));
     }
     return null;
   }
@@ -42,10 +43,10 @@ public class InMemoryJournalReader<T> implements JournalReader<T> {
     final List<Entry<T>> entries = new ArrayList<>(maximumEntries);
 
     for (int count = 0; count < maximumEntries; ++count) {
-      if (journalView.hasNext()) {
-        entries.add(journalView.next());
+      if (currentIndex < journalView.size()) {
+        entries.add(journalView.get(currentIndex++));
       } else {
-        count = maximumEntries + 1;
+        break;
       }
     }
     return Completes.withSuccess(entries);
@@ -53,9 +54,7 @@ public class InMemoryJournalReader<T> implements JournalReader<T> {
 
   @Override
   public void rewind() {
-    while (journalView.hasPrevious()) {
-      journalView.previous();
-    }
+    currentIndex = 0;
   }
 
   @Override
@@ -84,15 +83,12 @@ public class InMemoryJournalReader<T> implements JournalReader<T> {
   }
 
   private void end() {
-    while (journalView.hasNext()) {
-      journalView.next();
-    }
+    currentIndex = journalView.size() - 1;
   }
 
   private String readCurrentId() {
-    if (journalView.hasNext()) {
-      final String currentId = journalView.next().id();
-      journalView.previous();
+    if (currentIndex < journalView.size()) {
+      final String currentId = journalView.get(currentIndex).id();
       return currentId;
     }
     return "-1";
@@ -100,11 +96,12 @@ public class InMemoryJournalReader<T> implements JournalReader<T> {
 
   private void to(final String id) {
     rewind();
-    while (journalView.hasNext()) {
-      final Entry<T> entry = journalView.next();
+    while (currentIndex < journalView.size()) {
+      final Entry<T> entry = journalView.get(currentIndex);
       if (entry.id().equals(id)) {
         return;
       }
+      ++currentIndex;
     }
   }
 }

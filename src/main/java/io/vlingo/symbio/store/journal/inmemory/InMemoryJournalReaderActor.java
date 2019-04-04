@@ -8,7 +8,6 @@
 package io.vlingo.symbio.store.journal.inmemory;
 
 import java.util.List;
-import java.util.ListIterator;
 
 import io.vlingo.actors.Actor;
 import io.vlingo.common.Completes;
@@ -18,8 +17,8 @@ import io.vlingo.symbio.store.journal.JournalReader;
 public class InMemoryJournalReaderActor<T> extends Actor implements JournalReader<T> {
   private final InMemoryJournalReader<T> reader;
 
-  public InMemoryJournalReaderActor(final ListIterator<Entry<T>> journalView, final String name) {
-    this.reader = new InMemoryJournalReader<>(journalView, name);
+  public InMemoryJournalReaderActor(final InMemoryJournalReader<T> reader) {
+    this.reader = reader;
   }
 
   @Override

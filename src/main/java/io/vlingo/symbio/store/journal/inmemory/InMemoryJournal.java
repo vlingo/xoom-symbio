@@ -8,7 +8,6 @@
 package io.vlingo.symbio.store.journal.inmemory;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -109,7 +108,7 @@ public class InMemoryJournal<T,RS extends State<?>> implements Journal<T> {
   public Completes<JournalReader<T>> journalReader(final String name) {
     JournalReader<T> reader = journalReaders.get(name);
     if (reader == null) {
-      reader = new InMemoryJournalReader<>(journal.listIterator(), name);
+      reader = new InMemoryJournalReader<>(journal, name);
       journalReaders.put(name, reader);
     }
     return Completes.withSuccess(reader);
@@ -120,10 +119,7 @@ public class InMemoryJournal<T,RS extends State<?>> implements Journal<T> {
   public Completes<StreamReader<T>> streamReader(final String name) {
     StreamReader<T> reader = streamReaders.get(name);
     if (reader == null) {
-      final List<Entry<T>> journalView = Collections.unmodifiableList(journal);
-      final Map<String, Map<Integer,Integer>> streamIndexesView = Collections.unmodifiableMap(streamIndexes);
-      final Map<String, RS> snapshotsView = Collections.unmodifiableMap(snapshots);
-      reader = new InMemoryStreamReader(journalView, streamIndexesView, snapshotsView, name);
+      reader = new InMemoryStreamReader(journal, streamIndexes, snapshots, name);
       streamReaders.put(name, reader);
     }
     return Completes.withSuccess(reader);
