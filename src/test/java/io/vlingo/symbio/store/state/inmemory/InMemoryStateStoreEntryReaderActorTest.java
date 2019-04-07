@@ -18,7 +18,7 @@ import io.vlingo.actors.World;
 import io.vlingo.actors.testkit.AccessSafely;
 import io.vlingo.actors.testkit.TestWorld;
 import io.vlingo.common.Completes;
-import io.vlingo.symbio.Entry;
+import io.vlingo.symbio.BaseEntry.TextEntry;
 import io.vlingo.symbio.EntryAdapterProvider;
 import io.vlingo.symbio.Source;
 import io.vlingo.symbio.StateAdapterProvider;
@@ -39,7 +39,7 @@ public class InMemoryStateStoreEntryReaderActorTest {
   private MockDispatcher dispatcher;
   private EntryAdapterProvider entryAdapterProvider;
   private MockStateStoreResultInterest interest;
-  private StateStoreEntryReader<String> reader;
+  private StateStoreEntryReader<TextEntry> reader;
   private StateStore store;
   private TestWorld testWorld;
   private World world;
@@ -57,11 +57,11 @@ public class InMemoryStateStoreEntryReaderActorTest {
     assertEquals(new Event2(), access.readFrom("sources"));
     assertEquals(new Event3(), access.readFrom("sources"));
 
-    final Entry<String> entry1 = reader.readNext().await();
+    final TextEntry entry1 = reader.readNext().await();
     assertEquals(entryAdapterProvider.asEntry(new Event1()).withId("0"), entry1);
-    final Entry<String> entry2 = reader.readNext().await();
+    final TextEntry entry2 = reader.readNext().await();
     assertEquals(entryAdapterProvider.asEntry(new Event2()).withId("1"), entry2);
-    final Entry<String> entry3 = reader.readNext().await();
+    final TextEntry entry3 = reader.readNext().await();
     assertEquals(entryAdapterProvider.asEntry(new Event3()).withId("2"), entry3);
 
     reader.rewind();
@@ -84,7 +84,7 @@ public class InMemoryStateStoreEntryReaderActorTest {
 
     store = world.actorFor(StateStore.class, InMemoryStateStoreActor.class, dispatcher);
 
-    final Completes<StateStoreEntryReader<String>> completes = store.entryReader("test");
+    final Completes<StateStoreEntryReader<TextEntry>> completes = store.entryReader("test");
     reader = completes.await();
 
     StateTypeStateStoreMap.stateTypeToStoreName(Entity1.class, Entity1.class.getSimpleName());

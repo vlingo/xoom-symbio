@@ -28,6 +28,7 @@ public class Journal__Proxy<T> implements io.vlingo.symbio.store.journal.Journal
     this.mailbox = mailbox;
   }
 
+  @Override
   @SuppressWarnings({ "unchecked", "rawtypes" })
   public <S, ST>void append(java.lang.String arg0, int arg1, io.vlingo.symbio.Source<S> arg2, io.vlingo.symbio.store.journal.Journal.AppendResultInterest arg3, java.lang.Object arg4) {
     if (!actor.isStopped()) {
@@ -38,6 +39,7 @@ public class Journal__Proxy<T> implements io.vlingo.symbio.store.journal.Journal
       actor.deadLetters().failedDelivery(new DeadLetter(actor, appendRepresentation1));
     }
   }
+  @Override
   @SuppressWarnings({ "unchecked", "rawtypes" })
   public <S, ST>void appendAll(java.lang.String arg0, int arg1, java.util.List<io.vlingo.symbio.Source<S>> arg2, io.vlingo.symbio.store.journal.Journal.AppendResultInterest arg3, java.lang.Object arg4) {
     if (!actor.isStopped()) {
@@ -48,6 +50,7 @@ public class Journal__Proxy<T> implements io.vlingo.symbio.store.journal.Journal
       actor.deadLetters().failedDelivery(new DeadLetter(actor, appendAllRepresentation2));
     }
   }
+  @Override
   @SuppressWarnings({ "unchecked", "rawtypes" })
   public <S, ST>void appendAllWith(java.lang.String arg0, int arg1, java.util.List<io.vlingo.symbio.Source<S>> arg2, ST arg3, io.vlingo.symbio.store.journal.Journal.AppendResultInterest arg4, java.lang.Object arg5) {
     if (!actor.isStopped()) {
@@ -58,6 +61,7 @@ public class Journal__Proxy<T> implements io.vlingo.symbio.store.journal.Journal
       actor.deadLetters().failedDelivery(new DeadLetter(actor, appendAllWithRepresentation3));
     }
   }
+  @Override
   @SuppressWarnings({ "unchecked", "rawtypes" })
   public <S, ST>void appendWith(java.lang.String arg0, int arg1, io.vlingo.symbio.Source<S> arg2, ST arg3, io.vlingo.symbio.store.journal.Journal.AppendResultInterest arg4, java.lang.Object arg5) {
     if (!actor.isStopped()) {
@@ -69,10 +73,10 @@ public class Journal__Proxy<T> implements io.vlingo.symbio.store.journal.Journal
     }
   }
   @SuppressWarnings("rawtypes")
-  public io.vlingo.common.Completes<io.vlingo.symbio.store.journal.JournalReader<T>> journalReader(java.lang.String arg0) {
+  public <ET extends Entry<?>> io.vlingo.common.Completes<io.vlingo.symbio.store.journal.JournalReader<ET>> journalReader(java.lang.String arg0) {
     if (!actor.isStopped()) {
       final java.util.function.Consumer<Journal> consumer = (actor) -> actor.journalReader(arg0);
-      final io.vlingo.common.Completes<io.vlingo.symbio.store.journal.JournalReader<T>> completes = new BasicCompletes<>(actor.scheduler());
+      final io.vlingo.common.Completes<io.vlingo.symbio.store.journal.JournalReader<ET>> completes = new BasicCompletes<>(actor.scheduler());
       if (mailbox.isPreallocated()) { mailbox.send(actor, Journal.class, consumer, completes, journalReaderRepresentation5); }
       else { mailbox.send(new LocalMessage<Journal>(actor, Journal.class, consumer, completes, journalReaderRepresentation5)); }
       return completes;
@@ -81,6 +85,7 @@ public class Journal__Proxy<T> implements io.vlingo.symbio.store.journal.Journal
     }
     return null;
   }
+  @Override
   @SuppressWarnings("rawtypes")
   public io.vlingo.common.Completes<io.vlingo.symbio.store.journal.StreamReader<T>> streamReader(java.lang.String arg0) {
     if (!actor.isStopped()) {
@@ -94,6 +99,7 @@ public class Journal__Proxy<T> implements io.vlingo.symbio.store.journal.Journal
     }
     return null;
   }
+  @Override
   @SuppressWarnings({ "unchecked", "rawtypes" })
   public <S extends Source<?>,E extends Entry<?>> void registerEntryAdapter(java.lang.Class<S> arg0, io.vlingo.symbio.EntryAdapter<S, E> arg1) {
     if (!actor.isStopped()) {
@@ -104,6 +110,7 @@ public class Journal__Proxy<T> implements io.vlingo.symbio.store.journal.Journal
       actor.deadLetters().failedDelivery(new DeadLetter(actor, registerAdapterRepresentation7));
     }
   }
+  @Override
   @SuppressWarnings({ "unchecked", "rawtypes" })
   public <S,R extends State<?>> void registerStateAdapter(java.lang.Class<S> arg0, io.vlingo.symbio.StateAdapter<S, R> arg1) {
     if (!actor.isStopped()) {

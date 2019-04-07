@@ -32,7 +32,7 @@ public class InMemoryJournal<T,RS extends State<?>> implements Journal<T> {
   private final Map<Class<?>,StateAdapter<?,?>> stateAdapters;
   private final List<Entry<T>> journal;
   private final JournalListener<T> listener;
-  private final Map<String,JournalReader<T>> journalReaders;
+  private final Map<String,JournalReader<? extends Entry<?>>> journalReaders;
   private final Map<String,StreamReader<T>> streamReaders;
   private final Map<String, Map<Integer,Integer>> streamIndexes;
   private final Map<String,RS> snapshots;
@@ -105,13 +105,14 @@ public class InMemoryJournal<T,RS extends State<?>> implements Journal<T> {
   }
 
   @Override
-  public Completes<JournalReader<T>> journalReader(final String name) {
-    JournalReader<T> reader = journalReaders.get(name);
+  @SuppressWarnings({ "unchecked", "rawtypes" })
+  public <ET extends Entry<?>> Completes<JournalReader<ET>> journalReader(final String name) {
+    JournalReader<?> reader = journalReaders.get(name);
     if (reader == null) {
-      reader = new InMemoryJournalReader<>(journal, name);
+      reader = new InMemoryJournalReader(journal, name);
       journalReaders.put(name, reader);
     }
-    return Completes.withSuccess(reader);
+    return Completes.withSuccess((JournalReader<ET>) reader);
   }
 
   @Override

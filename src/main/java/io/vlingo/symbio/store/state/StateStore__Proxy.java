@@ -15,6 +15,7 @@ import io.vlingo.actors.LocalMessage;
 import io.vlingo.actors.Mailbox;
 import io.vlingo.common.BasicCompletes;
 import io.vlingo.common.Completes;
+import io.vlingo.symbio.Entry;
 import io.vlingo.symbio.Source;
 
 public class StateStore__Proxy implements io.vlingo.symbio.store.state.StateStore {
@@ -52,7 +53,7 @@ public class StateStore__Proxy implements io.vlingo.symbio.store.state.StateStor
     }
   }
   @Override
-  public <ET> Completes<StateStoreEntryReader<ET>> entryReader(String arg0) {
+  public <ET extends Entry<?>> Completes<StateStoreEntryReader<ET>> entryReader(String arg0) {
     if (!actor.isStopped()) {
       final java.util.function.Consumer<StateStore> consumer = (actor) -> actor.entryReader(arg0);
       final Completes<StateStoreEntryReader<ET>> completes = new BasicCompletes<>(actor.scheduler());

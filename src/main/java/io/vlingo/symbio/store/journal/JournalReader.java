@@ -7,6 +7,7 @@
 
 package io.vlingo.symbio.store.journal;
 
+import io.vlingo.symbio.Entry;
 import io.vlingo.symbio.store.EntryReader;
 
 /**
@@ -17,4 +18,4 @@ import io.vlingo.symbio.store.EntryReader;
  *
  * @param <T> the concrete type of {@code Entry<T>} stored and read, which maybe be String, byte[], or Object
  */
-public interface JournalReader<T> extends EntryReader<T> { }
+public interface JournalReader<T extends Entry<?>> extends EntryReader<T> { }

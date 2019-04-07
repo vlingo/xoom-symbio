@@ -31,7 +31,7 @@ public interface StateStore extends StateStoreReader, StateStoreWriter {
    * @param <ET> the specific type of {@code Entry<?>} that will be read
    * @return {@code Completes<StateStoreEntriesReader<ET>>}
    */
-  public <ET> Completes<StateStoreEntryReader<ET>> entryReader(final String name);
+  public <ET extends Entry<?>> Completes<StateStoreEntryReader<ET>> entryReader(final String name);
 
   /**
    * Defines the result of reading the state with the specific id to the store.
@@ -199,7 +199,8 @@ public interface StateStore extends StateStoreReader, StateStoreWriter {
    */
   public static interface StorageDelegate {
     <S extends State<?>> Collection<Dispatchable<S>> allUnconfirmedDispatchableStates() throws Exception;
-    <A,E> A appendExpressionFor(final List<Entry<E>> entries) throws Exception;
+    <A,E> A appendExpressionFor(final Entry<E> entry) throws Exception;
+    <A> A appendIdentityExpression();
     void beginRead() throws Exception;
     void beginWrite() throws Exception;
     void close();

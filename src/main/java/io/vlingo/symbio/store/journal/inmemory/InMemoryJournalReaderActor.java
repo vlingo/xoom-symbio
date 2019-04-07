@@ -14,7 +14,7 @@ import io.vlingo.common.Completes;
 import io.vlingo.symbio.Entry;
 import io.vlingo.symbio.store.journal.JournalReader;
 
-public class InMemoryJournalReaderActor<T> extends Actor implements JournalReader<T> {
+public class InMemoryJournalReaderActor<T extends Entry<?>> extends Actor implements JournalReader<T> {
   private final InMemoryJournalReader<T> reader;
 
   public InMemoryJournalReaderActor(final InMemoryJournalReader<T> reader) {
@@ -27,12 +27,12 @@ public class InMemoryJournalReaderActor<T> extends Actor implements JournalReade
   }
 
   @Override
-  public Completes<Entry<T>> readNext() {
+  public Completes<T> readNext() {
     return completes().with(reader.readNext().outcome());
   }
 
   @Override
-  public Completes<List<Entry<T>>> readNext(final int maximumEntries) {
+  public Completes<List<T>> readNext(final int maximumEntries) {
     return completes().with(reader.readNext(maximumEntries).outcome());
   }
 

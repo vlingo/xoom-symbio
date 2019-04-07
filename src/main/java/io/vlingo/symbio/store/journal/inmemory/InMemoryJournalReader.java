@@ -14,7 +14,7 @@ import io.vlingo.common.Completes;
 import io.vlingo.symbio.Entry;
 import io.vlingo.symbio.store.journal.JournalReader;
 
-public class InMemoryJournalReader<T> implements JournalReader<T> {
+public class InMemoryJournalReader<T extends Entry<?>> implements JournalReader<T> {
   private int currentIndex;
   private final List<Entry<T>> journalView;
   private final String name;
@@ -31,15 +31,17 @@ public class InMemoryJournalReader<T> implements JournalReader<T> {
   }
 
   @Override
-  public Completes<Entry<T>> readNext() {
+  @SuppressWarnings("unchecked")
+  public Completes<T> readNext() {
     if (currentIndex < journalView.size()) {
-      return Completes.withSuccess(journalView.get(currentIndex++));
+      return Completes.withSuccess((T) journalView.get(currentIndex++));
     }
     return null;
   }
 
   @Override
-  public Completes<List<Entry<T>>> readNext(final int maximumEntries) {
+  @SuppressWarnings("unchecked")
+  public Completes<List<T>> readNext(final int maximumEntries) {
     final List<Entry<T>> entries = new ArrayList<>(maximumEntries);
 
     for (int count = 0; count < maximumEntries; ++count) {
@@ -49,7 +51,7 @@ public class InMemoryJournalReader<T> implements JournalReader<T> {
         break;
       }
     }
-    return Completes.withSuccess(entries);
+    return Completes.withSuccess((List<T>) entries);
   }
 
   @Override

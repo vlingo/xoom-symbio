@@ -35,7 +35,7 @@ import io.vlingo.symbio.store.StorageException;
  */
 public interface Journal<T> {
   /**
-   * Answer a new {@code Journal<T>} 
+   * Answer a new {@code Journal<T>}
    * @param stage the Stage within which the {@code Journal<T>} is created
    * @param implementor the {@code Class<A>} of the implementor
    * @param listener the {@code JournalListener<T>}
@@ -46,9 +46,9 @@ public interface Journal<T> {
    */
   @SuppressWarnings("unchecked")
   static <A extends Actor,T> Journal<T> using(final Stage stage, final Class<A> implementor, final JournalListener<T> listener, final Object...additional) {
-    return (Journal<T>) (additional.length == 0 ?
+    return additional.length == 0 ?
              stage.actorFor(Journal.class, implementor, listener) :
-             stage.actorFor(Journal.class, implementor, listener, additional));
+             stage.actorFor(Journal.class, implementor, listener, additional);
   }
 
   /**
@@ -88,7 +88,7 @@ public interface Journal<T> {
    * is translated to a corresponding {@code Entry<T>} with an unknown id. If there is a registered
    * {@code JournalListener<T>}, it will be informed of the newly appended {@code Entry<T>} and it
    * will have an assigned valid id.
-   * 
+   *
    * @param streamName the String name of the stream to append
    * @param streamVersion the int version of the stream to append
    * @param source the {@code Source<S>} to append as an {@code Entry<T>}
@@ -106,7 +106,7 @@ public interface Journal<T> {
    * assigned an id. The entry and snapshot are consistently persisted together or neither
    * at all. If there is a registered {@code JournalListener<T>}, it will be informed of
    * the newly appended {@code Entry<T>} with an assigned valid id and the new {@code ST} snapshot.
-   * 
+   *
    * @param streamName the String name of the stream to append
    * @param streamVersion the int version of the stream to append
    * @param source the {@code Source<S>} to append as an {@code Entry<T>}
@@ -123,7 +123,7 @@ public interface Journal<T> {
    * journal creating an association to {@code streamName} with {@code streamVersion}. If there is
    * a registered {@code JournalListener<T>}, it will be informed of the newly appended {@code Entry<T>}
    * instances and each will have an assigned valid id.
-   * 
+   *
    * @param streamName the String name of the stream to append
    * @param fromStreamVersion the int version of the stream to start appending, and increasing for each of entries
    * @param sources the {@code List<Source<S>>} to append as {@code List<Entry<T>>} instances
@@ -140,7 +140,7 @@ public interface Journal<T> {
    * the full state {@code snapshot}. The entries and snapshot are consistently persisted together
    * or none at all. If there is a registered {@code JournalListener<T>}, it will be informed of
    * the newly appended {@code Entry<T>} instances with assigned valid ids, and the {@code snapshot}.
-   * 
+   *
    * @param streamName the String name of the stream to append
    * @param fromStreamVersion the int version of the stream to start appending, and increasing for each of entries
    * @param sources the {@code List<Source<S>>} to append as {@code List<Entry<T>>} instances
@@ -159,21 +159,21 @@ public interface Journal<T> {
    * reasons. For example, some readers may be interested in publishing {@code Entry<T>}
    * instances messaging while others may be projecting and building pipelines
    * of new streams.
-   * 
+   *
    * @param name the String name of the {@code JournalReader<T>} to answer
-   * 
+   *
    * @return {@code Completes<JournalReader<T>>}
    */
-  Completes<JournalReader<T>> journalReader(final String name);
+  <ET extends Entry<?>> Completes<JournalReader<ET>> journalReader(final String name);
 
   /**
    * Eventually answers the {@code StreamReader<T>} named {@code name} for this journal. If
    * the reader named name does not yet exist, it is first created. Readers
    * with different names enables reading from different streams and for different
    * reasons. For example, some streams may be very busy while others are not.
-   * 
+   *
    * @param name the String name of the {@code StreamReader<T>} to answer
-   * 
+   *
    * @return {@code Completes<StreamReader<T>>}
    */
   Completes<StreamReader<T>> streamReader(final String name);

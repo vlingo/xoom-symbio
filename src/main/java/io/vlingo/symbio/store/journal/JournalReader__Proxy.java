@@ -12,8 +12,9 @@ import io.vlingo.actors.DeadLetter;
 import io.vlingo.actors.LocalMessage;
 import io.vlingo.actors.Mailbox;
 import io.vlingo.common.BasicCompletes;
+import io.vlingo.symbio.Entry;
 
-public class JournalReader__Proxy<T> implements io.vlingo.symbio.store.journal.JournalReader<T> {
+public class JournalReader__Proxy<T extends Entry<?>> implements io.vlingo.symbio.store.journal.JournalReader<T> {
 
   private static final String nameRepresentation1 = "name()";
   private static final String rewindRepresentation2 = "rewind()";
@@ -29,6 +30,7 @@ public class JournalReader__Proxy<T> implements io.vlingo.symbio.store.journal.J
     this.mailbox = mailbox;
   }
 
+  @Override
   @SuppressWarnings("rawtypes")
   public io.vlingo.common.Completes<java.lang.String> name() {
     if (!actor.isStopped()) {
@@ -42,6 +44,7 @@ public class JournalReader__Proxy<T> implements io.vlingo.symbio.store.journal.J
     }
     return null;
   }
+  @Override
   @SuppressWarnings("rawtypes")
   public void rewind() {
     if (!actor.isStopped()) {
@@ -52,6 +55,7 @@ public class JournalReader__Proxy<T> implements io.vlingo.symbio.store.journal.J
       actor.deadLetters().failedDelivery(new DeadLetter(actor, rewindRepresentation2));
     }
   }
+  @Override
   @SuppressWarnings("rawtypes")
   public io.vlingo.common.Completes<java.lang.String> seekTo(java.lang.String arg0) {
     if (!actor.isStopped()) {
@@ -65,11 +69,12 @@ public class JournalReader__Proxy<T> implements io.vlingo.symbio.store.journal.J
     }
     return null;
   }
+  @Override
   @SuppressWarnings("rawtypes")
-  public io.vlingo.common.Completes<io.vlingo.symbio.Entry<T>> readNext() {
+  public io.vlingo.common.Completes<T> readNext() {
     if (!actor.isStopped()) {
       final java.util.function.Consumer<JournalReader> consumer = (actor) -> actor.readNext();
-      final io.vlingo.common.Completes<io.vlingo.symbio.Entry<T>> completes = new BasicCompletes<>(actor.scheduler());
+      final io.vlingo.common.Completes<T> completes = new BasicCompletes<>(actor.scheduler());
       if (mailbox.isPreallocated()) { mailbox.send(actor, JournalReader.class, consumer, completes, readNextRepresentation4); }
       else { mailbox.send(new LocalMessage<JournalReader>(actor, JournalReader.class, consumer, completes, readNextRepresentation4)); }
       return completes;
@@ -78,11 +83,12 @@ public class JournalReader__Proxy<T> implements io.vlingo.symbio.store.journal.J
     }
     return null;
   }
+  @Override
   @SuppressWarnings("rawtypes")
-  public io.vlingo.common.Completes<java.util.List<io.vlingo.symbio.Entry<T>>> readNext(int arg0) {
+  public io.vlingo.common.Completes<java.util.List<T>> readNext(int arg0) {
     if (!actor.isStopped()) {
       final java.util.function.Consumer<JournalReader> consumer = (actor) -> actor.readNext(arg0);
-      final io.vlingo.common.Completes<java.util.List<io.vlingo.symbio.Entry<T>>> completes = new BasicCompletes<>(actor.scheduler());
+      final io.vlingo.common.Completes<java.util.List<T>> completes = new BasicCompletes<>(actor.scheduler());
       if (mailbox.isPreallocated()) { mailbox.send(actor, JournalReader.class, consumer, completes, readNextRepresentation5); }
       else { mailbox.send(new LocalMessage<JournalReader>(actor, JournalReader.class, consumer, completes, readNextRepresentation5)); }
       return completes;

@@ -7,6 +7,7 @@
 
 package io.vlingo.symbio.store.state;
 
+import io.vlingo.symbio.Entry;
 import io.vlingo.symbio.store.EntryReader;
 
 /**
@@ -16,6 +17,6 @@ import io.vlingo.symbio.store.EntryReader;
  * first written {@code Entry<T>} to the current last written {@code Entry<T>}, and is prepared to read
  * all newly appended {@code Entry<T>} instances beyond that point when they become available.
  *
- * @param <T> the concrete type of {@code Entry<T>} stored and read, which maybe be String, byte[], or Object
+ * @param <T> the concrete type of {@code Entry<?>} stored and read, which maybe be String, byte[], or Object
  */
-public interface StateStoreEntryReader<T> extends EntryReader<T> { }
+public interface StateStoreEntryReader<T extends Entry<?>> extends EntryReader<T> { }

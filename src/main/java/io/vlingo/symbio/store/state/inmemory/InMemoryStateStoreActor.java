@@ -84,7 +84,7 @@ public class InMemoryStateStoreActor<RS extends State<?>> extends Actor
 
   @Override
   @SuppressWarnings("unchecked")
-  public <ET> Completes<StateStoreEntryReader<ET>> entryReader(final String name) {
+  public <ET extends Entry<?>> Completes<StateStoreEntryReader<ET>> entryReader(final String name) {
     StateStoreEntryReader<?> reader = entryReaders.get(name);
     if (reader == null) {
       reader = childActorFor(StateStoreEntryReader.class, Definition.has(InMemoryStateStoreEntryReaderActor.class, Definition.parameters(entries, name)));

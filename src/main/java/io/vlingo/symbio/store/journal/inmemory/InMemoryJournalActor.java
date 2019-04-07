@@ -50,10 +50,10 @@ public class InMemoryJournalActor<T,RS extends State<?>> extends Actor implement
   }
 
   @Override
-  public Completes<JournalReader<T>> journalReader(final String name) {
-    final JournalReader<T> inmemory = journal.journalReader(name).outcome();
-    @SuppressWarnings("unchecked")
-    final JournalReader<T> actor = childActorFor(JournalReader.class, Definition.has(InMemoryJournalReaderActor.class, Definition.parameters(inmemory)));
+  @SuppressWarnings("unchecked")
+  public <ET extends Entry<?>> Completes<JournalReader<ET>> journalReader(final String name) {
+    final JournalReader<ET> inmemory = (JournalReader<ET>) journal.journalReader(name).outcome();
+    final JournalReader<ET> actor = childActorFor(JournalReader.class, Definition.has(InMemoryJournalReaderActor.class, Definition.parameters(inmemory)));
     return completes().with(actor);
   }
 

@@ -15,7 +15,7 @@ import io.vlingo.common.Completes;
 import io.vlingo.symbio.Entry;
 import io.vlingo.symbio.store.state.StateStoreEntryReader;
 
-public class InMemoryStateStoreEntryReaderActor<T> extends Actor implements StateStoreEntryReader<T> {
+public class InMemoryStateStoreEntryReaderActor<T extends Entry<?>> extends Actor implements StateStoreEntryReader<T> {
   private int currentIndex;
   private final List<Entry<T>> entriesView;
   private final String name;
@@ -32,15 +32,17 @@ public class InMemoryStateStoreEntryReaderActor<T> extends Actor implements Stat
   }
 
   @Override
-  public Completes<Entry<T>> readNext() {
+  @SuppressWarnings("unchecked")
+  public Completes<T> readNext() {
     if (currentIndex < entriesView.size()) {
-      return completes().with(entriesView.get(currentIndex++));
+      return completes().with((T) entriesView.get(currentIndex++));
     }
     return completes().with(null);
   }
 
   @Override
-  public Completes<List<Entry<T>>> readNext(final int maximumEntries) {
+  @SuppressWarnings("unchecked")
+  public Completes<List<T>> readNext(final int maximumEntries) {
     final List<Entry<T>> entries = new ArrayList<>(maximumEntries);
 
     for (int count = 0; count < maximumEntries; ++count) {
@@ -50,7 +52,7 @@ public class InMemoryStateStoreEntryReaderActor<T> extends Actor implements Stat
         break;
       }
     }
-    return completes().with(entries);
+    return completes().with((List<T>) entries);
   }
 
   @Override

@@ -21,7 +21,7 @@ import io.vlingo.symbio.Entry;
  *
  * @param <T> the concrete type of {@code Entry<T>} stored and read, which maybe be String, byte[], or Object
  */
-public interface EntryReader<T> {
+public interface EntryReader<T extends Entry<?>> {
 
   /**
    * A means to seek to the first id position of the storage. This constant
@@ -58,10 +58,9 @@ public interface EntryReader<T> {
    * been read. Note that this is the least efficient read, because only one {@code Entry<T>} will
    * be answered, but it may be useful for test purposes or a storage that is
    * appended to slowly.
-   *
-   * @return the {@code Completes<Entry<T>>} next available entry or null if none
+   * @return the {@code Completes<T>} next available entry or null if none
    */
-  Completes<Entry<T>> readNext();
+  Completes<T> readNext();
 
   /**
    * Eventually answers the next available {@code Entry<T>} instances as a {@code List}, which may be
@@ -74,9 +73,9 @@ public interface EntryReader<T> {
    *
    * @param maximumEntries the int indicating the maximum number of {@code Entry<T>} instances to read
    *
-   * @return the {@code Completes<List<Entry<byte[]>>>} of at most maximumEntries or empty if none
+   * @return the {@code Completes<List<T>>} of at most maximumEntries or empty if none
    */
-  Completes<List<Entry<T>>> readNext(final int maximumEntries);
+  Completes<List<T>> readNext(final int maximumEntries);
 
   /**
    * Rewinds the reader so that the next available {@code Entry<T>} is the first one in the storage.
@@ -108,18 +107,18 @@ public interface EntryReader<T> {
     public final Object configuration;
     public final Class<? extends Actor> entryReaderClass;
     public final String queryEntryBatchExpression;
-    public final String queryEntryIdExpression;
+    public final String queryEntryExpression;
 
     public Advice(
             final Object configuration,
             final Class<? extends Actor> entryReaderClass,
             final String queryEntryBatchExpression,
-            final String queryEntryIdExpression) {
+            final String queryEntryExpression) {
 
       this.configuration = configuration;
       this.entryReaderClass = entryReaderClass;
       this.queryEntryBatchExpression = queryEntryBatchExpression;
-      this.queryEntryIdExpression = queryEntryIdExpression;
+      this.queryEntryExpression = queryEntryExpression;
     }
 
     @SuppressWarnings("unchecked")
