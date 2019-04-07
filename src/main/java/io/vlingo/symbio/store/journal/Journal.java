@@ -153,7 +153,7 @@ public interface Journal<T> {
   <S,ST> void appendAllWith(final String streamName, final int fromStreamVersion, final List<Source<S>> sources, final ST snapshot, final AppendResultInterest interest, final Object object);
 
   /**
-   * Eventually answers the {@code JournalReader<T>} named {@code name} for this journal. If
+   * Eventually answers the {@code JournalReader<ET>} named {@code name} for this journal. If
    * the reader named {@code name} does not yet exist, it is first created. Readers
    * with different names enables reading from different positions and for different
    * reasons. For example, some readers may be interested in publishing {@code Entry<T>}
@@ -161,7 +161,7 @@ public interface Journal<T> {
    * of new streams.
    *
    * @param name the String name of the {@code JournalReader<T>} to answer
-   *
+   * @param <ET> the concrete type of {@code Entry<?} of the {@code JournalReader<ET>}
    * @return {@code Completes<JournalReader<T>>}
    */
   <ET extends Entry<?>> Completes<JournalReader<ET>> journalReader(final String name);
