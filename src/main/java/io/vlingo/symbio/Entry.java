@@ -7,6 +7,9 @@
 
 package io.vlingo.symbio;
 
+import java.util.Collections;
+import java.util.List;
+
 /**
  * Entry represents a journal entry
  *
@@ -14,6 +17,15 @@ package io.vlingo.symbio;
  * which may be a String, byte[] or Object
  */
 public interface Entry<T> extends Comparable<Entry<T>> {
+
+  /**
+   * Answer an empty {@code List<Entry<T>>}.
+   * @param <T> the type used in {@code Entry<T>}
+   * @return {@code List<Entry<T>>}
+   */
+  public static <T> List<Entry<T>> none() {
+    return Collections.emptyList();
+  }
 
   /**
    * Answers my id;
