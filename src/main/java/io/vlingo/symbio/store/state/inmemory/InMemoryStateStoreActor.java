@@ -179,10 +179,10 @@ public class InMemoryStateStoreActor<RS extends State<?>> extends Actor
             }
           }
           typeStore.put(id, raw);
-          appendEntries(sources);
+          final List<Entry<?>> entries = appendEntries(sources);
           final String dispatchId = storeName + ":" + id;
           dispatchables.add(new Dispatchable<RS>(dispatchId, LocalDateTime.now(), raw));
-          dispatch(dispatchId, raw, sources);
+          dispatch(dispatchId, raw, entries);
 
           interest.writeResultedIn(Success.of(Result.Success), id, state, stateVersion, sources, object);
         } catch (Exception e) {
@@ -198,14 +198,16 @@ public class InMemoryStateStoreActor<RS extends State<?>> extends Actor
     }
   }
 
-  private <C> void appendEntries(final List<Source<C>> sources) {
-    for (Entry<?> each : entryAdapterProvider.asEntries(sources)) {
+  private <C> List<Entry<?>> appendEntries(final List<Source<C>> sources) {
+    final List<Entry<?>> adapted = entryAdapterProvider.asEntries(sources);
+    for (Entry<?> each : adapted) {
       ((BaseEntry<?>) each).__internal__setId(String.valueOf(entries.size()));
       entries.add(each);
     }
+    return adapted;
   }
 
-  private <ST extends State<?>,C> void dispatch(final String dispatchId, final ST state, final Collection<Source<C>> sources) {
-    dispatcher.dispatch(dispatchId, state, sources);
+  private <ST extends State<?>, E extends Entry<?>> void dispatch(final String dispatchId, final ST state, final Collection<E> entries) {
+    dispatcher.dispatch(dispatchId, state, entries);
   }
 }
