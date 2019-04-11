@@ -177,18 +177,18 @@ public interface StateStore extends StateStoreReader, StateStoreWriter {
      * @param <S> the type of {@code State<?>}, being BinaryState, ObjectState, or TextState
      */
     default <S extends State<?>> void dispatch(final String dispatchId, final S state) {
-      dispatch(dispatchId, state, Source.none());
+      dispatch(dispatchId, state, Entry.none());
     }
 
     /**
-     * Dispatch the {@code source} with the uniquely assigned {@code dispatchId}.
+     * Dispatch the {@code state} and {@code entries} with the uniquely assigned {@code dispatchId}.
      * @param dispatchId the String id assigned to this dispatch
-     * @param state the {@code BinaryState} to dispatch
-     * @param sources the {@code List<Source<?>>} to dispatch
+     * @param state the {@code State<?>} to dispatch
+     * @param entries the {@code List<Entry<?>>} to dispatch
      * @param <S> the type of {@code State<?>}, being BinaryState, ObjectState, or TextState
-     * @param <C> the type of {@code Source<?>}
+     * @param <E> the type of {@code Entry<?>}
      */
-    <S extends State<?>, C extends Source<?>> void dispatch(final String dispatchId, final S state, final Collection<C> sources);
+    <S extends State<?>, E extends Entry<?>> void dispatch(final String dispatchId, final S state, final Collection<E> entries);
   }
 
   /**
