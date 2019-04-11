@@ -10,10 +10,11 @@ package io.vlingo.symbio.store.state;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import io.vlingo.actors.testkit.AccessSafely;
-import io.vlingo.symbio.Source;
+import io.vlingo.symbio.Entry;
 import io.vlingo.symbio.State;
 import io.vlingo.symbio.store.state.StateStore.ConfirmDispatchedResultInterest;
 import io.vlingo.symbio.store.state.StateStore.Dispatcher;
@@ -25,6 +26,7 @@ public class MockDispatcher implements Dispatcher {
   private final ConfirmDispatchedResultInterest confirmDispatchedResultInterest;
   private DispatcherControl control;
   private final Map<String,Object> dispatched = new HashMap<>();
+  private final ConcurrentLinkedQueue<Entry<?>> dispatchedEntries = new ConcurrentLinkedQueue<>();
   private final AtomicBoolean processDispatch = new AtomicBoolean(true);
   private int dispatchAttemptCount = 0;
 
@@ -39,20 +41,25 @@ public class MockDispatcher implements Dispatcher {
   }
 
   @Override
-  public <S extends State<?>, SO extends Source<?>> void dispatch(final String dispatchId, final S state, final Collection<SO> sources) {
+  public <S extends State<?>, E extends Entry<?>> void dispatch(final String dispatchId, final S state, final Collection<E> entries) {
     dispatchAttemptCount++;
     if (processDispatch.get()) {
-      access.writeUsing("dispatchedState", dispatchId, (State<?>) state);
+      access.writeUsing("dispatched", dispatchId, new Dispatch<>(state, entries));
       control.confirmDispatched(dispatchId, confirmDispatchedResultInterest);
     }
   }
 
+  @SuppressWarnings({"unchecked", "rawtypes"})
   public AccessSafely afterCompleting(final int times) {
     access = AccessSafely
               .afterCompleting(times)
-              .writingWith("dispatchedState", (String id, Object state) -> dispatched.put(id, state))
+              .writingWith("dispatched", (String id, Dispatch dispatch) -> { dispatched.put(id, dispatch.state); dispatchedEntries.addAll(dispatch.entries); })
+
               .readingWith("dispatchedState", (String id) -> dispatched.get(id))
               .readingWith("dispatchedStateCount", () -> dispatched.size())
+
+              .readingWith("dispatchedEntries", () ->  dispatchedEntries)
+              .readingWith("dispatchedEntriesCount", () -> dispatchedEntries.size())
 
               .writingWith("processDispatch", (Boolean flag) -> processDispatch.set(flag))
               .readingWith("processDispatch", () -> processDispatch.get())
@@ -76,5 +83,15 @@ public class MockDispatcher implements Dispatcher {
 
   public void dispatchUnconfirmed() {
     control.dispatchUnconfirmed();
+  }
+
+  private static class Dispatch<S extends State<?>,E extends Entry<?>> {
+    final Collection<E> entries;
+    final S state;
+
+    Dispatch(final S state, final Collection<E> entries) {
+      this.state = state;
+      this.entries = entries;
+    }
   }
 }
