@@ -13,7 +13,7 @@ import io.vlingo.actors.Actor;
 import io.vlingo.actors.DeadLetter;
 import io.vlingo.actors.LocalMessage;
 import io.vlingo.actors.Mailbox;
-import io.vlingo.symbio.Source;
+import io.vlingo.symbio.Entry;
 import io.vlingo.symbio.store.state.StateStore.Dispatcher;
 
 public class StateStoreDispatcher__Proxy implements io.vlingo.symbio.store.state.StateStore.Dispatcher {
@@ -30,7 +30,7 @@ public class StateStoreDispatcher__Proxy implements io.vlingo.symbio.store.state
   }
 
   @Override
-  public <S extends io.vlingo.symbio.State<?>, C extends Source<?>> void dispatch(java.lang.String arg0, S arg1, final Collection<C> arg2) {
+  public <S extends io.vlingo.symbio.State<?>, E extends Entry<?>> void dispatch(java.lang.String arg0, S arg1, final Collection<E> arg2) {
     if (!actor.isStopped()) {
       final java.util.function.Consumer<Dispatcher> consumer = (actor) -> actor.dispatch(arg0, arg1, arg2);
       if (mailbox.isPreallocated()) { mailbox.send(actor, Dispatcher.class, consumer, null, dispatchRepresentation1); }
