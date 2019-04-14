@@ -7,10 +7,13 @@
 
 package io.vlingo.symbio;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.TimeZone;
 
 import io.vlingo.common.version.SemanticVersion;
 
@@ -70,6 +73,15 @@ public abstract class Source<T> {
   }
 
   /**
+   * Answer my {@code id} as a String. By default my id is
+   * empty. Override to provide an actual id.
+   * @return String
+   */
+  public String id() {
+    return "";
+  }
+
+  /**
    * Answer whether or not I am a Null Object, which is by default {@code false}.
    * @return boolean
    */
@@ -83,6 +95,37 @@ public abstract class Source<T> {
    */
   public String typeName() {
     return getClass().getSimpleName();
+  }
+
+  /**
+   * @see java.lang.Object#hashCode()
+   */
+  @Override
+  public int hashCode() {
+    return id().hashCode();
+  }
+
+  /**
+   * @see java.lang.Object#equals(java.lang.Object)
+   */
+  @Override
+  @SuppressWarnings("unchecked")
+  public boolean equals(final Object other) {
+    if (other != null && other.getClass() != getClass()) {
+      return false;
+    }
+    return id().equals(((Source<T>) other).id());
+  }
+
+  /**
+   * @see java.lang.Object#toString()
+   */
+  @Override
+  public String toString() {
+    final String id = id();
+    return "Source [id=" + (id == null || id.isEmpty() ? "(none)" : id)
+          + " dateTimeSourced=" + LocalDateTime.ofInstant(Instant.ofEpochMilli(dateTimeSourced), TimeZone.getDefault().toZoneId())
+          + " sourceTypeVersion=" + SemanticVersion.toString(sourceTypeVersion) + "]";
   }
 
   /**
