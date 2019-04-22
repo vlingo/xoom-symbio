@@ -26,8 +26,10 @@ import io.vlingo.common.serialization.JsonSerialization;
 import io.vlingo.symbio.BaseEntry;
 import io.vlingo.symbio.BaseEntry.TextEntry;
 import io.vlingo.symbio.EntryAdapter;
+import io.vlingo.symbio.EntryAdapterProvider;
 import io.vlingo.symbio.Metadata;
 import io.vlingo.symbio.Source;
+import io.vlingo.symbio.StateAdapterProvider;
 import io.vlingo.symbio.store.journal.Journal;
 import io.vlingo.symbio.store.state.SnapshotStateAdapter;
 
@@ -51,7 +53,7 @@ public class InMemoryEventJournalActorTest {
   public void testThatJournalAppendsOneEventWithSnapshot() {
     final AccessSafely access = listener.afterCompleting(1);
     journal.appendWith("123", 1, new Test1Source(), new SnapshotState(), interest, object);
-    assertEquals(1, (int)access.readFrom("size")); 
+    assertEquals(1, (int)access.readFrom("size"));
     assertNotNull( access.readFrom("entry", 0));
     assertEquals("1", access.readFrom("entryId", 0));
     assertNotNull(access.readFrom("snapshot"));
@@ -127,7 +129,7 @@ public class InMemoryEventJournalActorTest {
     journal.appendWith("123", 3, new Test1Source(), new SnapshotState(), interest, object);
     journal.append("123", 4, new Test1Source(), interest, object);
     journal.append("123", 5, new Test1Source(), interest, object);
-    
+
     final AccessSafely accessResults = new TestResults().afterCompleting(1);
     journal
       .streamReader("test")
@@ -146,9 +148,12 @@ public class InMemoryEventJournalActorTest {
     world = World.startWithDefaults("test-journal");
     listener = new MockEventJournalListener<>();
     journal = Journal.using(world.stage(), InMemoryJournalActor.class, listener);
-    journal.registerEntryAdapter(Test1Source.class, new Test1SourceAdapter());
-    journal.registerEntryAdapter(Test2Source.class, new Test2SourceAdapter());
-    journal.registerStateAdapter(SnapshotState.class, new SnapshotStateAdapter());
+    EntryAdapterProvider.instance(world).registerAdapter(Test1Source.class, new Test1SourceAdapter());
+    EntryAdapterProvider.instance(world).registerAdapter(Test2Source.class, new Test2SourceAdapter());
+    StateAdapterProvider.instance(world).registerAdapter(SnapshotState.class, new SnapshotStateAdapter());
+//    journal.registerEntryAdapter(Test1Source.class, new Test1SourceAdapter());
+//    journal.registerEntryAdapter(Test2Source.class, new Test2SourceAdapter());
+//    journal.registerStateAdapter(SnapshotState.class, new SnapshotStateAdapter());
   }
 
   public static final class Test1Source extends Source<String> {
@@ -198,22 +203,22 @@ public class InMemoryEventJournalActorTest {
       return new TextEntry(id, Test1Source.class, 1, serialization, Metadata.nullMetadata());
     }
   }
-  
+
   private static final class TestResults
   {
     AccessSafely access;
     public final List<BaseEntry<String>> entries = new ArrayList<>();
-    
+
     @SuppressWarnings("unchecked")
     public AccessSafely afterCompleting( final int times )
     {
-      access = 
+      access =
               AccessSafely.afterCompleting(times)
               .writingWith("addAll", (values) -> this.entries.addAll((Collection<BaseEntry<String>>)values ))
               .readingWith("entry", (index) -> this.entries.get((int)index))
               .readingWith("entryId", (index) -> this.entries.get((int)index).id())
               .readingWith("size", () -> this.entries.size());
-      
+
       return access;
     }
   }
