@@ -15,10 +15,7 @@ import io.vlingo.actors.Stage;
 import io.vlingo.common.Completes;
 import io.vlingo.common.Outcome;
 import io.vlingo.symbio.Entry;
-import io.vlingo.symbio.EntryAdapter;
 import io.vlingo.symbio.Source;
-import io.vlingo.symbio.State;
-import io.vlingo.symbio.StateAdapter;
 import io.vlingo.symbio.store.Result;
 import io.vlingo.symbio.store.StorageException;
 
@@ -177,24 +174,6 @@ public interface Journal<T> {
    * @return {@code Completes<StreamReader<T>>}
    */
   Completes<StreamReader<T>> streamReader(final String name);
-
-  /**
-   * Registers the {@code adapter} with the journal for {@code sourceType}.
-   * @param sourceType the {@code Class<S>} for which to register the adapter
-   * @param adapter the {@code EntryAdapter<S,E>} used to adapt from source type  {@code S} to {@code Entry<E>}
-   * @param <S> the source type
-   * @param <E> the Entry type
-   */
-  public <S extends Source<?>,E extends Entry<?>> void registerEntryAdapter(final Class<S> sourceType, final EntryAdapter<S,E> adapter);
-
-  /**
-   * Registers the {@code adapter} with the journal for {@code stateType}.
-   * @param stateType the {@code Class<S>} for which to register the adapter
-   * @param adapter the {@code StateAdapter<S,R>} used to adapt from state type {@code S} to raw type {@code R}
-   * @param <S> the type of the natural state
-   * @param <R> the raw State type
-   */
-  public <S,R extends State<?>> void registerStateAdapter(final Class<S> stateType, final StateAdapter<S,R> adapter);
 
   /**
    * The binary journal as type {@code Journal<byte[],BinaryState>}.
