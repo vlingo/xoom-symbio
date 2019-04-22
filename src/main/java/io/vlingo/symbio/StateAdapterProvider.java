@@ -23,7 +23,11 @@ public class StateAdapterProvider {
   private final StateAdapter<Object,TextState> defaultTextStateAdapter;
 
   public static StateAdapterProvider instance(final World world) {
-    return world.resolveDynamic(INTERNAL_NAME, StateAdapterProvider.class);
+    StateAdapterProvider instance = world.resolveDynamic(INTERNAL_NAME, StateAdapterProvider.class);
+    if (instance == null) {
+      instance = new StateAdapterProvider(world);
+    }
+    return instance;
   }
 
   public StateAdapterProvider(final World world) {
