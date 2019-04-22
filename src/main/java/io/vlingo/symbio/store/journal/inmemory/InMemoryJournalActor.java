@@ -13,10 +13,8 @@ import io.vlingo.actors.Actor;
 import io.vlingo.actors.Definition;
 import io.vlingo.common.Completes;
 import io.vlingo.symbio.Entry;
-import io.vlingo.symbio.EntryAdapter;
 import io.vlingo.symbio.Source;
 import io.vlingo.symbio.State;
-import io.vlingo.symbio.StateAdapter;
 import io.vlingo.symbio.store.journal.Journal;
 import io.vlingo.symbio.store.journal.JournalListener;
 import io.vlingo.symbio.store.journal.JournalReader;
@@ -26,7 +24,7 @@ public class InMemoryJournalActor<T,RS extends State<?>> extends Actor implement
   private final InMemoryJournal<T,RS> journal;
 
   public InMemoryJournalActor(final JournalListener<T> listener) {
-    this.journal = new InMemoryJournal<>(listener);
+    this.journal = new InMemoryJournal<>(listener, stage().world());
   }
 
   @Override
@@ -63,15 +61,5 @@ public class InMemoryJournalActor<T,RS extends State<?>> extends Actor implement
     @SuppressWarnings("unchecked")
     final StreamReader<T> actor = childActorFor(StreamReader.class, Definition.has(InMemoryStreamReaderActor.class, Definition.parameters(inmemory)));
     return completes().with(actor);
-  }
-
-  @Override
-  public <S extends Source<?>,E extends Entry<?>> void registerEntryAdapter(final Class<S> sourceType, final EntryAdapter<S,E> adapter) {
-    journal.registerEntryAdapter(sourceType, adapter);
-  }
-
-  @Override
-  public <S,R extends State<?>> void registerStateAdapter(final Class<S> stateType, final StateAdapter<S,R> adapter) {
-    journal.registerStateAdapter(stateType, adapter);
   }
 }
