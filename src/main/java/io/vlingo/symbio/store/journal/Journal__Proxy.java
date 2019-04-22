@@ -6,8 +6,6 @@ import io.vlingo.actors.LocalMessage;
 import io.vlingo.actors.Mailbox;
 import io.vlingo.common.BasicCompletes;
 import io.vlingo.symbio.Entry;
-import io.vlingo.symbio.Source;
-import io.vlingo.symbio.State;
 
 public class Journal__Proxy<T> implements io.vlingo.symbio.store.journal.Journal<T> {
 
@@ -17,8 +15,6 @@ public class Journal__Proxy<T> implements io.vlingo.symbio.store.journal.Journal
   private static final String appendWithRepresentation4 = "appendWith(java.lang.String, int, io.vlingo.symbio.Source<S>, ST, io.vlingo.symbio.store.journal.Journal.io.vlingo.symbio.store.journal.Journal.AppendResultInterest<ST>, java.lang.Object)";
   private static final String journalReaderRepresentation5 = "journalReader(java.lang.String)";
   private static final String streamReaderRepresentation6 = "streamReader(java.lang.String)";
-  private static final String registerAdapterRepresentation7 = "registerAdapter(java.lang.Class<S>, io.vlingo.symbio.EntryAdapter<S, E>)";
-  private static final String registerAdapterRepresentation8 = "registerAdapter(java.lang.Class<S>, io.vlingo.symbio.StateAdapter<S, R>)";
 
   private final Actor actor;
   private final Mailbox mailbox;
@@ -72,6 +68,7 @@ public class Journal__Proxy<T> implements io.vlingo.symbio.store.journal.Journal
       actor.deadLetters().failedDelivery(new DeadLetter(actor, appendWithRepresentation4));
     }
   }
+  @Override
   @SuppressWarnings("rawtypes")
   public <ET extends Entry<?>> io.vlingo.common.Completes<io.vlingo.symbio.store.journal.JournalReader<ET>> journalReader(java.lang.String arg0) {
     if (!actor.isStopped()) {
@@ -98,27 +95,5 @@ public class Journal__Proxy<T> implements io.vlingo.symbio.store.journal.Journal
       actor.deadLetters().failedDelivery(new DeadLetter(actor, streamReaderRepresentation6));
     }
     return null;
-  }
-  @Override
-  @SuppressWarnings({ "unchecked", "rawtypes" })
-  public <S extends Source<?>,E extends Entry<?>> void registerEntryAdapter(java.lang.Class<S> arg0, io.vlingo.symbio.EntryAdapter<S, E> arg1) {
-    if (!actor.isStopped()) {
-      final java.util.function.Consumer<Journal> consumer = (actor) -> actor.registerEntryAdapter(arg0, arg1);
-      if (mailbox.isPreallocated()) { mailbox.send(actor, Journal.class, consumer, null, registerAdapterRepresentation7); }
-      else { mailbox.send(new LocalMessage<Journal>(actor, Journal.class, consumer, registerAdapterRepresentation7)); }
-    } else {
-      actor.deadLetters().failedDelivery(new DeadLetter(actor, registerAdapterRepresentation7));
-    }
-  }
-  @Override
-  @SuppressWarnings({ "unchecked", "rawtypes" })
-  public <S,R extends State<?>> void registerStateAdapter(java.lang.Class<S> arg0, io.vlingo.symbio.StateAdapter<S, R> arg1) {
-    if (!actor.isStopped()) {
-      final java.util.function.Consumer<Journal> consumer = (actor) -> actor.registerStateAdapter(arg0, arg1);
-      if (mailbox.isPreallocated()) { mailbox.send(actor, Journal.class, consumer, null, registerAdapterRepresentation8); }
-      else { mailbox.send(new LocalMessage<Journal>(actor, Journal.class, consumer, registerAdapterRepresentation8)); }
-    } else {
-      actor.deadLetters().failedDelivery(new DeadLetter(actor, registerAdapterRepresentation8));
-    }
   }
 }
