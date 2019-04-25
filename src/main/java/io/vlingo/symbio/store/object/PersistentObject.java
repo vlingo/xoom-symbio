@@ -8,15 +8,22 @@
 package io.vlingo.symbio.store.object;
 
 import java.io.Serializable;
-
 /**
  * A base type for persistent objects.
  */
 public abstract class PersistentObject implements Serializable {
   private static final long Unidentified = -1;
+  private static final long InitialVersion = 0L;
   private static final long serialVersionUID = 1L;
 
   private long persistenceId = Unidentified;
+
+  /**
+   * My persistent version, indicating how many state
+   * mutations I have suffered over my lifetime. The default
+   * value is {@link #InitialVersion}.
+   */
+  private long version = InitialVersion;
 
   /**
    * Answer {@code persistentObject} as a {@code PersistentObject}.
@@ -44,6 +51,37 @@ public abstract class PersistentObject implements Serializable {
     return persistenceId != Unidentified;
   }
 
+  /**
+   * Answers my persistence version, which can be used
+   * to implement optimistic concurrency conflict detection.
+   * 
+   * @return int
+   */
+  public long version() {
+    return version;
+  }
+  
+  /**
+   * Increments my {@link version}. This method is necessary for
+   * application-managed optimistic concurrency control, but should
+   * not be used when the persistence mechanism (e.g., JPA) manages
+   * this attribute on behalf of the application.
+   */
+  public void incrementVersion() {
+    version++;
+  }
+  
+  /**
+   * Construct my default state with {@code persistenceId} and {@link version}
+   * @param persistenceId the long unique identity used for my persistence
+   * @param version the persistent version
+   */
+  protected PersistentObject(final long persistenceId, final long version) {
+    this();
+    this.persistenceId = persistenceId;
+    this.version = version;
+  }
+  
   /**
    * Construct my default state with {@code persistenceId}.
    * @param persistenceId the long unique identity used for my persistence
