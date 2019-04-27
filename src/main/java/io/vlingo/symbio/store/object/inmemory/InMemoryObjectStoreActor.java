@@ -59,7 +59,7 @@ public class InMemoryObjectStoreActor extends Actor implements ObjectStore {
 
   /* @see io.vlingo.symbio.store.object.ObjectStore#persist(java.lang.Object, java.util.List, long, io.vlingo.symbio.store.object.ObjectStore.PersistResultInterest, java.lang.Object) */
   @Override
-  public <E> void persist(Object persistentObject, final List<Source<E>> sources, long updateId, PersistResultInterest interest, Object object) {
+  public <T extends PersistentObject, E> void persist(final T persistentObject, final List<Source<E>> sources, long updateId, PersistResultInterest interest, Object object) {
     persistEach(persistentObject);
     appendEntries(sources);
     interest.persistResultedIn(Success.of(Result.Success), persistentObject, 1, 1, object);
@@ -67,7 +67,7 @@ public class InMemoryObjectStoreActor extends Actor implements ObjectStore {
 
   /* @see io.vlingo.symbio.store.object.ObjectStore#persistAll(java.util.Collection, java.util.List, long, io.vlingo.symbio.store.object.ObjectStore.PersistResultInterest, java.lang.Object) */
   @Override
-  public <E> void persistAll(Collection<Object> persistentObjects, final List<Source<E>> sources, long updateId, PersistResultInterest interest, Object object) {
+  public <T extends PersistentObject, E> void persistAll(Collection<T> persistentObjects, final List<Source<E>> sources, long updateId, PersistResultInterest interest, Object object) {
     for (final Object persistentObject : persistentObjects) {
       persistEach(persistentObject);
     }

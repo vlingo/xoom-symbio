@@ -11,6 +11,9 @@ import io.vlingo.actors.Actor;
 import io.vlingo.actors.DeadLetter;
 import io.vlingo.actors.LocalMessage;
 import io.vlingo.actors.Mailbox;
+import io.vlingo.common.Outcome;
+import io.vlingo.symbio.store.Result;
+import io.vlingo.symbio.store.StorageException;
 import io.vlingo.symbio.store.object.ObjectStoreWriter.PersistResultInterest;
 
 public class ObjectStorePersistResultInterest__Proxy implements io.vlingo.symbio.store.object.ObjectStore.PersistResultInterest {
@@ -25,8 +28,9 @@ public class ObjectStorePersistResultInterest__Proxy implements io.vlingo.symbio
     this.mailbox = mailbox;
   }
 
+  /* @see io.vlingo.symbio.store.object.ObjectStoreWriter.PersistResultInterest#persistResultedIn(io.vlingo.common.Outcome, io.vlingo.symbio.store.object.PersistentObject, int, int, java.lang.Object) */
   @Override
-  public void persistResultedIn(io.vlingo.common.Outcome<io.vlingo.symbio.store.StorageException, io.vlingo.symbio.store.Result> arg0, java.lang.Object arg1, int arg2, int arg3, java.lang.Object arg4) {
+  public void persistResultedIn(Outcome<StorageException, Result> arg0, java.lang.Object arg1, int arg2, int arg3, Object arg4) {
     if (!actor.isStopped()) {
       final java.util.function.Consumer<PersistResultInterest> consumer = (actor) -> actor.persistResultedIn(arg0, arg1, arg2, arg3, arg4);
       if (mailbox.isPreallocated()) { mailbox.send(actor, PersistResultInterest.class, consumer, null, persistResultedInRepresentation1); }
