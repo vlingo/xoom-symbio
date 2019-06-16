@@ -7,13 +7,6 @@
 
 package io.vlingo.symbio.store.state.inmemory;
 
-import java.time.LocalDateTime;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.CopyOnWriteArrayList;
-
 import io.vlingo.actors.Actor;
 import io.vlingo.actors.Definition;
 import io.vlingo.common.Completes;
@@ -31,6 +24,13 @@ import io.vlingo.symbio.store.StorageException;
 import io.vlingo.symbio.store.state.StateStore;
 import io.vlingo.symbio.store.state.StateStoreEntryReader;
 import io.vlingo.symbio.store.state.StateTypeStateStoreMap;
+
+import java.time.LocalDateTime;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class InMemoryStateStoreActor<RS extends State<?>> extends Actor
     implements StateStore {
@@ -131,13 +131,13 @@ public class InMemoryStateStoreActor<RS extends State<?>> extends Actor
         interest.readResultedIn(Success.of(Result.Success), id, state, raw.dataVersion, raw.metadata, object);
       } else {
         for (String storeId : typeStore.keySet()) {
-          System.out.println("UNFOUND STATES\n=====================");
-          System.out.println("STORE ID: '" + storeId + "' STATE: " + typeStore.get(storeId));
+          logger().debug("UNFOUND STATES\n=====================");
+          logger().debug("STORE ID: '" + storeId + "' STATE: " + typeStore.get(storeId));
         }
         interest.readResultedIn(Failure.of(new StorageException(Result.NotFound, "Not found.")), id, null, -1, null, object);
       }
     } else {
-      logger().log(
+      logger().warn(
               getClass().getSimpleName() +
               " readText() missing ReadResultInterest for: " +
               (id == null ? "unknown id" : id));
@@ -186,12 +186,12 @@ public class InMemoryStateStoreActor<RS extends State<?>> extends Actor
 
           interest.writeResultedIn(Success.of(Result.Success), id, state, stateVersion, sources, object);
         } catch (Exception e) {
-          logger().log(getClass().getSimpleName() + " writeText() error because: " + e.getMessage(), e);
+          logger().error(getClass().getSimpleName() + " writeText() error because: " + e.getMessage(), e);
           interest.writeResultedIn(Failure.of(new StorageException(Result.Error, e.getMessage(), e)), id, state, stateVersion, sources, object);
         }
       }
     } else {
-      logger().log(
+      logger().warn(
               getClass().getSimpleName() +
               " writeText() missing WriteResultInterest for: " +
               (state == null ? "unknown id" : id));
