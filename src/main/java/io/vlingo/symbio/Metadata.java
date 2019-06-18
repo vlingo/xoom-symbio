@@ -72,6 +72,18 @@ public class Metadata implements Comparable<Metadata> {
     return !hasOperation() && !hasValue();
   }
 
+  public Object object() {
+    return object;
+  }
+
+  public String operation() {
+    return operation;
+  }
+
+  public String value() {
+    return value;
+  }
+
   @SuppressWarnings("unchecked")
   public <T> T typedObject() {
     return (T) object;
