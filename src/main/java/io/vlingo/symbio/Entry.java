@@ -28,6 +28,21 @@ public interface Entry<T> extends Comparable<Entry<T>> {
   }
 
   /**
+   * Answers the Class&lt;C&gt; of the given {@code type}.
+   * @param type the String representation of the class
+   * @param <C> the Class type
+   * @return Class of C
+   */
+  @SuppressWarnings("unchecked")
+  public static <C> Class<C> typed(final String type) {
+    try {
+      return (Class<C>) Class.forName(type);
+    } catch (Exception e) {
+      throw new IllegalStateException("Cannot get class for type: " + type);
+    }
+  }
+
+  /**
    * Answers my id;
    * @return String
    */
