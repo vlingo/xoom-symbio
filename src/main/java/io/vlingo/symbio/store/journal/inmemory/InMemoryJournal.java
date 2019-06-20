@@ -7,6 +7,7 @@
 
 package io.vlingo.symbio.store.journal.inmemory;
 
+import io.vlingo.actors.Definition;
 import io.vlingo.actors.World;
 import io.vlingo.common.Completes;
 import io.vlingo.common.Success;
@@ -17,29 +18,40 @@ import io.vlingo.symbio.Source;
 import io.vlingo.symbio.State;
 import io.vlingo.symbio.StateAdapterProvider;
 import io.vlingo.symbio.store.Result;
+import io.vlingo.symbio.store.dispatch.Dispatcher;
+import io.vlingo.symbio.store.dispatch.DispatcherControl;
+import io.vlingo.symbio.store.dispatch.inmemory.InMemoryDispatcherControl;
 import io.vlingo.symbio.store.journal.Journal;
-import io.vlingo.symbio.store.journal.JournalListener;
 import io.vlingo.symbio.store.journal.JournalReader;
 import io.vlingo.symbio.store.journal.StreamReader;
+import io.vlingo.symbio.store.journal.dispatch.JournalDispatchable;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class InMemoryJournal<T,RS extends State<?>> implements Journal<T> {
   private final EntryAdapterProvider entryAdapterProvider;
   private final StateAdapterProvider stateAdapterProvider;
   private final List<Entry<T>> journal;
-  private final JournalListener<T> listener;
   private final Map<String,JournalReader<? extends Entry<?>>> journalReaders;
   private final Map<String,StreamReader<T>> streamReaders;
   private final Map<String, Map<Integer,Integer>> streamIndexes;
   private final Map<String,RS> snapshots;
-  
-  public InMemoryJournal(final JournalListener<T> listener, final World world) {
-    this.listener = listener;
+  private final List<JournalDispatchable<T,RS>> dispatchables;
+  private final Dispatcher<JournalDispatchable<T,RS>> dispatcher;
+  private final DispatcherControl dispatcherControl;
+
+  public InMemoryJournal(final Dispatcher<JournalDispatchable<T,RS>> dispatcher, final World world ) {
+    this(dispatcher, world, 1000L, 1000L);
+  }
+
+  public InMemoryJournal(final Dispatcher<JournalDispatchable<T,RS>> dispatcher, final World world,
+          long checkConfirmationExpirationInterval, final long confirmationExpiration) {
     this.entryAdapterProvider = EntryAdapterProvider.instance(world);
     this.stateAdapterProvider = StateAdapterProvider.instance(world);
     this.journal = new ArrayList<>();
@@ -47,13 +59,28 @@ public class InMemoryJournal<T,RS extends State<?>> implements Journal<T> {
     this.streamReaders = new HashMap<>(1);
     this.streamIndexes = new HashMap<>();
     this.snapshots = new HashMap<>();
+
+    this.dispatcher = dispatcher;
+    this.dispatchables = new CopyOnWriteArrayList<>();
+    this.dispatcherControl = world.stage().actorFor(
+            DispatcherControl.class,
+            Definition.has(
+                    InMemoryDispatcherControl.class,
+                    Definition.parameters(
+                            dispatcher,
+                            dispatchables,
+                            checkConfirmationExpirationInterval,
+                            confirmationExpiration)));
+
+    this.dispatcher.controlWith(dispatcherControl);
+    this.dispatcherControl.dispatchUnconfirmed();
   }
 
   @Override
   public <S,ST> void append(final String streamName, final int streamVersion, final Source<S> source, final AppendResultInterest interest, final Object object) {
     final Entry<T> entry = entryAdapterProvider.asEntry(source);
     insert(streamName, streamVersion, entry);
-    listener.appended(entry);
+    dispatch(streamName, streamVersion, Collections.singletonList(entry), null);
     interest.appendResultedIn(Success.of(Result.Success), streamName, streamVersion, source, Optional.empty(), object);
   }
 
@@ -73,7 +100,7 @@ public class InMemoryJournal<T,RS extends State<?>> implements Journal<T> {
       snapshotResult = Optional.empty();
     }
 
-    listener.appendedWith(entry, (State<T>) raw);
+    dispatch(streamName, streamVersion, Collections.singletonList(entry), raw);
     interest.appendResultedIn(Success.of(Result.Success), streamName, streamVersion, source, snapshotResult, object);
   }
 
@@ -81,7 +108,8 @@ public class InMemoryJournal<T,RS extends State<?>> implements Journal<T> {
   public <S,ST> void appendAll(final String streamName, final int fromStreamVersion, final List<Source<S>> sources, final AppendResultInterest interest, final Object object) {
     final List<Entry<T>> entries = entryAdapterProvider.asEntries(sources);
     insert(streamName, fromStreamVersion, entries);
-    listener.appendedAll(entries);
+
+    dispatch(streamName, fromStreamVersion, entries, null);
     interest.appendAllResultedIn(Success.of(Result.Success), streamName, fromStreamVersion, sources, Optional.empty(), object);
   }
 
@@ -100,7 +128,8 @@ public class InMemoryJournal<T,RS extends State<?>> implements Journal<T> {
       raw = null;
       snapshotResult = Optional.empty();
     }
-    listener.appendedAllWith(entries, (State<T>) raw);
+    
+    dispatch(streamName, fromStreamVersion, entries, raw);
     interest.appendAllResultedIn(Success.of(Result.Success), streamName, fromStreamVersion, sources, snapshotResult, object);
   }
 
@@ -131,11 +160,8 @@ public class InMemoryJournal<T,RS extends State<?>> implements Journal<T> {
     final String id = "" + (entryIndex + 1);
     ((BaseEntry<T>) entry).__internal__setId(id); //questionable cast
     journal.add(entry);
-    Map<Integer,Integer> versionIndexes = streamIndexes.get(streamName);
-    if (versionIndexes == null) {
-      versionIndexes = new HashMap<>();
-      streamIndexes.put(streamName, versionIndexes);
-    }
+    
+    Map<Integer, Integer> versionIndexes = streamIndexes.computeIfAbsent(streamName, k -> new HashMap<>());
     versionIndexes.put(streamVersion, entryIndex);
   }
 
@@ -145,5 +171,11 @@ public class InMemoryJournal<T,RS extends State<?>> implements Journal<T> {
       insert(streamName, fromStreamVersion + index, entry);
       ++index;
     }
+  }
+
+  private void dispatch(final String streamName, final int streamVersion, final List<Entry<T>> entries, RS snapshot){
+    final JournalDispatchable<T, RS> dispatchable = new JournalDispatchable<>(streamName, streamVersion, entries, snapshot);
+    this.dispatchables.add(dispatchable);
+    this.dispatcher.dispatch(dispatchable);
   }
 }

@@ -20,7 +20,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class MockDispatcher implements Dispatcher<StateStore.StateDispatchable> {
+public class MockStateStoreDispatcher implements Dispatcher<StateStore.StateDispatchable> {
   private AccessSafely access = AccessSafely.afterCompleting(0);
 
   private final ConfirmDispatchedResultInterest confirmDispatchedResultInterest;
@@ -30,7 +30,7 @@ public class MockDispatcher implements Dispatcher<StateStore.StateDispatchable> 
   private final AtomicBoolean processDispatch = new AtomicBoolean(true);
   private int dispatchAttemptCount = 0;
 
-  public MockDispatcher(final ConfirmDispatchedResultInterest confirmDispatchedResultInterest) {
+  public MockStateStoreDispatcher(final ConfirmDispatchedResultInterest confirmDispatchedResultInterest) {
     this.confirmDispatchedResultInterest = confirmDispatchedResultInterest;
     this.access = AccessSafely.afterCompleting(0);
   }

@@ -7,13 +7,6 @@
 
 package io.vlingo.symbio.store.state.inmemory;
 
-import static org.junit.Assert.assertEquals;
-
-import java.util.Arrays;
-
-import org.junit.Before;
-import org.junit.Test;
-
 import io.vlingo.actors.World;
 import io.vlingo.actors.testkit.AccessSafely;
 import io.vlingo.actors.testkit.TestWorld;
@@ -25,18 +18,24 @@ import io.vlingo.symbio.StateAdapterProvider;
 import io.vlingo.symbio.store.state.Entity1;
 import io.vlingo.symbio.store.state.Entity1.Entity1StateAdapter;
 import io.vlingo.symbio.store.state.Entity2;
-import io.vlingo.symbio.store.state.MockDispatcher;
+import io.vlingo.symbio.store.state.MockStateStoreDispatcher;
 import io.vlingo.symbio.store.state.MockStateStoreResultInterest;
 import io.vlingo.symbio.store.state.StateStore;
 import io.vlingo.symbio.store.state.StateStoreEntryReader;
 import io.vlingo.symbio.store.state.StateTypeStateStoreMap;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.util.Arrays;
+
+import static org.junit.Assert.assertEquals;
 
 public class InMemoryStateStoreEntryReaderActorTest {
   private static final String Id1 = "123-A";
   private static final String Id2 = "123-B";
   private static final String Id3 = "123-C";
 
-  private MockDispatcher dispatcher;
+  private MockStateStoreDispatcher dispatcher;
   private EntryAdapterProvider entryAdapterProvider;
   private MockStateStoreResultInterest interest;
   private StateStoreEntryReader<TextEntry> reader;
@@ -74,7 +73,7 @@ public class InMemoryStateStoreEntryReaderActorTest {
     world = testWorld.world();
 
     interest = new MockStateStoreResultInterest();
-    dispatcher = new MockDispatcher(interest);
+    dispatcher = new MockStateStoreDispatcher(interest);
 
     final StateAdapterProvider stateAdapterProvider = new StateAdapterProvider(world);
     entryAdapterProvider = new EntryAdapterProvider(world);

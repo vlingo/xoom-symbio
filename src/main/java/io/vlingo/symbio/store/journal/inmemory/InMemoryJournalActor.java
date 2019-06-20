@@ -7,24 +7,25 @@
 
 package io.vlingo.symbio.store.journal.inmemory;
 
-import java.util.List;
-
 import io.vlingo.actors.Actor;
 import io.vlingo.actors.Definition;
 import io.vlingo.common.Completes;
 import io.vlingo.symbio.Entry;
 import io.vlingo.symbio.Source;
 import io.vlingo.symbio.State;
+import io.vlingo.symbio.store.dispatch.Dispatcher;
 import io.vlingo.symbio.store.journal.Journal;
-import io.vlingo.symbio.store.journal.JournalListener;
 import io.vlingo.symbio.store.journal.JournalReader;
 import io.vlingo.symbio.store.journal.StreamReader;
+import io.vlingo.symbio.store.journal.dispatch.JournalDispatchable;
+
+import java.util.List;
 
 public class InMemoryJournalActor<T,RS extends State<?>> extends Actor implements Journal<T> {
   private final InMemoryJournal<T,RS> journal;
 
-  public InMemoryJournalActor(final JournalListener<T> listener) {
-    this.journal = new InMemoryJournal<>(listener, stage().world());
+  public InMemoryJournalActor(final Dispatcher<JournalDispatchable<T,RS>> dispatcher) {
+    this.journal = new InMemoryJournal<>(dispatcher, stage().world());
   }
 
   @Override

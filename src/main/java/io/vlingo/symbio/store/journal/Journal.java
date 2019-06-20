@@ -7,17 +7,20 @@
 
 package io.vlingo.symbio.store.journal;
 
-import java.util.List;
-import java.util.Optional;
-
 import io.vlingo.actors.Actor;
 import io.vlingo.actors.Stage;
 import io.vlingo.common.Completes;
 import io.vlingo.common.Outcome;
 import io.vlingo.symbio.Entry;
 import io.vlingo.symbio.Source;
+import io.vlingo.symbio.State;
 import io.vlingo.symbio.store.Result;
 import io.vlingo.symbio.store.StorageException;
+import io.vlingo.symbio.store.dispatch.Dispatcher;
+import io.vlingo.symbio.store.journal.dispatch.JournalDispatchable;
+
+import java.util.List;
+import java.util.Optional;
 
 /**
  * The top-level journal used within a Bounded Context (microservice) to store all of
@@ -39,13 +42,15 @@ public interface Journal<T> {
    * @param additional the Object[] of additional parameters
    * @param <A> the concrete type of the Actor implementing the {@code Journal<T>} protocol
    * @param <T> the concrete type of {@code Entry<T>} stored and read, which maybe be String, byte[], or Object
+   * @param <ST> the snapshot state type
    * @return {@code Journal<T>}
    */
   @SuppressWarnings("unchecked")
-  static <A extends Actor,T> Journal<T> using(final Stage stage, final Class<A> implementor, final JournalListener<T> listener, final Object...additional) {
+  static <A extends Actor, T, ST extends State<?>> Journal<T> using(final Stage stage, final Class<A> implementor,
+          final Dispatcher<JournalDispatchable<T,ST>> dispatcher, final Object...additional) {
     return additional.length == 0 ?
-             stage.actorFor(Journal.class, implementor, listener) :
-             stage.actorFor(Journal.class, implementor, listener, additional);
+             stage.actorFor(Journal.class, implementor, dispatcher) :
+             stage.actorFor(Journal.class, implementor, dispatcher, additional);
   }
 
   /**
