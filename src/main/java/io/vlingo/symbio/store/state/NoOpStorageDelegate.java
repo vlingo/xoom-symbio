@@ -12,11 +12,11 @@ import java.util.Collection;
 import io.vlingo.symbio.Entry;
 import io.vlingo.symbio.State;
 import io.vlingo.symbio.store.EntryReader.Advice;
-import io.vlingo.symbio.store.state.StateStore.Dispatchable;
+import io.vlingo.symbio.store.state.StateStore.StateDispatchable;
 import io.vlingo.symbio.store.state.StateStore.StorageDelegate;
 
 public class NoOpStorageDelegate implements StorageDelegate {
-  @Override public <S extends State<?>> Collection<Dispatchable<S>> allUnconfirmedDispatchableStates() { return null; }
+  @Override public <S extends State<?>> Collection<StateDispatchable<S>> allUnconfirmedDispatchableStates() { return null; }
 
   @Override public void beginRead() {  }
 

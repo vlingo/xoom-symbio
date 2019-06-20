@@ -21,12 +21,14 @@ import io.vlingo.symbio.State;
 import io.vlingo.symbio.StateAdapterProvider;
 import io.vlingo.symbio.store.Result;
 import io.vlingo.symbio.store.StorageException;
+import io.vlingo.symbio.store.dispatch.Dispatcher;
+import io.vlingo.symbio.store.dispatch.DispatcherControl;
+import io.vlingo.symbio.store.dispatch.inmemory.InMemoryDispatcherControl;
 import io.vlingo.symbio.store.state.StateStore;
 import io.vlingo.symbio.store.state.StateStoreEntryReader;
 import io.vlingo.symbio.store.state.StateTypeStateStoreMap;
 
 import java.time.LocalDateTime;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,8 +37,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class InMemoryStateStoreActor<RS extends State<?>> extends Actor
     implements StateStore {
 
-  private final List<Dispatchable<RS>> dispatchables;
-  private final Dispatcher dispatcher;
+  private final List<StateDispatchable<RS>> dispatchables;
+  private final Dispatcher<StateDispatchable<RS>> dispatcher;
   private final DispatcherControl dispatcherControl;
   private final List<Entry<?>> entries;
   private final Map<String,StateStoreEntryReader<?>> entryReaders;
@@ -44,11 +46,11 @@ public class InMemoryStateStoreActor<RS extends State<?>> extends Actor
   private final StateAdapterProvider stateAdapterProvider;
   private final Map<String, Map<String, RS>> store;
 
-  public InMemoryStateStoreActor(final Dispatcher dispatcher) {
+  public InMemoryStateStoreActor(final Dispatcher<StateDispatchable<RS>> dispatcher) {
     this(dispatcher, 1000L, 1000L);
   }
 
-  public InMemoryStateStoreActor(final Dispatcher dispatcher, long checkConfirmationExpirationInterval, final long confirmationExpiration) {
+  public InMemoryStateStoreActor(final Dispatcher<StateDispatchable<RS>> dispatcher, long checkConfirmationExpirationInterval, final long confirmationExpiration) {
     if (dispatcher == null) {
       throw new IllegalArgumentException("Dispatcher must not be null.");
     }
@@ -180,9 +182,7 @@ public class InMemoryStateStoreActor<RS extends State<?>> extends Actor
           }
           typeStore.put(id, raw);
           final List<Entry<?>> entries = appendEntries(sources);
-          final String dispatchId = storeName + ":" + id;
-          dispatchables.add(new Dispatchable<RS>(dispatchId, LocalDateTime.now(), raw));
-          dispatch(dispatchId, raw, entries);
+          dispatch(id, storeName, raw, entries);
 
           interest.writeResultedIn(Success.of(Result.Success), id, state, stateVersion, sources, object);
         } catch (Exception e) {
@@ -207,7 +207,10 @@ public class InMemoryStateStoreActor<RS extends State<?>> extends Actor
     return adapted;
   }
 
-  private <ST extends State<?>, E extends Entry<?>> void dispatch(final String dispatchId, final ST state, final Collection<E> entries) {
-    dispatcher.dispatch(dispatchId, state, entries);
+  private void dispatch(String id, String storeName, RS raw, List<Entry<?>> entries) {
+    final String dispatchId = storeName + ":" + id;
+    final StateDispatchable<RS> dispatchable = new StateDispatchable<>(dispatchId, LocalDateTime.now(), raw, entries);
+    this.dispatchables.add(dispatchable);
+    this.dispatcher.dispatch(dispatchable);
   }
 }

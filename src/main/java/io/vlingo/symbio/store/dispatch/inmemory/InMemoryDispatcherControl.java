@@ -5,45 +5,43 @@
 // was not distributed with this file, You can obtain
 // one at https://mozilla.org/MPL/2.0/.
 
-package io.vlingo.symbio.store.state.inmemory;
-
-import java.time.Duration;
-import java.time.LocalDateTime;
-import java.util.List;
+package io.vlingo.symbio.store.dispatch.inmemory;
 
 import io.vlingo.actors.Actor;
 import io.vlingo.common.Cancellable;
 import io.vlingo.common.Scheduled;
 import io.vlingo.common.Scheduler;
-import io.vlingo.symbio.State;
 import io.vlingo.symbio.store.Result;
-import io.vlingo.symbio.store.state.StateStore.ConfirmDispatchedResultInterest;
-import io.vlingo.symbio.store.state.StateStore.Dispatchable;
-import io.vlingo.symbio.store.state.StateStore.Dispatcher;
-import io.vlingo.symbio.store.state.StateStore.DispatcherControl;
+import io.vlingo.symbio.store.dispatch.ConfirmDispatchedResultInterest;
+import io.vlingo.symbio.store.dispatch.Dispatchable;
+import io.vlingo.symbio.store.dispatch.Dispatcher;
+import io.vlingo.symbio.store.dispatch.DispatcherControl;
+
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.List;
 /**
  * InMemoryDispatcherControl
  */
-public class InMemoryDispatcherControl<RS extends State<?>> extends Actor implements DispatcherControl, Scheduled<Object> {
+public class InMemoryDispatcherControl<D extends Dispatchable> extends Actor implements DispatcherControl, Scheduled<Object> {
   
   public final static long DEFAULT_REDISPATCH_DELAY = 2000L;
 
-  private final Dispatcher dispatcher;
-  private final List<Dispatchable<RS>> dispatchables;
+  private final Dispatcher<D> dispatcher;
+  private final List<D> dispatchables;
   private final long confirmationExpiration;
-  private final Scheduler scheduler;
   private final Cancellable cancellable;
   
   public InMemoryDispatcherControl(
-    final Dispatcher dispatcher,
-    final List<Dispatchable<RS>> dispatchables,
+    final Dispatcher<D> dispatcher,
+    final List<D> dispatchables,
     final long checkConfirmationExpirationInterval,
     long confirmationExpiration)
   {
     this.dispatcher = dispatcher;
     this.dispatchables = dispatchables;
     this.confirmationExpiration = confirmationExpiration;
-    this.scheduler = new Scheduler();
+    Scheduler scheduler = new Scheduler();
     this.cancellable = scheduler.schedule(this, null, DEFAULT_REDISPATCH_DELAY, checkConfirmationExpirationInterval);
   }
   
@@ -55,18 +53,23 @@ public class InMemoryDispatcherControl<RS extends State<?>> extends Actor implem
   @Override
   public void dispatchUnconfirmed() {
     final LocalDateTime now = LocalDateTime.now();
-    for (Dispatchable<?> dispatchable : dispatchables) {
-      final LocalDateTime then = dispatchable.createdAt;
+    for (D dispatchable : dispatchables) {
+      final LocalDateTime then = dispatchable.getCreatedAt();
       Duration duration = Duration.between(then, now);
       if (Math.abs(duration.toMillis()) > confirmationExpiration) {
-        dispatcher.dispatch(dispatchable.id, dispatchable.state);
+        dispatcher.dispatch(dispatchable);
       }
     }
   }
   
   @Override
   public void confirmDispatched(String dispatchId, ConfirmDispatchedResultInterest interest) {
-    dispatchables.remove(new Dispatchable<RS>(dispatchId, null, null));
+    dispatchables
+            .stream()
+            .filter(d -> d.getId().equals(dispatchId))
+            .findFirst()
+            .ifPresent(dispatchables::remove);
+
     interest.confirmDispatchedResultedIn(Result.Success, dispatchId);
   }
 

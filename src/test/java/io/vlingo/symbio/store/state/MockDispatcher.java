@@ -7,20 +7,20 @@
 
 package io.vlingo.symbio.store.state;
 
+import io.vlingo.actors.testkit.AccessSafely;
+import io.vlingo.symbio.Entry;
+import io.vlingo.symbio.State;
+import io.vlingo.symbio.store.dispatch.ConfirmDispatchedResultInterest;
+import io.vlingo.symbio.store.dispatch.Dispatcher;
+import io.vlingo.symbio.store.dispatch.DispatcherControl;
+
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import io.vlingo.actors.testkit.AccessSafely;
-import io.vlingo.symbio.Entry;
-import io.vlingo.symbio.State;
-import io.vlingo.symbio.store.state.StateStore.ConfirmDispatchedResultInterest;
-import io.vlingo.symbio.store.state.StateStore.Dispatcher;
-import io.vlingo.symbio.store.state.StateStore.DispatcherControl;
-
-public class MockDispatcher implements Dispatcher {
+public class MockDispatcher implements Dispatcher<StateStore.StateDispatchable> {
   private AccessSafely access = AccessSafely.afterCompleting(0);
 
   private final ConfirmDispatchedResultInterest confirmDispatchedResultInterest;
@@ -41,10 +41,11 @@ public class MockDispatcher implements Dispatcher {
   }
 
   @Override
-  public <S extends State<?>, E extends Entry<?>> void dispatch(final String dispatchId, final S state, final Collection<E> entries) {
+  public void dispatch(StateStore.StateDispatchable dispatchable) {
     dispatchAttemptCount++;
     if (processDispatch.get()) {
-      access.writeUsing("dispatched", dispatchId, new Dispatch<>(state, entries));
+      final String dispatchId = dispatchable.getId();
+      access.writeUsing("dispatched", dispatchId, new Dispatch(dispatchable.getState(), dispatchable.getEntries()));
       control.confirmDispatched(dispatchId, confirmDispatchedResultInterest);
     }
   }

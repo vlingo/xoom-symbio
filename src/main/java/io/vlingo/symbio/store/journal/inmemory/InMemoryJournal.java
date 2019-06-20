@@ -7,12 +7,6 @@
 
 package io.vlingo.symbio.store.journal.inmemory;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
 import io.vlingo.actors.World;
 import io.vlingo.common.Completes;
 import io.vlingo.common.Success;
@@ -28,6 +22,12 @@ import io.vlingo.symbio.store.journal.JournalListener;
 import io.vlingo.symbio.store.journal.JournalReader;
 import io.vlingo.symbio.store.journal.StreamReader;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
 public class InMemoryJournal<T,RS extends State<?>> implements Journal<T> {
   private final EntryAdapterProvider entryAdapterProvider;
   private final StateAdapterProvider stateAdapterProvider;
@@ -37,7 +37,7 @@ public class InMemoryJournal<T,RS extends State<?>> implements Journal<T> {
   private final Map<String,StreamReader<T>> streamReaders;
   private final Map<String, Map<Integer,Integer>> streamIndexes;
   private final Map<String,RS> snapshots;
-
+  
   public InMemoryJournal(final JournalListener<T> listener, final World world) {
     this.listener = listener;
     this.entryAdapterProvider = EntryAdapterProvider.instance(world);
@@ -72,6 +72,7 @@ public class InMemoryJournal<T,RS extends State<?>> implements Journal<T> {
       raw = null;
       snapshotResult = Optional.empty();
     }
+
     listener.appendedWith(entry, (State<T>) raw);
     interest.appendResultedIn(Success.of(Result.Success), streamName, streamVersion, source, snapshotResult, object);
   }
