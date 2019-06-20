@@ -38,16 +38,16 @@ public interface Journal<T> {
    * Answer a new {@code Journal<T>}
    * @param stage the Stage within which the {@code Journal<T>} is created
    * @param implementor the {@code Class<A>} of the implementor
-   * @param listener the {@code JournalListener<T>}
+   * @param dispatcher the {@code Dispatcher<T>}
    * @param additional the Object[] of additional parameters
    * @param <A> the concrete type of the Actor implementing the {@code Journal<T>} protocol
    * @param <T> the concrete type of {@code Entry<T>} stored and read, which maybe be String, byte[], or Object
-   * @param <ST> the snapshot state type
+   * @param <RS> the raw snapshot state type
    * @return {@code Journal<T>}
    */
   @SuppressWarnings("unchecked")
-  static <A extends Actor, T, ST extends State<?>> Journal<T> using(final Stage stage, final Class<A> implementor,
-          final Dispatcher<JournalDispatchable<T,ST>> dispatcher, final Object...additional) {
+  static <A extends Actor, T, RS extends State<?>> Journal<T> using(final Stage stage, final Class<A> implementor,
+          final Dispatcher<JournalDispatchable<T,RS>> dispatcher, final Object...additional) {
     return additional.length == 0 ?
              stage.actorFor(Journal.class, implementor, dispatcher) :
              stage.actorFor(Journal.class, implementor, dispatcher, additional);
