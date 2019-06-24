@@ -19,19 +19,19 @@ public abstract class Dispatchable {
   /**
    * The moment when I was persistently created.
    */
-  private final LocalDateTime createdAt;
+  private final LocalDateTime createdOn;
 
-  protected Dispatchable(String id, LocalDateTime createdAt) {
+  protected Dispatchable(String id, LocalDateTime createdOn) {
     this.id = id;
-    this.createdAt = createdAt;
+    this.createdOn = createdOn;
   }
 
   public String getId() {
     return id;
   }
 
-  public LocalDateTime getCreatedAt() {
-    return createdAt;
+  public LocalDateTime createdOn() {
+    return createdOn;
   }
 
   @Override
