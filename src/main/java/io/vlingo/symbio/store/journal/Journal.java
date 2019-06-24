@@ -12,6 +12,7 @@ import io.vlingo.actors.Stage;
 import io.vlingo.common.Completes;
 import io.vlingo.common.Outcome;
 import io.vlingo.symbio.Entry;
+import io.vlingo.symbio.Metadata;
 import io.vlingo.symbio.Source;
 import io.vlingo.symbio.State;
 import io.vlingo.symbio.store.Result;
@@ -71,6 +72,20 @@ public interface Journal<T> {
     <S,ST> void appendResultedIn(final Outcome<StorageException,Result> outcome, final String streamName, final int streamVersion, final Source<S> source, final Optional<ST> snapshot, final Object object);
 
     /**
+     * Conveys the {@code outcome} of a single appended {@code Source<S>} and a possible state {@code snapshot}.
+     * @param outcome the {@code Outcome<StorageException,Result>} either failure or success
+     * @param streamName the String name of the stream appended
+     * @param streamVersion the int version of the stream appended
+     * @param source the {@code Source<S>} that was appended
+     * @param metadata the Metadata associated with the Source
+     * @param snapshot the possible {@code Optional<ST>} that may have persisted as the stream's most recent snapshot
+     * @param object the Object supplied by the sender to be sent back in this result
+     * @param <S> the Source type
+     * @param <ST> the snapshot state type
+     */
+    <S,ST> void appendResultedIn(final Outcome<StorageException,Result> outcome, final String streamName, final int streamVersion, final Source<S> source, final Metadata metadata, final Optional<ST> snapshot, final Object object);
+
+    /**
      * Conveys the {@code outcome} of attempting to append multiple {@code Source<S>} instances and a possible state {@code snapshot}.
      * @param outcome the {@code Outcome<StorageException,Result>} either failure or success
      * @param streamName the String name of the stream failing the append
@@ -82,6 +97,20 @@ public interface Journal<T> {
      * @param <ST> the snapshot state type
      */
     <S,ST> void appendAllResultedIn(final Outcome<StorageException,Result> outcome, final String streamName, final int streamVersion, final List<Source<S>> sources, final Optional<ST> snapshot, final Object object);
+
+    /**
+     * Conveys the {@code outcome} of attempting to append multiple {@code Source<S>} instances and a possible state {@code snapshot}.
+     * @param outcome the {@code Outcome<StorageException,Result>} either failure or success
+     * @param streamName the String name of the stream failing the append
+     * @param streamVersion the int version of the stream failing the append
+     * @param sources the {@code List<Source<S>>} that was appended
+     * @param metadata the Metadata associated with the Source
+     * @param snapshot the possible {@code Optional<ST>} that may have persisted as the stream's most recent snapshot
+     * @param object the Object supplied by the sender to be sent back in this result
+     * @param <S> the Source type
+     * @param <ST> the snapshot state type
+     */
+    <S,ST> void appendAllResultedIn(final Outcome<StorageException,Result> outcome, final String streamName, final int streamVersion, final List<Source<S>> sources, final Metadata metadata, final Optional<ST> snapshot, final Object object);
   }
 
   /**
@@ -99,7 +128,27 @@ public interface Journal<T> {
    * @param <S> the Source type
    * @param <ST> the snapshot state type
    */
-  <S,ST> void append(final String streamName, final int streamVersion, final Source<S> source, final AppendResultInterest interest, final Object object);
+  default <S,ST> void append(final String streamName, final int streamVersion, final Source<S> source, final AppendResultInterest interest, final Object object) {
+    append(streamName, streamVersion, source, Metadata.nullMetadata(), interest, object);
+  }
+
+  /**
+   * Appends the single {@code Source<S>} as an {@code Entry<T>} to the end of the journal
+   * creating an association to {@code streamName} with {@code streamVersion}. The {@code Source<S>}
+   * is translated to a corresponding {@code Entry<T>} with an unknown id. If there is a registered
+   * {@code JournalListener<T>}, it will be informed of the newly appended {@code Entry<T>} and it
+   * will have an assigned valid id.
+   *
+   * @param streamName the String name of the stream to append
+   * @param streamVersion the int version of the stream to append
+   * @param source the {@code Source<S>} to append as an {@code Entry<T>}
+   * @param metadata the Metadata associated with the Source
+   * @param interest the Actor-backed {@code AppendResultInterest<ST>>} used to convey the result of the append
+   * @param object the Object from the sender that is to be included in the {@code AppendResultInterest<ST>>} response
+   * @param <S> the Source type
+   * @param <ST> the snapshot state type
+   */
+  <S,ST> void append(final String streamName, final int streamVersion, final Source<S> source, final Metadata metadata, final AppendResultInterest interest, final Object object);
 
   /**
    * Appends the single {@code Source<S>} as an {@code Entry<T>} to the end of the journal
@@ -118,7 +167,29 @@ public interface Journal<T> {
    * @param <S> the Source type
    * @param <ST> the snapshot state type
    */
-  <S,ST> void appendWith(final String streamName, final int streamVersion, final Source<S> source, final ST snapshot, final AppendResultInterest interest, final Object object);
+  default <S,ST> void appendWith(final String streamName, final int streamVersion, final Source<S> source, final ST snapshot, final AppendResultInterest interest, final Object object) {
+    appendWith(streamName, streamVersion, source, Metadata.nullMetadata(), snapshot, interest, object);
+  }
+
+  /**
+   * Appends the single {@code Source<S>} as an {@code Entry<T>} to the end of the journal
+   * creating an association to {@code streamName} with {@code streamVersion}, and storing
+   * the full state {@code snapshot}. The corresponding {@code Entry<T>} is internally
+   * assigned an id. The entry and snapshot are consistently persisted together or neither
+   * at all. If there is a registered {@code JournalListener<T>}, it will be informed of
+   * the newly appended {@code Entry<T>} with an assigned valid id and the new {@code ST} snapshot.
+   *
+   * @param streamName the String name of the stream to append
+   * @param streamVersion the int version of the stream to append
+   * @param source the {@code Source<S>} to append as an {@code Entry<T>}
+   * @param metadata the Metadata associated with the Source
+   * @param snapshot the current {@code ST} state of the stream before the source is applied
+   * @param interest the Actor-backed {@code AppendResultInterest<ST>>} used to convey the result of the append
+   * @param object the Object from the sender that is to be included in the {@code AppendResultInterest<ST>>} response
+   * @param <S> the Source type
+   * @param <ST> the snapshot state type
+   */
+  <S,ST> void appendWith(final String streamName, final int streamVersion, final Source<S> source, final Metadata metadata, final ST snapshot, final AppendResultInterest interest, final Object object);
 
   /**
    * Appends all {@code Source<S>} instances as {@code Entry<T>} instances to the end of the
@@ -134,7 +205,26 @@ public interface Journal<T> {
    * @param <S> the Source type
    * @param <ST> the snapshot state type
    */
-  <S,ST> void appendAll(final String streamName, final int fromStreamVersion, final List<Source<S>> sources, final AppendResultInterest interest, final Object object);
+  default <S,ST> void appendAll(final String streamName, final int fromStreamVersion, final List<Source<S>> sources, final AppendResultInterest interest, final Object object) {
+    appendAll(streamName, fromStreamVersion, sources, Metadata.nullMetadata(), interest, object);
+  }
+
+  /**
+   * Appends all {@code Source<S>} instances as {@code Entry<T>} instances to the end of the
+   * journal creating an association to {@code streamName} with {@code streamVersion}. If there is
+   * a registered {@code JournalListener<T>}, it will be informed of the newly appended {@code Entry<T>}
+   * instances and each will have an assigned valid id.
+   *
+   * @param streamName the String name of the stream to append
+   * @param fromStreamVersion the int version of the stream to start appending, and increasing for each of entries
+   * @param sources the {@code List<Source<S>>} to append as {@code List<Entry<T>>} instances
+   * @param metadata the Metadata associated with the Source
+   * @param interest the Actor-backed {@code AppendResultInterest<ST>>} used to convey the result of the append
+   * @param object the Object from the sender that is to be included in the {@code AppendResultInterest<ST>>} response
+   * @param <S> the Source type
+   * @param <ST> the snapshot state type
+   */
+  <S,ST> void appendAll(final String streamName, final int fromStreamVersion, final List<Source<S>> sources, final Metadata metadata, final AppendResultInterest interest, final Object object);
 
   /**
    * Appends all {@code Source<S>} instances as {@code Entry<T>} instances to the end of the
@@ -152,7 +242,28 @@ public interface Journal<T> {
    * @param <S> the Source type
    * @param <ST> the concrete state type
    */
-  <S,ST> void appendAllWith(final String streamName, final int fromStreamVersion, final List<Source<S>> sources, final ST snapshot, final AppendResultInterest interest, final Object object);
+  default <S,ST> void appendAllWith(final String streamName, final int fromStreamVersion, final List<Source<S>> sources, final ST snapshot, final AppendResultInterest interest, final Object object) {
+    appendAllWith(streamName, fromStreamVersion, sources, Metadata.nullMetadata(), snapshot, interest, object);
+  }
+
+  /**
+   * Appends all {@code Source<S>} instances as {@code Entry<T>} instances to the end of the
+   * journal creating an association to {@code streamName} with {@code streamVersion}, and storing
+   * the full state {@code snapshot}. The entries and snapshot are consistently persisted together
+   * or none at all. If there is a registered {@code JournalListener<T>}, it will be informed of
+   * the newly appended {@code Entry<T>} instances with assigned valid ids, and the {@code snapshot}.
+   *
+   * @param streamName the String name of the stream to append
+   * @param fromStreamVersion the int version of the stream to start appending, and increasing for each of entries
+   * @param sources the {@code List<Source<S>>} to append as {@code List<Entry<T>>} instances
+   * @param metadata the Metadata associated with the Source
+   * @param snapshot the current {@code ST} state of the stream before the sources are applied
+   * @param interest the Actor-backed {@code AppendResultInterest<T>>} used to convey the result of the append
+   * @param object the Object from the sender that is to be included in the {@code AppendResultInterest<T>>} response
+   * @param <S> the Source type
+   * @param <ST> the concrete state type
+   */
+  <S,ST> void appendAllWith(final String streamName, final int fromStreamVersion, final List<Source<S>> sources, final Metadata metadata, final ST snapshot, final AppendResultInterest interest, final Object object);
 
   /**
    * Eventually answers the {@code JournalReader<ET>} named {@code name} for this journal. If

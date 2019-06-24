@@ -10,6 +10,7 @@ import java.util.Collection;
 import java.util.List;
 
 import io.vlingo.common.Outcome;
+import io.vlingo.symbio.Metadata;
 import io.vlingo.symbio.Source;
 import io.vlingo.symbio.store.Result;
 import io.vlingo.symbio.store.StorageException;
@@ -17,19 +18,31 @@ import io.vlingo.symbio.store.StorageException;
  * ObjectStoreWriter defines protocol for writing to an {@link ObjectStore}.
  */
 public interface ObjectStoreWriter {
-  
+
   /**
    * Persists the new {@code persistentObject}.
    * @param <T> the concrete type of {@link PersistentObject} to persist
    * @param persistentObject the Object to persist
+   * @param metadata the Metadata associated with the persistentObject
    * @param interest the PersistResultInterest to which the result is dispatched
    */
   default <T extends PersistentObject> void persist(final T persistentObject, final PersistResultInterest interest) {
-    persist(persistentObject, Source.none(), -1, interest, null);
+    persist(persistentObject, Source.none(), Metadata.nullMetadata(), -1, interest, null);
   }
 
   /**
-   * Persists the new {@code persistentObject}.
+   * Persists the new {@code persistentObject} with {@code metadata}.
+   * @param <T> the concrete type of {@link PersistentObject} to persist
+   * @param persistentObject the Object to persist
+   * @param metadata the Metadata associated with the persistentObject and sources
+   * @param interest the PersistResultInterest to which the result is dispatched
+   */
+  default <T extends PersistentObject> void persist(final T persistentObject, final Metadata metadata, final PersistResultInterest interest) {
+    persist(persistentObject, Source.none(), metadata, -1, interest, null);
+  }
+
+  /**
+   * Persists the new {@code persistentObject} with {@code sources}.
    * @param <T> the concrete type of {@link PersistentObject} to persist
    * @param <E> the concrete type of the {@link Source}
    * @param persistentObject the Object to persist
@@ -37,7 +50,20 @@ public interface ObjectStoreWriter {
    * @param interest the PersistResultInterest to which the result is dispatched
    */
   default <T extends PersistentObject, E> void persist(final T persistentObject, final List<Source<E>> sources, final PersistResultInterest interest) {
-    persist(persistentObject, sources, -1, interest, null);
+    persist(persistentObject, sources, Metadata.nullMetadata(), -1, interest, null);
+  }
+
+  /**
+   * Persists the new {@code persistentObject} with {@code sources} and {@code metadata}.
+   * @param <T> the concrete type of {@link PersistentObject} to persist
+   * @param <E> the concrete type of the {@link Source}
+   * @param persistentObject the Object to persist
+   * @param sources the domain events to journal related to <code>persistentObject</code>
+   * @param metadata the Metadata associated with the persistentObject and sources
+   * @param interest the PersistResultInterest to which the result is dispatched
+   */
+  default <T extends PersistentObject, E> void persist(final T persistentObject, final List<Source<E>> sources, final Metadata metadata, final PersistResultInterest interest) {
+    persist(persistentObject, sources, metadata, -1, interest, null);
   }
 
   /**
@@ -48,11 +74,23 @@ public interface ObjectStoreWriter {
    * @param object an Object sent to the PersistResultInterest when the persist has succeeded or failed
    */
   default <T extends PersistentObject> void persist(final T persistentObject, final PersistResultInterest interest, final Object object) {
-    persist(persistentObject, Source.none(), -1, interest, object);
+    persist(persistentObject, Source.none(), Metadata.nullMetadata(), -1, interest, object);
   }
 
   /**
-   * Persists the new {@code persistentObject}.
+   * Persists the new {@code persistentObject} with {@code metadata}.
+   * @param <T> the concrete type of {@link PersistentObject} to persist
+   * @param persistentObject the Object to persist
+   * @param metadata the Metadata associated with the persistentObject and sources
+   * @param interest the PersistResultInterest to which the result is dispatched
+   * @param object an Object sent to the PersistResultInterest when the persist has succeeded or failed
+   */
+  default <T extends PersistentObject> void persist(final T persistentObject, final Metadata metadata, final PersistResultInterest interest, final Object object) {
+    persist(persistentObject, Source.none(), metadata, -1, interest, object);
+  }
+
+  /**
+   * Persists the new {@code persistentObject} with {@code sources}.
    * @param <T> the concrete type of {@link PersistentObject} to persist
    * @param <E> the concrete type of the {@link Source}
    * @param persistentObject the Object to persist
@@ -61,7 +99,21 @@ public interface ObjectStoreWriter {
    * @param object an Object sent to the PersistResultInterest when the persist has succeeded or failed
    */
   default <T extends PersistentObject, E> void persist(final T persistentObject, final List<Source<E>> sources, final PersistResultInterest interest, final Object object) {
-    persist(persistentObject, sources, -1, interest, object);
+    persist(persistentObject, sources, Metadata.nullMetadata(), -1, interest, object);
+  }
+
+  /**
+   * Persists the new {@code persistentObject} with {@code sources} and {@code metadata}.
+   * @param <T> the concrete type of {@link PersistentObject} to persist
+   * @param <E> the concrete type of the {@link Source}
+   * @param persistentObject the Object to persist
+   * @param sources the domain events to journal related to <code>persistentObject</code>
+   * @param metadata the Metadata associated with the persistentObject and sources
+   * @param interest the PersistResultInterest to which the result is dispatched
+   * @param object an Object sent to the PersistResultInterest when the persist has succeeded or failed
+   */
+  default <T extends PersistentObject, E> void persist(final T persistentObject, final List<Source<E>> sources, final Metadata metadata, final PersistResultInterest interest, final Object object) {
+    persist(persistentObject, sources, metadata, -1, interest, object);
   }
 
   /**
@@ -72,11 +124,24 @@ public interface ObjectStoreWriter {
    * @param interest the PersistResultInterest to which the result is dispatched
    */
   default <T extends PersistentObject> void persist(final T persistentObject, final long updateId, final PersistResultInterest interest) {
-    persist(persistentObject, Source.none(), updateId, interest, null);
+    persist(persistentObject, Source.none(), Metadata.nullMetadata(), updateId, interest, null);
   }
 
   /**
-   * Persists the {@code persistentObject} as new or updated depending on the value of {@code updateId}.
+   * Persists the {@code persistentObject} with {@code metadata}
+   * as new or updated depending on the value of {@code updateId}.
+   * @param <T> the concrete type of {@link PersistentObject} to persist
+   * @param persistentObject the Object to persist
+   * @param metadata the Metadata associated with the persistentObject
+   * @param updateId the long identity to facilitate update; &lt; 0 for create &gt; 0 for update
+   * @param interest the PersistResultInterest to which the result is dispatched
+   */
+  default <T extends PersistentObject> void persist(final T persistentObject, final Metadata metadata, final long updateId, final PersistResultInterest interest) {
+    persist(persistentObject, Source.none(), metadata, updateId, interest, null);
+  }
+
+  /**
+   * Persists the {@code persistentObject} with {@code sources} as new or updated depending on the value of {@code updateId}.
    * @param <T> the concrete type of {@link PersistentObject} to persist
    * @param <E> the concrete type of the {@link Source}
    * @param persistentObject the Object to persist
@@ -85,7 +150,22 @@ public interface ObjectStoreWriter {
    * @param interest the PersistResultInterest to which the result is dispatched
    */
   default <T extends PersistentObject, E> void persist(final T persistentObject, final List<Source<E>> sources, final long updateId, final PersistResultInterest interest) {
-    persist(persistentObject, sources, updateId, interest, null);
+    persist(persistentObject, sources, Metadata.nullMetadata(), updateId, interest, null);
+  }
+
+  /**
+   * Persists the {@code persistentObject} with {@code sources} and {@code metadata}
+   * as new or updated depending on the value of {@code updateId}.
+   * @param <T> the concrete type of {@link PersistentObject} to persist
+   * @param <E> the concrete type of the {@link Source}
+   * @param persistentObject the Object to persist
+   * @param sources the domain events to journal related to <code>persistentObject</code>
+   * @param metadata the Metadata associated with the persistentObject and sources
+   * @param updateId the long identity to facilitate update; &lt; 0 for create &gt; 0 for update
+   * @param interest the PersistResultInterest to which the result is dispatched
+   */
+  default <T extends PersistentObject, E> void persist(final T persistentObject, final List<Source<E>> sources, final Metadata metadata, final long updateId, final PersistResultInterest interest) {
+    persist(persistentObject, sources, metadata, updateId, interest, null);
   }
 
   /**
@@ -97,11 +177,24 @@ public interface ObjectStoreWriter {
    * @param object an Object sent to the PersistResultInterest when the persist has succeeded or failed
    */
   default <T extends PersistentObject> void persist(final T persistentObject, final long updateId, final PersistResultInterest interest, final Object object) {
-    persist(persistentObject, Source.none(), updateId, interest, object);
+    persist(persistentObject, Source.none(), Metadata.nullMetadata(), updateId, interest, object);
   }
 
   /**
-   * Persists the {@code persistentObject}.
+   * Persists the {@code persistentObject} with {@code metadata}.
+   * @param <T> the concrete type of {@link PersistentObject} to persist
+   * @param persistentObject the Object to persist
+   * @param metadata the Metadata associated with the persistentObject
+   * @param updateId the long identity to facilitate update; &lt; 0 for create &gt; 0 for update
+   * @param interest the PersistResultInterest to which the result is dispatched
+   * @param object an Object sent to the PersistResultInterest when the persist has succeeded or failed
+   */
+  default <T extends PersistentObject> void persist(final T persistentObject, final Metadata metadata, final long updateId, final PersistResultInterest interest, final Object object) {
+    persist(persistentObject, Source.none(), metadata, updateId, interest, object);
+  }
+
+  /**
+   * Persists the {@code persistentObject} with {@code sources}.
    * @param <T> the concrete type of {@link PersistentObject} to persist
    * @param <E> the concrete type of the {@link Source}
    * @param persistentObject the Object to persist
@@ -110,7 +203,22 @@ public interface ObjectStoreWriter {
    * @param interest the PersistResultInterest to which the result is dispatched
    * @param object an Object sent to the PersistResultInterest when the persist has succeeded or failed
    */
-  <T extends PersistentObject, E> void persist(final T persistentObject, final List<Source<E>> sources, final long updateId, final PersistResultInterest interest, final Object object);
+  default <T extends PersistentObject, E> void persist(final T persistentObject, final List<Source<E>> sources, final long updateId, final PersistResultInterest interest, final Object object) {
+    persist(persistentObject, sources, Metadata.nullMetadata(), updateId, interest, object);
+  }
+
+  /**
+   * Persists the {@code persistentObject} with {@code sources} and {@code metadata}.
+   * @param <T> the concrete type of {@link PersistentObject} to persist
+   * @param <E> the concrete type of the {@link Source}
+   * @param persistentObject the Object to persist
+   * @param sources the domain events to journal related to <code>persistentObject</code>
+   * @param metadata the Metadata associated with the persistentObject and sources
+   * @param updateId the long identity to facilitate update; &lt; 0 for create &gt; 0 for update
+   * @param interest the PersistResultInterest to which the result is dispatched
+   * @param object an Object sent to the PersistResultInterest when the persist has succeeded or failed
+   */
+  <T extends PersistentObject, E> void persist(final T persistentObject, final List<Source<E>> sources, final Metadata metadata, final long updateId, final PersistResultInterest interest, final Object object);
 
 
   /**
@@ -120,11 +228,22 @@ public interface ObjectStoreWriter {
    * @param interest the PersistResultInterest to which the result is dispatched
    */
   default <T extends PersistentObject> void persistAll(final Collection<T> persistentObjects, final PersistResultInterest interest) {
-    persistAll(persistentObjects, Source.none(), -1, interest, null);
+    persistAll(persistentObjects, Source.none(), Metadata.nullMetadata(), -1, interest, null);
   }
 
   /**
-   * Persists the new {@code persistentObjects}.
+   * Persists the new {@code persistentObjects} with {@code metadata}.
+   * @param <T> the concrete type of {@link PersistentObject}s to persist
+   * @param persistentObjects the {@code Collection<Object>} to persist
+   * @param metadata the Metadata associated with the persistentObject
+   * @param interest the PersistResultInterest to which the result is dispatched
+   */
+  default <T extends PersistentObject> void persistAll(final Collection<T> persistentObjects, final Metadata metadata, final PersistResultInterest interest) {
+    persistAll(persistentObjects, Source.none(), metadata, -1, interest, null);
+  }
+
+  /**
+   * Persists the new {@code persistentObjects} with {@code sources}.
    * @param <T> the concrete type of {@link PersistentObject}s to persist
    * @param <E> the concrete type of the {@link Source}
    * @param persistentObjects the {@code Collection<Object>} to persist
@@ -132,7 +251,20 @@ public interface ObjectStoreWriter {
    * @param interest the PersistResultInterest to which the result is dispatched
    */
   default <T extends PersistentObject, E> void persistAll(final Collection<T> persistentObjects, final List<Source<E>> sources, final PersistResultInterest interest) {
-    persistAll(persistentObjects, sources, -1, interest, null);
+    persistAll(persistentObjects, sources, Metadata.nullMetadata(), -1, interest, null);
+  }
+
+  /**
+   * Persists the new {@code persistentObjects} with {@code sources} and {@code metadata}.
+   * @param <T> the concrete type of {@link PersistentObject}s to persist
+   * @param <E> the concrete type of the {@link Source}
+   * @param persistentObjects the {@code Collection<Object>} to persist
+   * @param sources the domain events to journal related to <code>persistentObjects</code>
+   * @param metadata the Metadata associated with the persistentObjects and sources
+   * @param interest the PersistResultInterest to which the result is dispatched
+   */
+  default <T extends PersistentObject, E> void persistAll(final Collection<T> persistentObjects, final List<Source<E>> sources, final Metadata metadata, final PersistResultInterest interest) {
+    persistAll(persistentObjects, sources, metadata, -1, interest, null);
   }
 
   /**
@@ -143,11 +275,23 @@ public interface ObjectStoreWriter {
    * @param object an Object sent to the PersistResultInterest when the persist has succeeded or failed
    */
   default <T extends PersistentObject> void persistAll(final Collection<T> persistentObjects, final PersistResultInterest interest, final Object object) {
-    persistAll(persistentObjects, Source.none(), -1, interest, object);
+    persistAll(persistentObjects, Source.none(), Metadata.nullMetadata(), -1, interest, object);
   }
 
   /**
-   * Persists the new {@code persistentObjects}.
+   * Persists the new {@code persistentObjects} with {@code metadata}.
+   * @param <T> the concrete type of {@link PersistentObject}s to persist
+   * @param persistentObjects the {@code Collection<Object>} to persist
+   * @param metadata the Metadata associated with the persistentObjects
+   * @param interest the PersistResultInterest to which the result is dispatched
+   * @param object an Object sent to the PersistResultInterest when the persist has succeeded or failed
+   */
+  default <T extends PersistentObject> void persistAll(final Collection<T> persistentObjects, final Metadata metadata, final PersistResultInterest interest, final Object object) {
+    persistAll(persistentObjects, Source.none(), metadata, -1, interest, object);
+  }
+
+  /**
+   * Persists the new {@code persistentObjects} with {@code sources}.
    * @param <T> the concrete type of {@link PersistentObject}s to persist
    * @param <E> the concrete type of the {@link Source}
    * @param persistentObjects the {@code Collection<Object>} to persist
@@ -156,7 +300,21 @@ public interface ObjectStoreWriter {
    * @param object an Object sent to the PersistResultInterest when the persist has succeeded or failed
    */
   default <T extends PersistentObject, E> void persistAll(final Collection<T> persistentObjects, final List<Source<E>> sources, final PersistResultInterest interest, final Object object) {
-    persistAll(persistentObjects, sources, -1, interest, object);
+    persistAll(persistentObjects, sources, Metadata.nullMetadata(), -1, interest, object);
+  }
+
+  /**
+   * Persists the new {@code persistentObjects} with {@code sources} and {@code metadata}.
+   * @param <T> the concrete type of {@link PersistentObject}s to persist
+   * @param <E> the concrete type of the {@link Source}
+   * @param persistentObjects the {@code Collection<Object>} to persist
+   * @param sources the domain events to journal related to <code>persistentObjects</code>
+   * @param metadata the Metadata associated with the persistentObjects and sources
+   * @param interest the PersistResultInterest to which the result is dispatched
+   * @param object an Object sent to the PersistResultInterest when the persist has succeeded or failed
+   */
+  default <T extends PersistentObject, E> void persistAll(final Collection<T> persistentObjects, final List<Source<E>> sources, final Metadata metadata, final PersistResultInterest interest, final Object object) {
+    persistAll(persistentObjects, sources, metadata, -1, interest, object);
   }
 
   /**
@@ -167,11 +325,25 @@ public interface ObjectStoreWriter {
    * @param interest the PersistResultInterest to which the result is dispatched
    */
   default <T extends PersistentObject> void persistAll(final Collection<T> persistentObjects, final long updateId, final PersistResultInterest interest) {
-    persistAll(persistentObjects, Source.none(), updateId, interest, null);
+    persistAll(persistentObjects, Source.none(), Metadata.nullMetadata(), updateId, interest, null);
   }
 
   /**
-   * Persists the {@code persistentObjects} as new or updated depending on the value of {@code updateId}.
+   * Persists the {@code persistentObjects} with {@code metadata}
+   * as new or updated depending on the value of {@code updateId}.
+   * @param <T> the concrete type of {@link PersistentObject}s to persist
+   * @param persistentObjects the {@code Collection<Object>} to persist
+   * @param metadata the Metadata associated with the persistentObjects
+   * @param updateId the long identity to facilitate update; &lt; 0 for create &gt; 0 for update
+   * @param interest the PersistResultInterest to which the result is dispatched
+   */
+  default <T extends PersistentObject> void persistAll(final Collection<T> persistentObjects, final Metadata metadata, final long updateId, final PersistResultInterest interest) {
+    persistAll(persistentObjects, Source.none(), metadata, updateId, interest, null);
+  }
+
+  /**
+   * Persists the {@code persistentObjects} with {@code sources}
+   * as new or updated depending on the value of {@code updateId}.
    * @param <T> the concrete type of {@link PersistentObject}s to persist
    * @param <E> the concrete type of the {@link Source}
    * @param persistentObjects the {@code Collection<Object>} to persist
@@ -180,7 +352,22 @@ public interface ObjectStoreWriter {
    * @param interest the PersistResultInterest to which the result is dispatched
    */
   default <T extends PersistentObject, E> void persistAll(final Collection<T> persistentObjects, final List<Source<E>> sources, final long updateId, final PersistResultInterest interest) {
-    persistAll(persistentObjects, sources, updateId, interest, null);
+    persistAll(persistentObjects, sources, Metadata.nullMetadata(), updateId, interest, null);
+  }
+
+  /**
+   * Persists the {@code persistentObjects} with {@code sources} and {@code metadata}
+   * as new or updated depending on the value of {@code updateId}.
+   * @param <T> the concrete type of {@link PersistentObject}s to persist
+   * @param <E> the concrete type of the {@link Source}
+   * @param persistentObjects the {@code Collection<Object>} to persist
+   * @param sources the domain events to journal related to <code>persistentObjects</code>
+   * @param metadata the Metadata associated with the persistentObjects and sources
+   * @param updateId the long identity to facilitate update; &lt; 0 for create &gt; 0 for update
+   * @param interest the PersistResultInterest to which the result is dispatched
+   */
+  default <T extends PersistentObject, E> void persistAll(final Collection<T> persistentObjects, final List<Source<E>> sources, final Metadata metadata, final long updateId, final PersistResultInterest interest) {
+    persistAll(persistentObjects, sources, metadata, updateId, interest, null);
   }
 
   /**
@@ -192,11 +379,24 @@ public interface ObjectStoreWriter {
    * @param object an Object sent to the PersistResultInterest when the persist has succeeded or failed
    */
   default <T extends PersistentObject> void persistAll(final Collection<T> persistentObjects, final long updateId, final PersistResultInterest interest, final Object object) {
-    persistAll(persistentObjects, Source.none(), updateId, interest, object);
+    persistAll(persistentObjects, Source.none(), Metadata.nullMetadata(), updateId, interest, object);
   }
 
   /**
-   * Persists the {@code persistentObjects}.
+   * Persists the {@code persistentObjects} with {@code metadata}.
+   * @param <T> the concrete type of {@link PersistentObject}s to persist
+   * @param persistentObjects the {@code Collection<Object>} to persist
+   * @param metadata the Metadata associated with the persistentObjects
+   * @param updateId the long identity to facilitate update; &lt; 0 for create &gt; 0 for update
+   * @param interest the PersistResultInterest to which the result is dispatched
+   * @param object an Object sent to the PersistResultInterest when the persist has succeeded or failed
+   */
+  default <T extends PersistentObject> void persistAll(final Collection<T> persistentObjects, final Metadata metadata, final long updateId, final PersistResultInterest interest, final Object object) {
+    persistAll(persistentObjects, Source.none(), metadata, updateId, interest, object);
+  }
+
+  /**
+   * Persists the {@code persistentObjects} with {@code sources}.
    * @param <T> the concrete type of {@link PersistentObject}s to persist
    * @param <E> the concrete type of the {@link Source}
    * @param persistentObjects the {@code Collection<Object>} to persist
@@ -205,7 +405,22 @@ public interface ObjectStoreWriter {
    * @param interest the PersistResultInterest to which the result is dispatched
    * @param object an Object sent to the PersistResultInterest when the persist has succeeded or failed
    */
-  <T extends PersistentObject, E> void persistAll(final Collection<T> persistentObjects, final List<Source<E>> sources, final long updateId, final PersistResultInterest interest, final Object object);
+  default <T extends PersistentObject, E> void persistAll(final Collection<T> persistentObjects, final List<Source<E>> sources, final long updateId, final PersistResultInterest interest, final Object object) {
+    persistAll(persistentObjects, sources, Metadata.nullMetadata(), updateId, interest, object);
+  }
+
+  /**
+   * Persists the {@code persistentObjects} with {@code sources} and {@code metadata}.
+   * @param <T> the concrete type of {@link PersistentObject}s to persist
+   * @param <E> the concrete type of the {@link Source}
+   * @param persistentObjects the {@code Collection<Object>} to persist
+   * @param sources the domain events to journal related to <code>persistentObjects</code>
+   * @param metadata the Metadata associated with the persistentObjects and sources
+   * @param updateId the long identity to facilitate update; &lt; 0 for create &gt; 0 for update
+   * @param interest the PersistResultInterest to which the result is dispatched
+   * @param object an Object sent to the PersistResultInterest when the persist has succeeded or failed
+   */
+  <T extends PersistentObject, E> void persistAll(final Collection<T> persistentObjects, final List<Source<E>> sources, final Metadata metadata, final long updateId, final PersistResultInterest interest, final Object object);
 
   /**
    * Defines the result of persisting to the store with a persistent object.
