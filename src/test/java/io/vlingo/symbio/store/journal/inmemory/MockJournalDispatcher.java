@@ -8,11 +8,12 @@
 package io.vlingo.symbio.store.journal.inmemory;
 
 import io.vlingo.actors.testkit.AccessSafely;
+import io.vlingo.symbio.Entry;
 import io.vlingo.symbio.State;
 import io.vlingo.symbio.store.dispatch.ConfirmDispatchedResultInterest;
+import io.vlingo.symbio.store.dispatch.Dispatchable;
 import io.vlingo.symbio.store.dispatch.Dispatcher;
 import io.vlingo.symbio.store.dispatch.DispatcherControl;
-import io.vlingo.symbio.store.journal.dispatch.JournalDispatchable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,12 +22,12 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 
-public class MockJournalDispatcher<T, ST extends State<?>> implements Dispatcher<JournalDispatchable<T,ST>> {
+public class MockJournalDispatcher<T, ST extends State<?>> implements Dispatcher<Dispatchable<Entry<T>,ST>> {
   private AccessSafely access = AccessSafely.afterCompleting(0);
 
   private final ConfirmDispatchedResultInterest confirmDispatchedResultInterest;
   private DispatcherControl control;
-  private final Map<String, JournalDispatchable> dispatched = new HashMap<>();
+  private final Map<String, Dispatchable> dispatched = new HashMap<>();
   private final AtomicBoolean processDispatch = new AtomicBoolean(true);
   private int dispatchAttemptCount = 0;
 
@@ -41,7 +42,7 @@ public class MockJournalDispatcher<T, ST extends State<?>> implements Dispatcher
   }
 
   @Override
-  public void dispatch(JournalDispatchable dispatchable) {
+  public void dispatch(Dispatchable dispatchable) {
     dispatchAttemptCount++;
     if (processDispatch.get()) {
       final String dispatchId = dispatchable.id();
@@ -55,7 +56,7 @@ public class MockJournalDispatcher<T, ST extends State<?>> implements Dispatcher
     access = AccessSafely.afterCompleting(times)
             .writingWith("dispatched", dispatched::put)
             .readingWith("dispatched", () -> dispatched)
-            .readingWith("dispatchedState", (Function<String, JournalDispatchable>) dispatched::get)
+            .readingWith("dispatchedState", (Function<String, Dispatchable>) dispatched::get)
             .readingWith("dispatchedStateCount", dispatched::size)
 
             .writingWith("processDispatch", processDispatch::set)
@@ -66,12 +67,12 @@ public class MockJournalDispatcher<T, ST extends State<?>> implements Dispatcher
   }
   
   public int dispatchedCount() {
-    Map<String, JournalDispatchable> dispatched = access.readFrom("dispatched");
+    Map<String, Dispatchable> dispatched = access.readFrom("dispatched");
     return dispatched.size();
   }
 
-  public List<JournalDispatchable<T,ST>> getDispached(){
-    final Map<String, JournalDispatchable<T, ST>> dispatched = access.readFrom("dispatched");
+  public List<Dispatchable<Entry<T>,ST>> getDispached(){
+    final Map<String, Dispatchable<Entry<T>, ST>> dispatched = access.readFrom("dispatched");
     return new ArrayList<>(dispatched.values());
   }
 }

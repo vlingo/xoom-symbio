@@ -11,6 +11,7 @@ import io.vlingo.actors.testkit.AccessSafely;
 import io.vlingo.symbio.Entry;
 import io.vlingo.symbio.State;
 import io.vlingo.symbio.store.dispatch.ConfirmDispatchedResultInterest;
+import io.vlingo.symbio.store.dispatch.Dispatchable;
 import io.vlingo.symbio.store.dispatch.Dispatcher;
 import io.vlingo.symbio.store.dispatch.DispatcherControl;
 
@@ -20,7 +21,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class MockStateStoreDispatcher implements Dispatcher<StateStore.StateDispatchable> {
+public class MockStateStoreDispatcher implements Dispatcher<Dispatchable<?,?>> {
   private AccessSafely access = AccessSafely.afterCompleting(0);
 
   private final ConfirmDispatchedResultInterest confirmDispatchedResultInterest;
@@ -41,11 +42,11 @@ public class MockStateStoreDispatcher implements Dispatcher<StateStore.StateDisp
   }
 
   @Override
-  public void dispatch(StateStore.StateDispatchable dispatchable) {
+  public void dispatch(Dispatchable dispatchable) {
     dispatchAttemptCount++;
     if (processDispatch.get()) {
       final String dispatchId = dispatchable.id();
-      access.writeUsing("dispatched", dispatchId, new Dispatch(dispatchable.getState(), dispatchable.getEntries()));
+      access.writeUsing("dispatched", dispatchId, new Dispatch(dispatchable.typedState(), dispatchable.entries()));
       control.confirmDispatched(dispatchId, confirmDispatchedResultInterest);
     }
   }

@@ -18,21 +18,24 @@ import io.vlingo.symbio.Source;
 import io.vlingo.symbio.State;
 import io.vlingo.symbio.StateAdapterProvider;
 import io.vlingo.symbio.store.Result;
+import io.vlingo.symbio.store.dispatch.Dispatchable;
 import io.vlingo.symbio.store.dispatch.Dispatcher;
 import io.vlingo.symbio.store.dispatch.DispatcherControl;
 import io.vlingo.symbio.store.dispatch.inmemory.InMemoryDispatcherControl;
 import io.vlingo.symbio.store.journal.Journal;
 import io.vlingo.symbio.store.journal.JournalReader;
 import io.vlingo.symbio.store.journal.StreamReader;
-import io.vlingo.symbio.store.journal.dispatch.JournalDispatchable;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.Collectors;
 
 public class InMemoryJournal<T,RS extends State<?>> implements Journal<T> {
   private final EntryAdapterProvider entryAdapterProvider;
@@ -42,15 +45,15 @@ public class InMemoryJournal<T,RS extends State<?>> implements Journal<T> {
   private final Map<String,StreamReader<T>> streamReaders;
   private final Map<String, Map<Integer,Integer>> streamIndexes;
   private final Map<String,RS> snapshots;
-  private final List<JournalDispatchable<T,RS>> dispatchables;
-  private final Dispatcher<JournalDispatchable<T,RS>> dispatcher;
+  private final List<Dispatchable<Entry<T>, RS>> dispatchables;
+  private final Dispatcher<Dispatchable<Entry<T>,RS>> dispatcher;
   private final DispatcherControl dispatcherControl;
 
-  public InMemoryJournal(final Dispatcher<JournalDispatchable<T,RS>> dispatcher, final World world ) {
+  public InMemoryJournal(final Dispatcher<Dispatchable<Entry<T>, RS>> dispatcher, final World world ) {
     this(dispatcher, world, 1000L, 1000L);
   }
 
-  public InMemoryJournal(final Dispatcher<JournalDispatchable<T,RS>> dispatcher, final World world,
+  public InMemoryJournal(final Dispatcher<Dispatchable<Entry<T>,RS>> dispatcher, final World world,
           long checkConfirmationExpirationInterval, final long confirmationExpiration) {
     this.entryAdapterProvider = EntryAdapterProvider.instance(world);
     this.stateAdapterProvider = StateAdapterProvider.instance(world);
@@ -174,8 +177,14 @@ public class InMemoryJournal<T,RS extends State<?>> implements Journal<T> {
   }
 
   private void dispatch(final String streamName, final int streamVersion, final List<Entry<T>> entries, RS snapshot){
-    final JournalDispatchable<T, RS> dispatchable = new JournalDispatchable<>(streamName, streamVersion, entries, snapshot);
+    final String id = getDispatchId(streamName, streamVersion, entries);
+    final Dispatchable<Entry<T>, RS> dispatchable = new Dispatchable<>(id,  LocalDateTime.now(), snapshot, entries);
     this.dispatchables.add(dispatchable);
     this.dispatcher.dispatch(dispatchable);
+  }
+
+  private static <T> String getDispatchId(String streamName, int streamVersion, Collection<Entry<T>> entries) {
+    return streamName + ":" + streamVersion + ":"
+            + entries.stream().map(Entry::id).collect(Collectors.joining(":"));
   }
 }

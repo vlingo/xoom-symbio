@@ -16,8 +16,8 @@ import io.vlingo.symbio.Source;
 import io.vlingo.symbio.State;
 import io.vlingo.symbio.store.Result;
 import io.vlingo.symbio.store.StorageException;
+import io.vlingo.symbio.store.dispatch.Dispatchable;
 import io.vlingo.symbio.store.dispatch.Dispatcher;
-import io.vlingo.symbio.store.journal.dispatch.JournalDispatchable;
 
 import java.util.List;
 import java.util.Optional;
@@ -47,7 +47,7 @@ public interface Journal<T> {
    */
   @SuppressWarnings("unchecked")
   static <A extends Actor, T, RS extends State<?>> Journal<T> using(final Stage stage, final Class<A> implementor,
-          final Dispatcher<JournalDispatchable<T,RS>> dispatcher, final Object...additional) {
+          final Dispatcher<Dispatchable<Entry<T>,RS>> dispatcher, final Object...additional) {
     return additional.length == 0 ?
              stage.actorFor(Journal.class, implementor, dispatcher) :
              stage.actorFor(Journal.class, implementor, dispatcher, additional);

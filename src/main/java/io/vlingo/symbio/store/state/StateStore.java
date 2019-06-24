@@ -18,7 +18,6 @@ import io.vlingo.symbio.store.Result;
 import io.vlingo.symbio.store.StorageException;
 import io.vlingo.symbio.store.dispatch.Dispatchable;
 
-import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 
@@ -70,64 +69,13 @@ public interface StateStore extends StateStoreReader, StateStoreWriter {
   }
 
   /**
-   * Defines the data holder for identity and state that has been
-   * successfully stored and is then dispatched to registered
-   * interests.
-   *
-   * @param <R> the concrete {@code State<?>} type of the storage
-   */
-   class StateDispatchable<R extends State<?>> extends Dispatchable {
-
-    /**
-     * My R concrete {@code State<?>} type.
-     */
-    private final R state;
-    
-    /**
-     * My {@code List<Entry<?>>} to dispatch
-     */
-    private final List<Entry<?>> entries;
-
-    /**
-     * Constructs my state.
-     * @param id the String unique identity
-     * @param createdAt the persistence creation timestamp
-     * @param state the R concrete {@code State<?>} type
-     * @param entries the {@code List<Entry<?>>} to dispatch
-     */
-    public StateDispatchable(final String id, final LocalDateTime createdAt, final R state, List<Entry<?>> entries) {
-      super(id, createdAt);
-      this.state = state;
-      this.entries = entries;
-    }
-
-    public R getState() {
-      return state;
-    }
-
-    public List<Entry<?>> getEntries() {
-      return entries;
-    }
-
-    /**
-     * Answer the state as an instance of specific type {@code State<S>}.
-     * @return {@code State<S>}
-     * @param <S> the type of the state, String or byte[]
-     */
-    @SuppressWarnings("unchecked")
-    public <S> State<S> typedState() {
-      return (State<S>) state;
-    }
-  }
-
-  /**
    * Defines the interface through which basic abstract storage implementations
    * delegate to the technical implementations. See any of the existing concrete
    * implementations for details, such as the Postgres or HSQL found in component
    * {@code vlingo-symbio-jdbc}.
    */
   public static interface StorageDelegate {
-    <S extends State<?>> Collection<StateDispatchable<S>> allUnconfirmedDispatchableStates() throws Exception;
+    <S extends State<?>> Collection<Dispatchable<Entry<?>,S>> allUnconfirmedDispatchableStates() throws Exception;
     <A,E> A appendExpressionFor(final Entry<E> entry) throws Exception;
     <A> A appendIdentityExpression();
     void beginRead() throws Exception;
