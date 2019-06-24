@@ -75,7 +75,7 @@ public class InMemoryEventJournalActorTest {
 
     Assert.assertNotNull(dispatched.createdOn());
     Assert.assertFalse(dispatched.getSnapshot().isPresent());
-    Assert.assertNotNull(dispatched.getId());
+    Assert.assertNotNull(dispatched.id());
     final Collection<Entry<String>> dispatchedEntries = dispatched.getEntries();
     Assert.assertEquals(1, dispatchedEntries.size());
   }
@@ -108,7 +108,7 @@ public class InMemoryEventJournalActorTest {
 
     Assert.assertNotNull(dispatched.createdOn());
     Assert.assertTrue(dispatched.getSnapshot().isPresent());
-    Assert.assertNotNull(dispatched.getId());
+    Assert.assertNotNull(dispatched.id());
     final Collection<Entry<String>> dispatchedEntries = dispatched.getEntries();
     Assert.assertEquals(1, dispatchedEntries.size());
   }

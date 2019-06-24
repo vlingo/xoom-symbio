@@ -44,7 +44,7 @@ public class MockJournalDispatcher<T, ST extends State<?>> implements Dispatcher
   public void dispatch(JournalDispatchable dispatchable) {
     dispatchAttemptCount++;
     if (processDispatch.get()) {
-      final String dispatchId = dispatchable.getId();
+      final String dispatchId = dispatchable.id();
       access.writeUsing("dispatched", dispatchId, dispatchable);
       control.confirmDispatched(dispatchId, confirmDispatchedResultInterest);
     }

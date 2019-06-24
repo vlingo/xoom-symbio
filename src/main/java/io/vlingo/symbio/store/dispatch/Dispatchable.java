@@ -26,7 +26,7 @@ public abstract class Dispatchable {
     this.createdOn = createdOn;
   }
 
-  public String getId() {
+  public String id() {
     return id;
   }
 

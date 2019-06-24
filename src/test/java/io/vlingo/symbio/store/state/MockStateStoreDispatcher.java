@@ -44,7 +44,7 @@ public class MockStateStoreDispatcher implements Dispatcher<StateStore.StateDisp
   public void dispatch(StateStore.StateDispatchable dispatchable) {
     dispatchAttemptCount++;
     if (processDispatch.get()) {
-      final String dispatchId = dispatchable.getId();
+      final String dispatchId = dispatchable.id();
       access.writeUsing("dispatched", dispatchId, new Dispatch(dispatchable.getState(), dispatchable.getEntries()));
       control.confirmDispatched(dispatchId, confirmDispatchedResultInterest);
     }

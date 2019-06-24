@@ -66,7 +66,7 @@ public class InMemoryDispatcherControl<D extends Dispatchable> extends Actor imp
   public void confirmDispatched(String dispatchId, ConfirmDispatchedResultInterest interest) {
     dispatchables
             .stream()
-            .filter(d -> d.getId().equals(dispatchId))
+            .filter(d -> d.id().equals(dispatchId))
             .findFirst()
             .ifPresent(dispatchables::remove);
 
