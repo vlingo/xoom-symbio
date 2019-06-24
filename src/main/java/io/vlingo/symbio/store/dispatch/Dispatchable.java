@@ -7,10 +7,22 @@
 
 package io.vlingo.symbio.store.dispatch;
 
-import java.time.LocalDateTime;
-import java.util.Objects;
+import io.vlingo.symbio.Entry;
+import io.vlingo.symbio.State;
 
-public abstract class Dispatchable {
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+
+/**
+ * Defines the data holder for identity and state that has been
+ * successfully stored and is then dispatched to registered
+ * interests.
+ *
+ * @param <RS> the concrete {@code State<?>} type of the storage
+ */
+public class Dispatchable<E extends Entry<?>, RS extends State<?>> {
   /**
    * My String unique identity.
    */
@@ -19,19 +31,39 @@ public abstract class Dispatchable {
   /**
    * The moment when I was persistently created.
    */
-  private final LocalDateTime createdAt;
+  private final LocalDateTime createdOn;
 
-  protected Dispatchable(String id, LocalDateTime createdAt) {
+  /**
+   * My R concrete {@code State<?>} type.
+   */
+  private final RS state;
+
+  /**
+   * My {@code List<Entry<?>>} to dispatch
+   */
+  private final List<E> entries;
+
+  public Dispatchable(String id, LocalDateTime createdOn, RS state, List<E> entries) {
     this.id = id;
-    this.createdAt = createdAt;
+    this.createdOn = createdOn;
+    this.state = state;
+    this.entries = entries;
   }
 
-  public String getId() {
+  public String id() {
     return id;
   }
 
-  public LocalDateTime getCreatedAt() {
-    return createdAt;
+  public LocalDateTime createdOn() {
+    return createdOn;
+  }
+
+  public Optional<RS> state() {
+    return Optional.ofNullable(state);
+  }
+
+  public List<E> entries() {
+    return entries;
   }
 
   @Override
@@ -42,6 +74,17 @@ public abstract class Dispatchable {
       return false;
     Dispatchable that = (Dispatchable) o;
     return id.equals(that.id);
+  }
+
+
+  /**
+   * Answer the state as an instance of specific type {@code State<S>}.
+   * @return {@code State<S>}
+   * @param <S> the type of the state, String or byte[]
+   */
+  @SuppressWarnings("unchecked")
+  public <S> State<S> typedState() {
+    return (State<S>) state;
   }
 
   @Override

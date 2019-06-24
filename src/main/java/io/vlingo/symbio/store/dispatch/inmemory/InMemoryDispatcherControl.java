@@ -54,7 +54,7 @@ public class InMemoryDispatcherControl<D extends Dispatchable> extends Actor imp
   public void dispatchUnconfirmed() {
     final LocalDateTime now = LocalDateTime.now();
     for (D dispatchable : dispatchables) {
-      final LocalDateTime then = dispatchable.getCreatedAt();
+      final LocalDateTime then = dispatchable.createdOn();
       Duration duration = Duration.between(then, now);
       if (Math.abs(duration.toMillis()) > confirmationExpiration) {
         dispatcher.dispatch(dispatchable);
@@ -66,7 +66,7 @@ public class InMemoryDispatcherControl<D extends Dispatchable> extends Actor imp
   public void confirmDispatched(String dispatchId, ConfirmDispatchedResultInterest interest) {
     dispatchables
             .stream()
-            .filter(d -> d.getId().equals(dispatchId))
+            .filter(d -> d.id().equals(dispatchId))
             .findFirst()
             .ifPresent(dispatchables::remove);
 

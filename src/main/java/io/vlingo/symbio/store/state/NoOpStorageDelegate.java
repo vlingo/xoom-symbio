@@ -7,16 +7,16 @@
 
 package io.vlingo.symbio.store.state;
 
-import java.util.Collection;
-
 import io.vlingo.symbio.Entry;
 import io.vlingo.symbio.State;
 import io.vlingo.symbio.store.EntryReader.Advice;
-import io.vlingo.symbio.store.state.StateStore.StateDispatchable;
+import io.vlingo.symbio.store.dispatch.Dispatchable;
 import io.vlingo.symbio.store.state.StateStore.StorageDelegate;
 
+import java.util.Collection;
+
 public class NoOpStorageDelegate implements StorageDelegate {
-  @Override public <S extends State<?>> Collection<StateDispatchable<S>> allUnconfirmedDispatchableStates() { return null; }
+  @Override public <S extends State<?>> Collection<Dispatchable<Entry<?>,S>> allUnconfirmedDispatchableStates() { return null; }
 
   @Override public void beginRead() {  }
 

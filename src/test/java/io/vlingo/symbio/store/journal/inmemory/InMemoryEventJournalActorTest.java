@@ -19,9 +19,9 @@ import io.vlingo.symbio.Metadata;
 import io.vlingo.symbio.Source;
 import io.vlingo.symbio.StateAdapterProvider;
 import io.vlingo.symbio.store.Result;
+import io.vlingo.symbio.store.dispatch.Dispatchable;
 import io.vlingo.symbio.store.dispatch.MockConfirmDispatchedResultInterest;
 import io.vlingo.symbio.store.journal.Journal;
-import io.vlingo.symbio.store.journal.dispatch.JournalDispatchable;
 import io.vlingo.symbio.store.journal.inmemory.MockAppendResultInterest.JournalData;
 import io.vlingo.symbio.store.state.SnapshotStateAdapter;
 import org.junit.After;
@@ -71,12 +71,12 @@ public class InMemoryEventJournalActorTest {
     Assert.assertEquals(source, sourceList.get(0));
 
     assertEquals(1, dispatcher.dispatchedCount());
-    final JournalDispatchable<String, SnapshotState> dispatched = dispatcher.getDispached().get(0);
+    final Dispatchable<Entry<String>,SnapshotState> dispatched = dispatcher.getDispached().get(0);
 
-    Assert.assertNotNull(dispatched.getCreatedAt());
-    Assert.assertFalse(dispatched.getSnapshot().isPresent());
-    Assert.assertNotNull(dispatched.getId());
-    final Collection<Entry<String>> dispatchedEntries = dispatched.getEntries();
+    Assert.assertNotNull(dispatched.createdOn());
+    Assert.assertFalse(dispatched.state().isPresent());
+    Assert.assertNotNull(dispatched.id());
+    final Collection<Entry<String>> dispatchedEntries = dispatched.entries();
     Assert.assertEquals(1, dispatchedEntries.size());
   }
 
@@ -104,12 +104,12 @@ public class InMemoryEventJournalActorTest {
     Assert.assertEquals(source, sourceList.get(0));
 
     assertEquals(1, dispatcher.dispatchedCount());
-    final JournalDispatchable<String, SnapshotState> dispatched = dispatcher.getDispached().get(0);
+    final Dispatchable<Entry<String>,SnapshotState> dispatched = dispatcher.getDispached().get(0);
 
-    Assert.assertNotNull(dispatched.getCreatedAt());
-    Assert.assertTrue(dispatched.getSnapshot().isPresent());
-    Assert.assertNotNull(dispatched.getId());
-    final Collection<Entry<String>> dispatchedEntries = dispatched.getEntries();
+    Assert.assertNotNull(dispatched.createdOn());
+    Assert.assertTrue(dispatched.state().isPresent());
+    Assert.assertNotNull(dispatched.id());
+    final Collection<Entry<String>> dispatchedEntries = dispatched.entries();
     Assert.assertEquals(1, dispatchedEntries.size());
   }
 

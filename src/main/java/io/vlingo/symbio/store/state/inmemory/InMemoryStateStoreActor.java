@@ -21,6 +21,7 @@ import io.vlingo.symbio.State;
 import io.vlingo.symbio.StateAdapterProvider;
 import io.vlingo.symbio.store.Result;
 import io.vlingo.symbio.store.StorageException;
+import io.vlingo.symbio.store.dispatch.Dispatchable;
 import io.vlingo.symbio.store.dispatch.Dispatcher;
 import io.vlingo.symbio.store.dispatch.DispatcherControl;
 import io.vlingo.symbio.store.dispatch.inmemory.InMemoryDispatcherControl;
@@ -37,8 +38,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class InMemoryStateStoreActor<RS extends State<?>> extends Actor
     implements StateStore {
 
-  private final List<StateDispatchable<RS>> dispatchables;
-  private final Dispatcher<StateDispatchable<RS>> dispatcher;
+  private final List<Dispatchable<Entry<?>,RS>> dispatchables;
+  private final Dispatcher<Dispatchable<Entry<?>,RS>> dispatcher;
   private final DispatcherControl dispatcherControl;
   private final List<Entry<?>> entries;
   private final Map<String,StateStoreEntryReader<?>> entryReaders;
@@ -46,11 +47,11 @@ public class InMemoryStateStoreActor<RS extends State<?>> extends Actor
   private final StateAdapterProvider stateAdapterProvider;
   private final Map<String, Map<String, RS>> store;
 
-  public InMemoryStateStoreActor(final Dispatcher<StateDispatchable<RS>> dispatcher) {
+  public InMemoryStateStoreActor(final Dispatcher<Dispatchable<Entry<?>, RS>> dispatcher) {
     this(dispatcher, 1000L, 1000L);
   }
 
-  public InMemoryStateStoreActor(final Dispatcher<StateDispatchable<RS>> dispatcher, long checkConfirmationExpirationInterval, final long confirmationExpiration) {
+  public InMemoryStateStoreActor(final Dispatcher<Dispatchable<Entry<?>, RS>> dispatcher, long checkConfirmationExpirationInterval, final long confirmationExpiration) {
     if (dispatcher == null) {
       throw new IllegalArgumentException("Dispatcher must not be null.");
     }
@@ -209,7 +210,7 @@ public class InMemoryStateStoreActor<RS extends State<?>> extends Actor
 
   private void dispatch(String id, String storeName, RS raw, List<Entry<?>> entries) {
     final String dispatchId = storeName + ":" + id;
-    final StateDispatchable<RS> dispatchable = new StateDispatchable<>(dispatchId, LocalDateTime.now(), raw, entries);
+    final Dispatchable<Entry<?>, RS> dispatchable = new Dispatchable<>(dispatchId, LocalDateTime.now(), raw, entries);
     this.dispatchables.add(dispatchable);
     this.dispatcher.dispatch(dispatchable);
   }
