@@ -125,7 +125,7 @@ public abstract class BaseEntry<T> implements Entry<T> {
   /**
    * Returns true if I am an instance of {@link BinaryEntry}.
    * The default is to answer false.
-   * 
+   *
    * @return true if I am an instance of {@link BinaryEntry}
    */
   public boolean isBinary() {
@@ -147,7 +147,7 @@ public abstract class BaseEntry<T> implements Entry<T> {
   /**
    * Returns true if I am an instance of {@link ObjectEntry}.
    * The default is to answer false.
-   * 
+   *
    * @return true if I am an instance of {@link ObjectEntry}
    */
   public boolean isObject() {
@@ -157,22 +157,19 @@ public abstract class BaseEntry<T> implements Entry<T> {
   /**
    * Returns true if I am an instance of {@link TextEntry}.
    * The default is to answer false.
-   * 
+   *
    * @return true if I am an instance of {@link TextEntry}
    */
   public boolean isText() {
     return false;
   }
 
-  /* @see io.vlingo.symbio.Entry#typed() */
+  /**
+   * @see io.vlingo.symbio.Entry#typed()
+   */
   @Override
-  @SuppressWarnings("unchecked")
   public <C> Class<C> typed() {
-    try {
-      return (Class<C>) Class.forName(type);
-    } catch (Exception e) {
-      throw new IllegalStateException("Cannot get class for type: " + type);
-    }
+    return Entry.typed(type);
   }
 
   /**
