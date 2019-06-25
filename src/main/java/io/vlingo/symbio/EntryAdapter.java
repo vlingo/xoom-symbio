@@ -27,7 +27,17 @@ public interface EntryAdapter<S extends Source<?>,E extends Entry<?>> {
    * @param source the {@code S Source<?>} native state
    * @return E
    */
-  E toEntry(final S source);
+  default E toEntry(final S source){
+     return this.toEntry(source, Metadata.nullMetadata());
+  }
+
+  /**
+   * Answer the {@code E Entry<?>} state from the {@code S Source<?>} native state.
+   * @param source the {@code S Source<?>} native state
+   * @param metadata the Metadata for this entry
+   * @return E
+   */
+  E toEntry(final S source, final Metadata metadata);
 
   /**
    * Answer the {@code E Entry<?>} state with its {@code id} from the {@code S Source<?>} native state.
@@ -35,5 +45,16 @@ public interface EntryAdapter<S extends Source<?>,E extends Entry<?>> {
    * @param id the String unique identity to assign to the Entry
    * @return E
    */
-  E toEntry(final S source, final String id);
+  default E toEntry(final S source, final String id){
+    return this.toEntry(source, id, Metadata.nullMetadata());
+  }
+
+  /**
+   * Answer the {@code E Entry<?>} state with its {@code id} from the {@code S Source<?>} native state.
+   * @param source the {@code S Source<?>} native state
+   * @param id the String unique identity to assign to the Entry
+   * @param metadata the Metadata for this entry
+   * @return E
+   */
+  E toEntry(final S source, final String id, final Metadata metadata);
 }

@@ -81,23 +81,18 @@ public class InMemoryJournal<T,RS extends State<?>> implements Journal<T> {
   }
 
   @Override
-  public <S,ST> void append(final String streamName, final int streamVersion, final Source<S> source, final AppendResultInterest interest, final Object object) {
-    final Entry<T> entry = entryAdapterProvider.asEntry(source);
+  public <S, ST> void append(String streamName, int streamVersion, Source<S> source, Metadata metadata,
+          AppendResultInterest interest, Object object) {
+    final Entry<T> entry = entryAdapterProvider.asEntry(source, metadata);
     insert(streamName, streamVersion, entry);
     dispatch(streamName, streamVersion, Collections.singletonList(entry), null);
     interest.appendResultedIn(Success.of(Result.Success), streamName, streamVersion, source, Optional.empty(), object);
   }
-
+  
   @Override
-  public <S, ST> void append(String streamName, int streamVersion, Source<S> source, Metadata metadata,
+  public <S, ST> void appendWith(String streamName, int streamVersion, Source<S> source, Metadata metadata, ST snapshot,
           AppendResultInterest interest, Object object) {
-    //TODO implement
-  }
-
-  @Override
-  @SuppressWarnings("unchecked")
-  public <S,ST> void appendWith(final String streamName, final int streamVersion, final Source<S> source, final ST snapshot, final AppendResultInterest interest, final Object object) {
-    final Entry<T> entry = entryAdapterProvider.asEntry(source);
+    final Entry<T> entry = entryAdapterProvider.asEntry(source, metadata);
     insert(streamName, streamVersion, entry);
     final RS raw;
     final Optional<ST> snapshotResult;
@@ -114,31 +109,22 @@ public class InMemoryJournal<T,RS extends State<?>> implements Journal<T> {
     interest.appendResultedIn(Success.of(Result.Success), streamName, streamVersion, source, snapshotResult, object);
   }
 
+  
   @Override
-  public <S, ST> void appendWith(String streamName, int streamVersion, Source<S> source, Metadata metadata, ST snapshot,
+  public <S, ST> void appendAll(String streamName, int fromStreamVersion, List<Source<S>> sources, Metadata metadata,
           AppendResultInterest interest, Object object) {
-    //TODO implement
-  }
-
-  @Override
-  public <S,ST> void appendAll(final String streamName, final int fromStreamVersion, final List<Source<S>> sources, final AppendResultInterest interest, final Object object) {
-    final List<Entry<T>> entries = entryAdapterProvider.asEntries(sources);
+    final List<Entry<T>> entries = entryAdapterProvider.asEntries(sources, metadata);
     insert(streamName, fromStreamVersion, entries);
 
     dispatch(streamName, fromStreamVersion, entries, null);
     interest.appendAllResultedIn(Success.of(Result.Success), streamName, fromStreamVersion, sources, Optional.empty(), object);
   }
 
+  
   @Override
-  public <S, ST> void appendAll(String streamName, int fromStreamVersion, List<Source<S>> sources, Metadata metadata,
-          AppendResultInterest interest, Object object) {
-    //TODO implement
-  }
-
-  @Override
-  @SuppressWarnings("unchecked")
-  public <S,ST> void appendAllWith(final String streamName, final int fromStreamVersion, final List<Source<S>> sources, final ST snapshot, final AppendResultInterest interest, final Object object) {
-    final List<Entry<T>> entries = entryAdapterProvider.asEntries(sources);
+  public <S, ST> void appendAllWith(String streamName, int fromStreamVersion, List<Source<S>> sources,
+          Metadata metadata, ST snapshot, AppendResultInterest interest, Object object) {
+    final List<Entry<T>> entries = entryAdapterProvider.asEntries(sources, metadata);
     insert(streamName, fromStreamVersion, entries);
     final RS raw;
     final Optional<ST> snapshotResult;
@@ -150,15 +136,9 @@ public class InMemoryJournal<T,RS extends State<?>> implements Journal<T> {
       raw = null;
       snapshotResult = Optional.empty();
     }
-    
+
     dispatch(streamName, fromStreamVersion, entries, raw);
     interest.appendAllResultedIn(Success.of(Result.Success), streamName, fromStreamVersion, sources, snapshotResult, object);
-  }
-
-  @Override
-  public <S, ST> void appendAllWith(String streamName, int fromStreamVersion, List<Source<S>> sources,
-          Metadata metadata, ST snapshot, AppendResultInterest interest, Object object) {
-    //TODO implement
   }
 
   @Override

@@ -182,7 +182,7 @@ public class InMemoryStateStoreActor<RS extends State<?>> extends Actor
             }
           }
           typeStore.put(id, raw);
-          final List<Entry<?>> entries = appendEntries(sources);
+          final List<Entry<?>> entries = appendEntries(sources, metadata);
           dispatch(id, storeName, raw, entries);
 
           interest.writeResultedIn(Success.of(Result.Success), id, state, stateVersion, sources, object);
@@ -199,8 +199,8 @@ public class InMemoryStateStoreActor<RS extends State<?>> extends Actor
     }
   }
 
-  private <C> List<Entry<?>> appendEntries(final List<Source<C>> sources) {
-    final List<Entry<?>> adapted = entryAdapterProvider.asEntries(sources);
+  private <C> List<Entry<?>> appendEntries(final List<Source<C>> sources, final Metadata metadata) {
+    final List<Entry<?>> adapted = entryAdapterProvider.asEntries(sources, metadata);
     for (Entry<?> each : adapted) {
       ((BaseEntry<?>) each).__internal__setId(String.valueOf(entries.size()));
       entries.add(each);

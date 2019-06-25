@@ -71,7 +71,7 @@ public class InMemoryEventJournalActorTest {
     Assert.assertEquals(source, sourceList.get(0));
 
     assertEquals(1, dispatcher.dispatchedCount());
-    final Dispatchable<Entry<String>,SnapshotState> dispatched = dispatcher.getDispached().get(0);
+    final Dispatchable<Entry<String>, SnapshotState> dispatched = dispatcher.getDispached().get(0);
 
     Assert.assertNotNull(dispatched.createdOn());
     Assert.assertFalse(dispatched.state().isPresent());
@@ -104,7 +104,7 @@ public class InMemoryEventJournalActorTest {
     Assert.assertEquals(source, sourceList.get(0));
 
     assertEquals(1, dispatcher.dispatchedCount());
-    final Dispatchable<Entry<String>,SnapshotState> dispatched = dispatcher.getDispached().get(0);
+    final Dispatchable<Entry<String>, SnapshotState> dispatched = dispatcher.getDispached().get(0);
 
     Assert.assertNotNull(dispatched.createdOn());
     Assert.assertTrue(dispatched.state().isPresent());
@@ -124,12 +124,9 @@ public class InMemoryEventJournalActorTest {
     journal.append(streamName, streamVersion, source, interest, object);
 
     final AccessSafely accessResults = new TestResults().afterCompleting(1);
-    journal
-      .journalReader("test")
-      .andThenTo(reader -> reader.readNext())
-      .andThenConsume(event -> {
-        accessResults.writeUsing("addAll", Collections.singletonList(event));
-      });
+    journal.journalReader("test").andThenTo(reader -> reader.readNext()).andThenConsume(event -> {
+      accessResults.writeUsing("addAll", Collections.singletonList(event));
+    });
 
     assertNotNull(accessResults.readFrom("entry", 0));
     assertEquals("1", accessResults.readFrom("entryId", 0));
@@ -144,14 +141,11 @@ public class InMemoryEventJournalActorTest {
     journal.appendAll("123", 1, three, interest, object);
 
     final AccessSafely accessResults = new TestResults().afterCompleting(1);
-    journal
-      .journalReader("test")
-      .andThenTo(reader -> reader.readNext(5))
-      .andThenConsume(entries -> {
-        accessResults.writeUsing("addAll", entries);
-      });
-    
-    assertEquals(3, (int)accessResults.readFrom("size"));
+    journal.journalReader("test").andThenTo(reader -> reader.readNext(5)).andThenConsume(entries -> {
+      accessResults.writeUsing("addAll", entries);
+    });
+
+    assertEquals(3, (int) accessResults.readFrom("size"));
     assertEquals("1", accessResults.readFrom("entryId", 0));
     assertEquals("2", accessResults.readFrom("entryId", 1));
     assertEquals("3", accessResults.readFrom("entryId", 2));
@@ -168,14 +162,11 @@ public class InMemoryEventJournalActorTest {
     journal.append("123", 5, new Test1Source(), interest, object);
 
     final AccessSafely accessResults = new TestResults().afterCompleting(1);
-    journal
-      .streamReader("test")
-      .andThenTo(reader -> reader.streamFor("123"))
-      .andThenConsume(eventStream -> {
-        accessResults.writeUsing("addAll", eventStream.entries);
-      });
+    journal.streamReader("test").andThenTo(reader -> reader.streamFor("123")).andThenConsume(eventStream -> {
+      accessResults.writeUsing("addAll", eventStream.entries);
+    });
 
-    assertEquals(3, (int)accessResults.readFrom("size"));
+    assertEquals(3, (int) accessResults.readFrom("size"));
     assertEquals("3", accessResults.readFrom("entryId", 0));
     assertEquals("4", accessResults.readFrom("entryId", 1));
     assertEquals("5", accessResults.readFrom("entryId", 2));
@@ -192,15 +183,12 @@ public class InMemoryEventJournalActorTest {
     journal.append("123", 5, new Test1Source(), interest, object);
 
     final AccessSafely accessResults = new TestResults().afterCompleting(1);
-    journal
-      .streamReader("test")
-      .andThenTo(reader -> reader.streamFor("123", 4))
-      .andThenConsume(eventStream -> {
-        accessResults.writeUsing("addAll", eventStream.entries);
-        assertNull(eventStream.snapshot);
-      });
+    journal.streamReader("test").andThenTo(reader -> reader.streamFor("123", 4)).andThenConsume(eventStream -> {
+      accessResults.writeUsing("addAll", eventStream.entries);
+      assertNull(eventStream.snapshot);
+    });
 
-    assertEquals(2, (int)accessResults.readFrom("size"));
+    assertEquals(2, (int) accessResults.readFrom("size"));
     assertEquals("4", accessResults.readFrom("entryId", 0));
     assertEquals("5", accessResults.readFrom("entryId", 1));
   }
@@ -223,65 +211,68 @@ public class InMemoryEventJournalActorTest {
 
   public static final class Test1Source extends Source<String> {
     private final int one = 1;
-    public int one() { return one; }
+
+    public int one() {
+      return one;
+    }
   }
 
   public static final class Test2Source extends Source<String> {
     private final int two = 2;
-    public int two() { return two; }
+
+    public int two() {
+      return two;
+    }
   }
 
-  private static final class Test1SourceAdapter implements EntryAdapter<Test1Source,TextEntry> {
+  private static final class Test1SourceAdapter implements EntryAdapter<Test1Source, TextEntry> {
     @Override
     public Test1Source fromEntry(final TextEntry entry) {
       return JsonSerialization.deserialized(entry.entryData(), Test1Source.class);
     }
 
     @Override
-    public TextEntry toEntry(final Test1Source source) {
+    public TextEntry toEntry(Test1Source source, Metadata metadata) {
       final String serialization = JsonSerialization.serialized(source);
-      return new TextEntry(Test1Source.class, 1, serialization, Metadata.nullMetadata());
+      return new TextEntry(Test1Source.class, 1, serialization, metadata);
     }
 
     @Override
-    public TextEntry toEntry(final Test1Source source, final String id) {
+    public TextEntry toEntry(Test1Source source, String id, Metadata metadata) {
       final String serialization = JsonSerialization.serialized(source);
-      return new TextEntry(id, Test1Source.class, 1, serialization, Metadata.nullMetadata());
+      return new TextEntry(id, Test1Source.class, 1, serialization, metadata);
     }
   }
 
-  private static final class Test2SourceAdapter implements EntryAdapter<Test2Source,TextEntry> {
+  private static final class Test2SourceAdapter implements EntryAdapter<Test2Source, TextEntry> {
     @Override
     public Test2Source fromEntry(final TextEntry entry) {
       return JsonSerialization.deserialized(entry.entryData(), Test2Source.class);
     }
 
     @Override
-    public TextEntry toEntry(final Test2Source source) {
+    public TextEntry toEntry(Test2Source source, Metadata metadata) {
       final String serialization = JsonSerialization.serialized(source);
-      return new TextEntry(Test1Source.class, 1, serialization, Metadata.nullMetadata());
+      return new TextEntry(Test1Source.class, 1, serialization, metadata);
     }
 
     @Override
-    public TextEntry toEntry(Test2Source source, String id) {
+    public TextEntry toEntry(Test2Source source, String id, Metadata metadata) {
       final String serialization = JsonSerialization.serialized(source);
-      return new TextEntry(id, Test1Source.class, 1, serialization, Metadata.nullMetadata());
+      return new TextEntry(id, Test1Source.class, 1, serialization, metadata);
     }
   }
 
-  private static final class TestResults
-  {
+  private static final class TestResults {
     AccessSafely access;
     public final List<BaseEntry<String>> entries = new ArrayList<>();
 
     @SuppressWarnings("unchecked")
-    public AccessSafely afterCompleting( final int times )
-    {
-      access =
-              AccessSafely.afterCompleting(times)
-              .writingWith("addAll", (values) -> this.entries.addAll((Collection<BaseEntry<String>>)values ))
-              .readingWith("entry", (index) -> this.entries.get((int)index))
-              .readingWith("entryId", (index) -> this.entries.get((int)index).id())
+    public AccessSafely afterCompleting(final int times) {
+      access = AccessSafely.afterCompleting(times)
+              .writingWith("addAll", (values) -> this.entries.addAll((Collection<BaseEntry<String>>) values))
+              .readingWith("entry", (index) -> this.entries.get((int) index))
+              .readingWith("entryId", (index) -> this.entries.get((int) index).id())
               .readingWith("size", () -> this.entries.size());
 
       return access;

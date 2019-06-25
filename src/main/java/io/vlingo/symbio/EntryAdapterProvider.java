@@ -62,21 +62,21 @@ public class EntryAdapterProvider {
     consumer.accept(sourceType, adapter);
   }
 
-  public <S extends Source<?>,E extends Entry<?>> List<E> asEntries(final List<S> sources) {
+  public <S extends Source<?>,E extends Entry<?>> List<E> asEntries(final List<S> sources, final Metadata metadata) {
     final List<E> entries = new ArrayList<>(sources.size());
     for (final S source : sources) {
-      entries.add(asEntry(source));
+      entries.add(asEntry(source, metadata));
     }
     return entries;
   }
 
   @SuppressWarnings("unchecked")
-  public <S extends Source<?>,E extends Entry<?>> E asEntry(final S source) {
+  public <S extends Source<?>,E extends Entry<?>> E asEntry(final S source, final Metadata metadata) {
     final EntryAdapter<S,E>  adapter = (EntryAdapter<S,E>) adapter((Class<S>) source.getClass());
     if (adapter != null) {
-      return adapter.toEntry(source);
+      return adapter.toEntry(source, metadata);
     }
-    return (E) defaultTextEntryAdapter.toEntry(source);
+    return (E) defaultTextEntryAdapter.toEntry(source, metadata);
   }
                                                   
   public <S extends Source<?>,E extends Entry<?>> List<S> asSources(final List<E> entries) {

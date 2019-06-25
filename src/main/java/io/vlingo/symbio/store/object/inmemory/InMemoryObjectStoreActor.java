@@ -57,42 +57,25 @@ public class InMemoryObjectStoreActor extends Actor implements ObjectStore {
   public void close() {
     store.clear();
   }
+  
 
   /* @see io.vlingo.symbio.store.object.ObjectStore#persist(java.lang.Object, java.util.List, long, io.vlingo.symbio.store.object.ObjectStore.PersistResultInterest, java.lang.Object) */
   @Override
-  public <T extends PersistentObject, E> void persist(final T persistentObject, final List<Source<E>> sources, long updateId, PersistResultInterest interest, Object object) {
-    persistEach(persistentObject);
-    appendEntries(sources);
-    interest.persistResultedIn(Success.of(Result.Success), persistentObject, 1, 1, object);
-  }
-
-  @Override
   public <T extends PersistentObject, E> void persist(T persistentObject, List<Source<E>> sources, Metadata metadata,
           long updateId, PersistResultInterest interest, Object object) {
-    //TODO implement
     persistEach(persistentObject);
-    appendEntries(sources);
+    appendEntries(sources, metadata);
     interest.persistResultedIn(Success.of(Result.Success), persistentObject, 1, 1, object);
   }
-
+  
   /* @see io.vlingo.symbio.store.object.ObjectStore#persistAll(java.util.Collection, java.util.List, long, io.vlingo.symbio.store.object.ObjectStore.PersistResultInterest, java.lang.Object) */
-  @Override
-  public <T extends PersistentObject, E> void persistAll(Collection<T> persistentObjects, final List<Source<E>> sources, long updateId, PersistResultInterest interest, Object object) {
-    for (final Object persistentObject : persistentObjects) {
-      persistEach(persistentObject);
-    }
-    appendEntries(sources);
-    interest.persistResultedIn(Success.of(Result.Success), persistentObjects, persistentObjects.size(), persistentObjects.size(), object);
-  }
-
   @Override
   public <T extends PersistentObject, E> void persistAll(Collection<T> persistentObjects, List<Source<E>> sources,
           Metadata metadata, long updateId, PersistResultInterest interest, Object object) {
-    //TODO implement
     for (final Object persistentObject : persistentObjects) {
       persistEach(persistentObject);
     }
-    appendEntries(sources);
+    appendEntries(sources, metadata);
     interest.persistResultedIn(Success.of(Result.Success), persistentObjects, persistentObjects.size(), persistentObjects.size(), object);
   }
 
@@ -161,8 +144,8 @@ public class InMemoryObjectStoreActor extends Actor implements ObjectStore {
     store.put(persistable.id, persistable);
   }
 
-  private <E> void appendEntries(List<Source<E>> sources) {
-    final Collection<BaseEntry<?>> all = entryAdapterProvider.asEntries(sources);
+  private <E> void appendEntries(final List<Source<E>> sources, final Metadata metadata) {
+    final Collection<BaseEntry<?>> all = entryAdapterProvider.asEntries(sources, metadata);
     entries.addAll(all);
   }
 

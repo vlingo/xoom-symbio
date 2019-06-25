@@ -7,13 +7,6 @@
 
 package io.vlingo.symbio.store.object.inmemory;
 
-import static org.junit.Assert.assertEquals;
-
-import java.util.Arrays;
-
-import org.junit.Before;
-import org.junit.Test;
-
 import io.vlingo.actors.World;
 import io.vlingo.actors.testkit.AccessSafely;
 import io.vlingo.symbio.BaseEntry.ObjectEntry;
@@ -24,6 +17,12 @@ import io.vlingo.symbio.Source;
 import io.vlingo.symbio.store.object.MapQueryExpression;
 import io.vlingo.symbio.store.object.ObjectStore;
 import io.vlingo.symbio.store.object.QueryExpression;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.util.Arrays;
+
+import static org.junit.Assert.assertEquals;
 
 public class InMemoryObjectStoreActorTest {
   private MockPersistResultInterest persistInterest;
@@ -94,13 +93,13 @@ public class InMemoryObjectStoreActorTest {
     }
 
     @Override
-    public ObjectEntry<Test1Source> toEntry(final Test1Source source) {
-      return new ObjectEntry<Test1Source>(Test1Source.class, 1, source, Metadata.nullMetadata());
+    public ObjectEntry<Test1Source> toEntry(Test1Source source, Metadata metadata) {
+      return new ObjectEntry<>(Test1Source.class, 1, source, metadata);
     }
 
     @Override
-    public ObjectEntry<Test1Source> toEntry(final Test1Source source, final String id) {
-      return new ObjectEntry<Test1Source>(id, Test1Source.class, 1, source, Metadata.nullMetadata());
+    public ObjectEntry<Test1Source> toEntry(Test1Source source, String id, Metadata metadata) {
+      return new ObjectEntry<>(id, Test1Source.class, 1, source, metadata);
     }
   }
 }
