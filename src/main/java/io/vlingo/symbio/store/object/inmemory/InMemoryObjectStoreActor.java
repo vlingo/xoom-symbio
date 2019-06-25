@@ -8,20 +8,28 @@
 package io.vlingo.symbio.store.object.inmemory;
 
 import io.vlingo.actors.Actor;
+import io.vlingo.actors.Definition;
 import io.vlingo.common.Failure;
 import io.vlingo.common.Success;
-import io.vlingo.common.serialization.JsonSerialization;
 import io.vlingo.symbio.BaseEntry;
+import io.vlingo.symbio.Entry;
 import io.vlingo.symbio.EntryAdapterProvider;
 import io.vlingo.symbio.Metadata;
 import io.vlingo.symbio.Source;
+import io.vlingo.symbio.State;
+import io.vlingo.symbio.StateAdapterProvider;
 import io.vlingo.symbio.store.Result;
 import io.vlingo.symbio.store.StorageException;
+import io.vlingo.symbio.store.dispatch.Dispatchable;
+import io.vlingo.symbio.store.dispatch.Dispatcher;
+import io.vlingo.symbio.store.dispatch.DispatcherControl;
+import io.vlingo.symbio.store.dispatch.inmemory.InMemoryDispatcherControl;
 import io.vlingo.symbio.store.object.ObjectStore;
 import io.vlingo.symbio.store.object.PersistentObject;
 import io.vlingo.symbio.store.object.PersistentObjectMapper;
 import io.vlingo.symbio.store.object.QueryExpression;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -29,25 +37,54 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.Collectors;
 
 /**
  * In-memory implementation of {@code ObjectStore}. Note that {@code queryAll()} variations
  * do not support select constraints but always select all stored objects.
  */
 public class InMemoryObjectStoreActor extends Actor implements ObjectStore {
-  private final Map<Long,SerializedPersistentObject> store;
+  private final EntryAdapterProvider entryAdapterProvider;
+  private final StateAdapterProvider stateAdapterProvider;
+
+  private final Map<Long, State<?>> store;
   private final Map<Class<?>,PersistentObjectMapper> mappers;
   private final List<BaseEntry<?>> entries;
-  private final EntryAdapterProvider entryAdapterProvider;
+
+  private final List<Dispatchable<BaseEntry<?>, State<?>>> dispatchables;
+  private final Dispatcher<Dispatchable<BaseEntry<?>,State<?>>> dispatcher;
+  private final DispatcherControl dispatcherControl;
 
   /**
    * Construct my default state.
    */
-  public InMemoryObjectStoreActor() {
+  public InMemoryObjectStoreActor(final Dispatcher<Dispatchable<BaseEntry<?>,State<?>>> dispatcher){
+    this(dispatcher, 1000L, 1000L);
+  }
+  
+  public InMemoryObjectStoreActor(final Dispatcher<Dispatchable<BaseEntry<?>,State<?>>> dispatcher,
+         final long checkConfirmationExpirationInterval, final long confirmationExpiration ) {
     this.store = new HashMap<>();
     this.mappers = new HashMap<>();
     this.entries = new ArrayList<>();
     this.entryAdapterProvider = EntryAdapterProvider.instance(stage().world());
+    this.stateAdapterProvider = StateAdapterProvider.instance(stage().world());
+
+    this.dispatcher = dispatcher;
+    this.dispatchables = new CopyOnWriteArrayList<>();
+    this.dispatcherControl = stage().actorFor(
+            DispatcherControl.class,
+            Definition.has(
+                    InMemoryDispatcherControl.class,
+                    Definition.parameters(
+                            dispatcher,
+                            dispatchables,
+                            checkConfirmationExpirationInterval,
+                            confirmationExpiration)));
+
+    this.dispatcher.controlWith(dispatcherControl);
+    this.dispatcherControl.dispatchUnconfirmed();
   }
 
   /*
@@ -57,25 +94,39 @@ public class InMemoryObjectStoreActor extends Actor implements ObjectStore {
   public void close() {
     store.clear();
   }
-  
+
 
   /* @see io.vlingo.symbio.store.object.ObjectStore#persist(java.lang.Object, java.util.List, long, io.vlingo.symbio.store.object.ObjectStore.PersistResultInterest, java.lang.Object) */
   @Override
   public <T extends PersistentObject, E> void persist(T persistentObject, List<Source<E>> sources, Metadata metadata,
           long updateId, PersistResultInterest interest, Object object) {
-    persistEach(persistentObject);
-    appendEntries(sources, metadata);
+    final State<?> raw = persistEach(persistentObject, metadata);
+
+    final List<BaseEntry<?>> entries = entryAdapterProvider.asEntries(sources, metadata);
+    appendEntries(entries);
+
+    dispatch(raw, entries);
     interest.persistResultedIn(Success.of(Result.Success), persistentObject, 1, 1, object);
   }
-  
+
+
   /* @see io.vlingo.symbio.store.object.ObjectStore#persistAll(java.util.Collection, java.util.List, long, io.vlingo.symbio.store.object.ObjectStore.PersistResultInterest, java.lang.Object) */
   @Override
   public <T extends PersistentObject, E> void persistAll(Collection<T> persistentObjects, List<Source<E>> sources,
           Metadata metadata, long updateId, PersistResultInterest interest, Object object) {
-    for (final Object persistentObject : persistentObjects) {
-      persistEach(persistentObject);
+
+    final List<State<?>> states = new ArrayList<>(persistentObjects.size());
+    for (final T persistentObject : persistentObjects) {
+      final State<?> state = persistEach(persistentObject, metadata);
+      states.add(state);
     }
-    appendEntries(sources, metadata);
+    final List<BaseEntry<?>> entries = entryAdapterProvider.asEntries(sources, metadata);
+    appendEntries(entries);
+
+    states.forEach(state -> {
+      //dispatch each persistent object
+      dispatch(state, entries);
+    });
     interest.persistResultedIn(Success.of(Result.Success), persistentObjects, persistentObjects.size(), persistentObjects.size(), object);
   }
 
@@ -87,8 +138,8 @@ public class InMemoryObjectStoreActor extends Actor implements ObjectStore {
     // NOTE: No query constraints accepted; selects all stored objects
 
     final Set<PersistentObject> all = new TreeSet<>();
-    for (final SerializedPersistentObject entry : store.values()) {
-      final PersistentObject persistentObject = entry.deserialize();
+    for (final State<?> entry : store.values()) {
+      final PersistentObject persistentObject = stateAdapterProvider.fromRaw(entry);
       all.add(persistentObject);
     }
     interest.queryAllResultedIn(Success.of(Result.Success), QueryMultiResults.of(all), object);
@@ -110,10 +161,10 @@ public class InMemoryObjectStoreActor extends Actor implements ObjectStore {
       return;
     }
 
-    final SerializedPersistentObject found = store.get(Long.parseLong(id));
+    final State<?> found = store.get(Long.parseLong(id));
 
     if (found != null) {
-      final PersistentObject persistentObject = found.deserialize();
+      final PersistentObject persistentObject = stateAdapterProvider.fromRaw(found);
       interest.queryObjectResultedIn(Success.of(Result.Success), QuerySingleResult.of(persistentObject), object);
     } else {
       interest.queryObjectResultedIn(Failure.of(new StorageException(Result.NotFound, "No object identified by: " + id)), QuerySingleResult.of(null), object);
@@ -127,7 +178,7 @@ public class InMemoryObjectStoreActor extends Actor implements ObjectStore {
   public void registerMapper(final PersistentObjectMapper mapper) {
     mappers.put(mapper.type(), mapper);
   }
-  
+
   private String idParameterAsString(final Object id) {
     if (id instanceof String) {
       return (String) id;
@@ -139,29 +190,24 @@ public class InMemoryObjectStoreActor extends Actor implements ObjectStore {
     return String.valueOf(id);
   }
 
-  private <E> void persistEach(final Object persistentObject) {
-    final SerializedPersistentObject persistable = new SerializedPersistentObject((PersistentObject) persistentObject);
-    store.put(persistable.id, persistable);
+  private <E extends State<?>> E persistEach(final PersistentObject persistentObject, final Metadata metadata) {
+    final E raw = this.stateAdapterProvider.asRaw(String.valueOf(persistentObject.persistenceId()), persistentObject, 1, metadata);
+    store.put(persistentObject.persistenceId(), raw);
+    return raw;
   }
 
-  private <E> void appendEntries(final List<Source<E>> sources, final Metadata metadata) {
-    final Collection<BaseEntry<?>> all = entryAdapterProvider.asEntries(sources, metadata);
-    entries.addAll(all);
+  private <E> void appendEntries(Collection<BaseEntry<?>> entries) {
+    this.entries.addAll(entries);
   }
 
-  private static class SerializedPersistentObject {
-    final long id;
-    final String serialization;
-    final Class<?> type;
+  private void dispatch(final State<?> state, final List<BaseEntry<?>> entries ){
+    final String id = getDispatchId(state, entries);
+    final Dispatchable<BaseEntry<?>, State<?>> dispatchable = new Dispatchable<>(id, LocalDateTime.now(), state, entries);
+    this.dispatchables.add(dispatchable);
+    this.dispatcher.dispatch(dispatchable);
+  }
 
-    SerializedPersistentObject(final PersistentObject persistentObject) {
-      this.id = persistentObject.persistenceId();
-      this.type = persistentObject.getClass();
-      this.serialization = JsonSerialization.serialized(persistentObject);
-    }
-
-    PersistentObject deserialize() {
-      return (PersistentObject) JsonSerialization.deserialized(serialization, type);
-    }
+  private static String getDispatchId(final State<?> raw, final List<BaseEntry<?>> entries) {
+    return raw.id + ":" + entries.stream().map(Entry::id).collect(Collectors.joining(":"));
   }
 }

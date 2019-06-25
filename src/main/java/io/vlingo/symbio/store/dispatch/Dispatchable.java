@@ -21,6 +21,7 @@ import java.util.Optional;
  * interests.
  *
  * @param <RS> the concrete {@code State<?>} type of the storage
+ * @param <E> the concrete {@code Entry<?>} type of the entries
  */
 public class Dispatchable<E extends Entry<?>, RS extends State<?>> {
   /**
