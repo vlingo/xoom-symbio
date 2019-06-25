@@ -7,15 +7,15 @@
 
 package io.vlingo.symbio;
 
+import io.vlingo.actors.World;
+import io.vlingo.symbio.BaseEntry.TextEntry;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.BiConsumer;
-
-import io.vlingo.actors.World;
-import io.vlingo.symbio.BaseEntry.TextEntry;
 
 public class EntryAdapterProvider {
   static final String INTERNAL_NAME = UUID.randomUUID().toString();
@@ -78,7 +78,7 @@ public class EntryAdapterProvider {
     }
     return (E) defaultTextEntryAdapter.toEntry(source);
   }
-
+                                                  
   public <S extends Source<?>,E extends Entry<?>> List<S> asSources(final List<E> entries) {
     final List<S> sources = new ArrayList<>(entries.size());
     for (final E entry : entries) {

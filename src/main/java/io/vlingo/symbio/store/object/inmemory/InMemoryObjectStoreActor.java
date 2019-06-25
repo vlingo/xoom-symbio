@@ -7,20 +7,13 @@
 
 package io.vlingo.symbio.store.object.inmemory;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
-
 import io.vlingo.actors.Actor;
 import io.vlingo.common.Failure;
 import io.vlingo.common.Success;
 import io.vlingo.common.serialization.JsonSerialization;
 import io.vlingo.symbio.BaseEntry;
 import io.vlingo.symbio.EntryAdapterProvider;
+import io.vlingo.symbio.Metadata;
 import io.vlingo.symbio.Source;
 import io.vlingo.symbio.store.Result;
 import io.vlingo.symbio.store.StorageException;
@@ -28,6 +21,14 @@ import io.vlingo.symbio.store.object.ObjectStore;
 import io.vlingo.symbio.store.object.PersistentObject;
 import io.vlingo.symbio.store.object.PersistentObjectMapper;
 import io.vlingo.symbio.store.object.QueryExpression;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * In-memory implementation of {@code ObjectStore}. Note that {@code queryAll()} variations
@@ -65,9 +66,29 @@ public class InMemoryObjectStoreActor extends Actor implements ObjectStore {
     interest.persistResultedIn(Success.of(Result.Success), persistentObject, 1, 1, object);
   }
 
+  @Override
+  public <T extends PersistentObject, E> void persist(T persistentObject, List<Source<E>> sources, Metadata metadata,
+          long updateId, PersistResultInterest interest, Object object) {
+    //TODO implement
+    persistEach(persistentObject);
+    appendEntries(sources);
+    interest.persistResultedIn(Success.of(Result.Success), persistentObject, 1, 1, object);
+  }
+
   /* @see io.vlingo.symbio.store.object.ObjectStore#persistAll(java.util.Collection, java.util.List, long, io.vlingo.symbio.store.object.ObjectStore.PersistResultInterest, java.lang.Object) */
   @Override
   public <T extends PersistentObject, E> void persistAll(Collection<T> persistentObjects, final List<Source<E>> sources, long updateId, PersistResultInterest interest, Object object) {
+    for (final Object persistentObject : persistentObjects) {
+      persistEach(persistentObject);
+    }
+    appendEntries(sources);
+    interest.persistResultedIn(Success.of(Result.Success), persistentObjects, persistentObjects.size(), persistentObjects.size(), object);
+  }
+
+  @Override
+  public <T extends PersistentObject, E> void persistAll(Collection<T> persistentObjects, List<Source<E>> sources,
+          Metadata metadata, long updateId, PersistResultInterest interest, Object object) {
+    //TODO implement
     for (final Object persistentObject : persistentObjects) {
       persistEach(persistentObject);
     }

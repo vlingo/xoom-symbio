@@ -14,6 +14,7 @@ import io.vlingo.common.Success;
 import io.vlingo.symbio.BaseEntry;
 import io.vlingo.symbio.Entry;
 import io.vlingo.symbio.EntryAdapterProvider;
+import io.vlingo.symbio.Metadata;
 import io.vlingo.symbio.Source;
 import io.vlingo.symbio.State;
 import io.vlingo.symbio.StateAdapterProvider;
@@ -88,6 +89,12 @@ public class InMemoryJournal<T,RS extends State<?>> implements Journal<T> {
   }
 
   @Override
+  public <S, ST> void append(String streamName, int streamVersion, Source<S> source, Metadata metadata,
+          AppendResultInterest interest, Object object) {
+    //TODO implement
+  }
+
+  @Override
   @SuppressWarnings("unchecked")
   public <S,ST> void appendWith(final String streamName, final int streamVersion, final Source<S> source, final ST snapshot, final AppendResultInterest interest, final Object object) {
     final Entry<T> entry = entryAdapterProvider.asEntry(source);
@@ -108,12 +115,24 @@ public class InMemoryJournal<T,RS extends State<?>> implements Journal<T> {
   }
 
   @Override
+  public <S, ST> void appendWith(String streamName, int streamVersion, Source<S> source, Metadata metadata, ST snapshot,
+          AppendResultInterest interest, Object object) {
+    //TODO implement
+  }
+
+  @Override
   public <S,ST> void appendAll(final String streamName, final int fromStreamVersion, final List<Source<S>> sources, final AppendResultInterest interest, final Object object) {
     final List<Entry<T>> entries = entryAdapterProvider.asEntries(sources);
     insert(streamName, fromStreamVersion, entries);
 
     dispatch(streamName, fromStreamVersion, entries, null);
     interest.appendAllResultedIn(Success.of(Result.Success), streamName, fromStreamVersion, sources, Optional.empty(), object);
+  }
+
+  @Override
+  public <S, ST> void appendAll(String streamName, int fromStreamVersion, List<Source<S>> sources, Metadata metadata,
+          AppendResultInterest interest, Object object) {
+    //TODO implement
   }
 
   @Override
@@ -134,6 +153,12 @@ public class InMemoryJournal<T,RS extends State<?>> implements Journal<T> {
     
     dispatch(streamName, fromStreamVersion, entries, raw);
     interest.appendAllResultedIn(Success.of(Result.Success), streamName, fromStreamVersion, sources, snapshotResult, object);
+  }
+
+  @Override
+  public <S, ST> void appendAllWith(String streamName, int fromStreamVersion, List<Source<S>> sources,
+          Metadata metadata, ST snapshot, AppendResultInterest interest, Object object) {
+    //TODO implement
   }
 
   @Override

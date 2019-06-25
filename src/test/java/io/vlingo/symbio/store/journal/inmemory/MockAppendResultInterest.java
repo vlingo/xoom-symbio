@@ -9,6 +9,7 @@ package io.vlingo.symbio.store.journal.inmemory;
 
 import io.vlingo.actors.testkit.AccessSafely;
 import io.vlingo.common.Outcome;
+import io.vlingo.symbio.Metadata;
 import io.vlingo.symbio.Source;
 import io.vlingo.symbio.store.Result;
 import io.vlingo.symbio.store.StorageException;
@@ -39,8 +40,36 @@ public class MockAppendResultInterest<T, ST> implements AppendResultInterest {
   }
 
   @Override
+  public <S, ST> void appendResultedIn(Outcome<StorageException, Result> outcome, String streamName, int streamVersion,
+          Source<S> source, Metadata metadata, Optional<ST> snapshot, Object object) {
+    outcome.andThen(result -> {
+      access.writeUsing("appendResultedIn",
+              new JournalData<>(streamName, streamVersion, null, result, Collections.singletonList(source), snapshot));
+      return result;
+    }).otherwise(cause -> {
+      access.writeUsing("appendResultedIn",
+              new JournalData<>(streamName, streamVersion, cause, null, Collections.singletonList(source), snapshot));
+      return cause.result;
+    });
+  }
+
+  @Override
   public <S, ST> void appendAllResultedIn(Outcome<StorageException, Result> outcome, String streamName,
           int streamVersion, List<Source<S>> sources, Optional<ST> snapshot, Object object) {
+    outcome.andThen(result -> {
+      access.writeUsing("appendResultedIn",
+              new JournalData<>(streamName, streamVersion, null, result, sources, snapshot));
+      return result;
+    }).otherwise(cause -> {
+      access.writeUsing("appendResultedIn",
+              new JournalData<>(streamName, streamVersion, cause, null, sources, snapshot));
+      return cause.result;
+    });
+  }
+
+  @Override
+  public <S, ST> void appendAllResultedIn(Outcome<StorageException, Result> outcome, String streamName,
+          int streamVersion, List<Source<S>> sources, Metadata metadata, Optional<ST> snapshot, Object object) {
     outcome.andThen(result -> {
       access.writeUsing("appendResultedIn",
               new JournalData<>(streamName, streamVersion, null, result, sources, snapshot));
