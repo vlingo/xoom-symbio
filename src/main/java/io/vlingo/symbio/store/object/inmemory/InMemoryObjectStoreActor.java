@@ -58,6 +58,7 @@ public class InMemoryObjectStoreActor extends Actor implements ObjectStore {
 
   /**
    * Construct my default state.
+   * @param dispatcher The dispatcher to be used
    */
   public InMemoryObjectStoreActor(final Dispatcher<Dispatchable<BaseEntry<?>,State<?>>> dispatcher){
     this(dispatcher, 1000L, 1000L);

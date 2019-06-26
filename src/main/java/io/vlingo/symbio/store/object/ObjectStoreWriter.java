@@ -6,14 +6,14 @@
 // one at https://mozilla.org/MPL/2.0/.
 package io.vlingo.symbio.store.object;
 
-import java.util.Collection;
-import java.util.List;
-
 import io.vlingo.common.Outcome;
 import io.vlingo.symbio.Metadata;
 import io.vlingo.symbio.Source;
 import io.vlingo.symbio.store.Result;
 import io.vlingo.symbio.store.StorageException;
+
+import java.util.Collection;
+import java.util.List;
 /**
  * ObjectStoreWriter defines protocol for writing to an {@link ObjectStore}.
  */
@@ -23,7 +23,6 @@ public interface ObjectStoreWriter {
    * Persists the new {@code persistentObject}.
    * @param <T> the concrete type of {@link PersistentObject} to persist
    * @param persistentObject the Object to persist
-   * @param metadata the Metadata associated with the persistentObject
    * @param interest the PersistResultInterest to which the result is dispatched
    */
   default <T extends PersistentObject> void persist(final T persistentObject, final PersistResultInterest interest) {
