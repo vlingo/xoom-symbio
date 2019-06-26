@@ -5,22 +5,18 @@
 // was not distributed with this file, You can obtain
 // one at https://mozilla.org/MPL/2.0/.
 
-package io.vlingo.symbio.store.object.inmemory;
+package io.vlingo.symbio.store.dispatch;
 
 import io.vlingo.actors.testkit.AccessSafely;
 import io.vlingo.symbio.Entry;
 import io.vlingo.symbio.State;
-import io.vlingo.symbio.store.dispatch.ConfirmDispatchedResultInterest;
-import io.vlingo.symbio.store.dispatch.Dispatchable;
-import io.vlingo.symbio.store.dispatch.Dispatcher;
-import io.vlingo.symbio.store.dispatch.DispatcherControl;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
-public class MockObjectStoreDispatcher implements Dispatcher<Dispatchable<Entry<?>, State<?>>> {
+public class MockDispatcher <T, ST extends State<?>> implements Dispatcher<Dispatchable<Entry<T>,ST>> {
   private AccessSafely access;
 
   private final ConfirmDispatchedResultInterest confirmDispatchedResultInterest;
@@ -29,7 +25,7 @@ public class MockObjectStoreDispatcher implements Dispatcher<Dispatchable<Entry<
   private final AtomicBoolean processDispatch = new AtomicBoolean(true);
   private int dispatchAttemptCount = 0;
 
-  public MockObjectStoreDispatcher(final ConfirmDispatchedResultInterest confirmDispatchedResultInterest) {
+  public MockDispatcher(final ConfirmDispatchedResultInterest confirmDispatchedResultInterest) {
     this.confirmDispatchedResultInterest = confirmDispatchedResultInterest;
     this.access = afterCompleting(0);
   }
@@ -53,7 +49,11 @@ public class MockObjectStoreDispatcher implements Dispatcher<Dispatchable<Entry<
   public AccessSafely afterCompleting(final int times) {
     access = AccessSafely.afterCompleting(times)
             .writingWith("dispatched", (Consumer<Dispatchable>) this.dispatched::add)
-            .readingWith("dispatched", () -> dispatched);
+            .readingWith("dispatched", () -> dispatched)
+
+            .writingWith("processDispatch", processDispatch::set)
+            .readingWith("processDispatch", processDispatch::get)
+            .readingWith("dispatchAttemptCount", () -> dispatchAttemptCount);
 
     return access;
   }

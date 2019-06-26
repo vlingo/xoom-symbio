@@ -21,6 +21,7 @@ import io.vlingo.symbio.StateAdapterProvider;
 import io.vlingo.symbio.store.Result;
 import io.vlingo.symbio.store.dispatch.Dispatchable;
 import io.vlingo.symbio.store.dispatch.MockConfirmDispatchedResultInterest;
+import io.vlingo.symbio.store.dispatch.MockDispatcher;
 import io.vlingo.symbio.store.journal.Journal;
 import io.vlingo.symbio.store.journal.inmemory.MockAppendResultInterest.JournalData;
 import io.vlingo.symbio.store.state.SnapshotStateAdapter;
@@ -44,7 +45,7 @@ public class InMemoryEventJournalActorTest {
   private MockAppendResultInterest interest = new MockAppendResultInterest<String, SnapshotState>();
   private Journal<String> journal;
   private World world;
-  private MockJournalDispatcher<String, SnapshotState> dispatcher;
+  private MockDispatcher<String, SnapshotState> dispatcher;
 
   @Test
   public void testThatJournalAppendsOneEvent() {
@@ -71,12 +72,12 @@ public class InMemoryEventJournalActorTest {
     Assert.assertEquals(source, sourceList.get(0));
 
     assertEquals(1, dispatcher.dispatchedCount());
-    final Dispatchable<Entry<String>, SnapshotState> dispatched = dispatcher.getDispached().get(0);
+    final Dispatchable<Entry<?>, ?> dispatched = dispatcher.getDispatched().get(0);
 
     Assert.assertNotNull(dispatched.createdOn());
     Assert.assertFalse(dispatched.state().isPresent());
     Assert.assertNotNull(dispatched.id());
-    final Collection<Entry<String>> dispatchedEntries = dispatched.entries();
+    final Collection<Entry<?>> dispatchedEntries = dispatched.entries();
     Assert.assertEquals(1, dispatchedEntries.size());
   }
 
@@ -104,12 +105,12 @@ public class InMemoryEventJournalActorTest {
     Assert.assertEquals(source, sourceList.get(0));
 
     assertEquals(1, dispatcher.dispatchedCount());
-    final Dispatchable<Entry<String>, SnapshotState> dispatched = dispatcher.getDispached().get(0);
+    final Dispatchable<Entry<?>, ?> dispatched = dispatcher.getDispatched().get(0);
 
     Assert.assertNotNull(dispatched.createdOn());
     Assert.assertTrue(dispatched.state().isPresent());
     Assert.assertNotNull(dispatched.id());
-    final Collection<Entry<String>> dispatchedEntries = dispatched.entries();
+    final Collection<Entry<?>> dispatchedEntries = dispatched.entries();
     Assert.assertEquals(1, dispatchedEntries.size());
   }
 
@@ -196,7 +197,7 @@ public class InMemoryEventJournalActorTest {
   @Before
   public void setUp() {
     world = World.startWithDefaults("test-journal");
-    this.dispatcher = new MockJournalDispatcher<>(new MockConfirmDispatchedResultInterest());
+    this.dispatcher = new MockDispatcher<>(new MockConfirmDispatchedResultInterest());
 
     journal = Journal.using(world.stage(), InMemoryJournalActor.class, this.dispatcher);
     EntryAdapterProvider.instance(world).registerAdapter(Test1Source.class, new Test1SourceAdapter());

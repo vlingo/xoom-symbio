@@ -18,6 +18,7 @@ import io.vlingo.symbio.Source;
 import io.vlingo.symbio.State;
 import io.vlingo.symbio.store.dispatch.Dispatchable;
 import io.vlingo.symbio.store.dispatch.MockConfirmDispatchedResultInterest;
+import io.vlingo.symbio.store.dispatch.MockDispatcher;
 import io.vlingo.symbio.store.object.MapQueryExpression;
 import io.vlingo.symbio.store.object.ObjectStore;
 import io.vlingo.symbio.store.object.QueryExpression;
@@ -36,7 +37,7 @@ public class InMemoryObjectStoreActorTest {
   private MockQueryResultInterest queryResultInterest;
   private ObjectStore objectStore;
   private World world;
-  private MockObjectStoreDispatcher dispatcher;
+  private MockDispatcher<Entry<?>, State<?>> dispatcher;
 
   @Test
   public void testThatObjectPersistsQueries() {
@@ -127,7 +128,8 @@ public class InMemoryObjectStoreActorTest {
     world = World.startWithDefaults("test-object-store");
     final EntryAdapterProvider entryAdapterProvider = new EntryAdapterProvider(world);
     entryAdapterProvider.registerAdapter(Test1Source.class, new Test1SourceAdapter());
-    this.dispatcher = new MockObjectStoreDispatcher(new MockConfirmDispatchedResultInterest());
+    
+    this.dispatcher = new MockDispatcher<>(new MockConfirmDispatchedResultInterest());
     objectStore = world.actorFor(ObjectStore.class, InMemoryObjectStoreActor.class, this.dispatcher);
   }
 
