@@ -25,13 +25,13 @@ public final class DefaultTextEntryAdapter implements EntryAdapter {
   }
 
   @Override
-  public Entry<?> toEntry(Source source, Metadata metadata) {
+  public Entry<?> toEntry(final Source source, final Metadata metadata) {
     final String serialization = JsonSerialization.serialized(source);
     return new TextEntry(source.getClass(), 1, serialization, metadata);
   }
 
   @Override
-  public Entry<?> toEntry(Source source, String id, Metadata metadata) {
+  public Entry<?> toEntry(final Source source, final String id, final Metadata metadata) {
     final String serialization = JsonSerialization.serialized(source);
     return new TextEntry(id, source.getClass(), 1, serialization, metadata);
   }

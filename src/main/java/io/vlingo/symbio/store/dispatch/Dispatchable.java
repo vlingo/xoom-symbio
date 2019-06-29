@@ -44,7 +44,7 @@ public class Dispatchable<E extends Entry<?>, RS extends State<?>> {
    */
   private final List<E> entries;
 
-  public Dispatchable(String id, LocalDateTime createdOn, RS state, List<E> entries) {
+  public Dispatchable(final String id, final LocalDateTime createdOn, final RS state, final List<E> entries) {
     this.id = id;
     this.createdOn = createdOn;
     this.state = state;

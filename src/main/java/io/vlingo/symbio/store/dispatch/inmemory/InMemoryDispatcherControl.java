@@ -46,7 +46,7 @@ public class InMemoryDispatcherControl<D extends Dispatchable> extends Actor imp
   }
   
   @Override
-  public void intervalSignal(Scheduled<Object> scheduled, Object data) {
+  public void intervalSignal(final Scheduled<Object> scheduled, Object data) {
     dispatchUnconfirmed();
   }
 
@@ -63,7 +63,7 @@ public class InMemoryDispatcherControl<D extends Dispatchable> extends Actor imp
   }
   
   @Override
-  public void confirmDispatched(String dispatchId, ConfirmDispatchedResultInterest interest) {
+  public void confirmDispatched(final String dispatchId, final ConfirmDispatchedResultInterest interest) {
     dispatchables
             .stream()
             .filter(d -> d.id().equals(dispatchId))

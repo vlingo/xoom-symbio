@@ -52,172 +52,172 @@ public class ObjectStore__Proxy implements io.vlingo.symbio.store.object.ObjectS
   }
 
   @Override
-  public void registerMapper(io.vlingo.symbio.store.object.PersistentObjectMapper arg0) {
+  public void registerMapper(final io.vlingo.symbio.store.object.PersistentObjectMapper arg0) {
     final java.util.function.Consumer<ObjectStore> consumer = (actor) -> actor.registerMapper(arg0);
     send(ObjectStore__Proxy.registerMapperRepresentation2, consumer);
   }
 
   @Override
-  public void queryObject(io.vlingo.symbio.store.object.QueryExpression arg0,
-          io.vlingo.symbio.store.object.ObjectStoreReader.QueryResultInterest arg1, java.lang.Object arg2) {
+  public void queryObject(final io.vlingo.symbio.store.object.QueryExpression arg0,
+          final io.vlingo.symbio.store.object.ObjectStoreReader.QueryResultInterest arg1, final java.lang.Object arg2) {
     final java.util.function.Consumer<ObjectStore> consumer = (actor) -> actor.queryObject(arg0, arg1, arg2);
     send(ObjectStore__Proxy.queryObjectRepresentation3, consumer);
   }
 
   @Override
-  public void queryObject(io.vlingo.symbio.store.object.QueryExpression arg0,
-          io.vlingo.symbio.store.object.ObjectStoreReader.QueryResultInterest arg1) {
+  public void queryObject(final io.vlingo.symbio.store.object.QueryExpression arg0,
+          final io.vlingo.symbio.store.object.ObjectStoreReader.QueryResultInterest arg1) {
     final java.util.function.Consumer<ObjectStore> consumer = (actor) -> actor.queryObject(arg0, arg1);
     send(ObjectStore__Proxy.queryObjectRepresentation4, consumer);
   }
 
   @Override
-  public void queryAll(io.vlingo.symbio.store.object.QueryExpression arg0,
-          io.vlingo.symbio.store.object.ObjectStoreReader.QueryResultInterest arg1, java.lang.Object arg2) {
+  public void queryAll(final io.vlingo.symbio.store.object.QueryExpression arg0,
+          final io.vlingo.symbio.store.object.ObjectStoreReader.QueryResultInterest arg1, final java.lang.Object arg2) {
     final java.util.function.Consumer<ObjectStore> consumer = (actor) -> actor.queryAll(arg0, arg1, arg2);
     send(ObjectStore__Proxy.queryAllRepresentation5, consumer);
   }
 
   @Override
-  public void queryAll(io.vlingo.symbio.store.object.QueryExpression arg0,
-          io.vlingo.symbio.store.object.ObjectStoreReader.QueryResultInterest arg1) {
+  public void queryAll(final io.vlingo.symbio.store.object.QueryExpression arg0,
+          final io.vlingo.symbio.store.object.ObjectStoreReader.QueryResultInterest arg1) {
     final java.util.function.Consumer<ObjectStore> consumer = (actor) -> actor.queryAll(arg0, arg1);
     send(ObjectStore__Proxy.queryAllRepresentation6, consumer);
   }
 
   @Override
-  public <T extends PersistentObject, E> void persist(T arg0, java.util.List<io.vlingo.symbio.Source<E>> arg1,
-          long arg2, io.vlingo.symbio.store.object.ObjectStoreWriter.PersistResultInterest arg3) {
+  public <T extends PersistentObject, E> void persist(final T arg0, final java.util.List<io.vlingo.symbio.Source<E>> arg1,
+          final long arg2, final io.vlingo.symbio.store.object.ObjectStoreWriter.PersistResultInterest arg3) {
     final java.util.function.Consumer<ObjectStore> consumer = (actor) -> actor.persist(arg0, arg1, arg2, arg3);
     send(ObjectStore__Proxy.persistRepresentation7, consumer);
   }
 
   @Override
-  public <T extends PersistentObject> void persist(T arg0, long arg1,
-          io.vlingo.symbio.store.object.ObjectStoreWriter.PersistResultInterest arg2, java.lang.Object arg3) {
+  public <T extends PersistentObject> void persist(final T arg0, final long arg1,
+          final io.vlingo.symbio.store.object.ObjectStoreWriter.PersistResultInterest arg2, final java.lang.Object arg3) {
     final java.util.function.Consumer<ObjectStore> consumer = (actor) -> actor.persist(arg0, arg1, arg2, arg3);
     send(ObjectStore__Proxy.persistRepresentation8, consumer);
   }
 
   @Override
-  public <T extends PersistentObject, E> void persist(T arg0, java.util.List<io.vlingo.symbio.Source<E>> arg1,
-          long arg2, io.vlingo.symbio.store.object.ObjectStoreWriter.PersistResultInterest arg3,
-          java.lang.Object arg4) {
+  public <T extends PersistentObject, E> void persist(final T arg0, final java.util.List<io.vlingo.symbio.Source<E>> arg1,
+          final long arg2, final io.vlingo.symbio.store.object.ObjectStoreWriter.PersistResultInterest arg3,
+          final java.lang.Object arg4) {
     final java.util.function.Consumer<ObjectStore> consumer = (actor) -> actor.persist(arg0, arg1, arg2, arg3, arg4);
     send(ObjectStore__Proxy.persistRepresentation9, consumer);
   }
 
   @Override
-  public <T extends PersistentObject, E> void persist(T arg1, List<Source<E>> arg2, Metadata arg3,
-          long arg4, PersistResultInterest arg5, Object arg6) {
+  public <T extends PersistentObject, E> void persist(final T arg1, final List<Source<E>> arg2, final Metadata arg3,
+          final long arg4, final PersistResultInterest arg5, final Object arg6) {
     final java.util.function.Consumer<ObjectStore> consumer = (actor) -> actor
             .persist(arg1, arg2, arg3, arg4, arg5, arg6);
     send(ObjectStore__Proxy.persistRepresentation15, consumer);
   }
 
   @Override
-  public <T extends PersistentObject> void persist(T arg0,
-          io.vlingo.symbio.store.object.ObjectStoreWriter.PersistResultInterest arg1) {
+  public <T extends PersistentObject> void persist(final T arg0,
+          final io.vlingo.symbio.store.object.ObjectStoreWriter.PersistResultInterest arg1) {
     final java.util.function.Consumer<ObjectStore> consumer = (actor) -> actor.persist(arg0, arg1);
     send(ObjectStore__Proxy.persistRepresentation10, consumer);
   }
 
   @Override
-  public <T extends PersistentObject, E> void persist(T arg0, java.util.List<io.vlingo.symbio.Source<E>> arg1,
-          io.vlingo.symbio.store.object.ObjectStoreWriter.PersistResultInterest arg2) {
+  public <T extends PersistentObject, E> void persist(final T arg0, final java.util.List<io.vlingo.symbio.Source<E>> arg1,
+          final io.vlingo.symbio.store.object.ObjectStoreWriter.PersistResultInterest arg2) {
     final java.util.function.Consumer<ObjectStore> consumer = (actor) -> actor.persist(arg0, arg1, arg2);
     send(ObjectStore__Proxy.persistRepresentation11, consumer);
   }
 
   @Override
-  public <T extends PersistentObject> void persist(T arg0,
-          io.vlingo.symbio.store.object.ObjectStoreWriter.PersistResultInterest arg1, java.lang.Object arg2) {
+  public <T extends PersistentObject> void persist(final T arg0,
+          final io.vlingo.symbio.store.object.ObjectStoreWriter.PersistResultInterest arg1, final java.lang.Object arg2) {
     final java.util.function.Consumer<ObjectStore> consumer = (actor) -> actor.persist(arg0, arg1, arg2);
     send(ObjectStore__Proxy.persistRepresentation12, consumer);
   }
 
   @Override
-  public <T extends PersistentObject, E> void persist(T arg0, java.util.List<io.vlingo.symbio.Source<E>> arg1,
-          io.vlingo.symbio.store.object.ObjectStoreWriter.PersistResultInterest arg2, java.lang.Object arg3) {
+  public <T extends PersistentObject, E> void persist(final T arg0, final java.util.List<io.vlingo.symbio.Source<E>> arg1,
+          final io.vlingo.symbio.store.object.ObjectStoreWriter.PersistResultInterest arg2, final java.lang.Object arg3) {
     final java.util.function.Consumer<ObjectStore> consumer = (actor) -> actor.persist(arg0, arg1, arg2, arg3);
     send(ObjectStore__Proxy.persistRepresentation13, consumer);
   }
 
   @Override
-  public <T extends PersistentObject> void persist(T arg0, long arg1,
-          io.vlingo.symbio.store.object.ObjectStoreWriter.PersistResultInterest arg2) {
+  public <T extends PersistentObject> void persist(final T arg0, final long arg1,
+          final io.vlingo.symbio.store.object.ObjectStoreWriter.PersistResultInterest arg2) {
     final java.util.function.Consumer<ObjectStore> consumer = (actor) -> actor.persist(arg0, arg1, arg2);
     send(ObjectStore__Proxy.persistRepresentation14, consumer);
   }
 
   @Override
-  public <T extends PersistentObject> void persistAll(java.util.Collection<T> arg0, long arg1,
-          io.vlingo.symbio.store.object.ObjectStoreWriter.PersistResultInterest arg2, java.lang.Object arg3) {
+  public <T extends PersistentObject> void persistAll(final java.util.Collection<T> arg0, final long arg1,
+          final io.vlingo.symbio.store.object.ObjectStoreWriter.PersistResultInterest arg2, final java.lang.Object arg3) {
     final java.util.function.Consumer<ObjectStore> consumer = (actor) -> actor.persistAll(arg0, arg1, arg2, arg3);
     send(ObjectStore__Proxy.persistAllRepresentation15, consumer);
   }
 
   @Override
-  public <T extends PersistentObject, E> void persistAll(java.util.Collection<T> arg0,
-          java.util.List<io.vlingo.symbio.Source<E>> arg1, long arg2,
-          io.vlingo.symbio.store.object.ObjectStoreWriter.PersistResultInterest arg3) {
+  public <T extends PersistentObject, E> void persistAll(final java.util.Collection<T> arg0,
+          final java.util.List<io.vlingo.symbio.Source<E>> arg1, final long arg2,
+          final io.vlingo.symbio.store.object.ObjectStoreWriter.PersistResultInterest arg3) {
     final java.util.function.Consumer<ObjectStore> consumer = (actor) -> actor.persistAll(arg0, arg1, arg2, arg3);
     send(ObjectStore__Proxy.persistAllRepresentation16, consumer);
   }
 
   @Override
-  public <T extends PersistentObject, E> void persistAll(java.util.Collection<T> arg0,
-          java.util.List<io.vlingo.symbio.Source<E>> arg1, long arg2,
-          io.vlingo.symbio.store.object.ObjectStoreWriter.PersistResultInterest arg3, java.lang.Object arg4) {
+  public <T extends PersistentObject, E> void persistAll(final java.util.Collection<T> arg0,
+          final java.util.List<io.vlingo.symbio.Source<E>> arg1, final long arg2,
+          final io.vlingo.symbio.store.object.ObjectStoreWriter.PersistResultInterest arg3, final java.lang.Object arg4) {
     final java.util.function.Consumer<ObjectStore> consumer = (actor) -> actor.persistAll(arg0, arg1, arg2, arg3, arg4);
     send(ObjectStore__Proxy.persistAllRepresentation17, consumer);
   }
 
   @Override
-  public <T extends PersistentObject, E> void persistAll(Collection<T> arg0, List<Source<E>> arg1,
-          Metadata arg2, long arg3, PersistResultInterest arg4, Object arg5) {
+  public <T extends PersistentObject, E> void persistAll(final Collection<T> arg0, final List<Source<E>> arg1,
+          final Metadata arg2, final long arg3, final PersistResultInterest arg4, final Object arg5) {
     final java.util.function.Consumer<ObjectStore> consumer = (actor) -> actor.persistAll(arg0, arg1, arg2, arg3, arg4, arg5);
     send(ObjectStore__Proxy.persistAllRepresentation23, consumer);
   }
 
   @Override
-  public <T extends PersistentObject> void persistAll(java.util.Collection<T> arg0,
-          io.vlingo.symbio.store.object.ObjectStoreWriter.PersistResultInterest arg1) {
+  public <T extends PersistentObject> void persistAll(final java.util.Collection<T> arg0,
+          final io.vlingo.symbio.store.object.ObjectStoreWriter.PersistResultInterest arg1) {
     final java.util.function.Consumer<ObjectStore> consumer = (actor) -> actor.persistAll(arg0, arg1);
     send(ObjectStore__Proxy.persistAllRepresentation18, consumer);
   }
 
   @Override
-  public <T extends PersistentObject, E> void persistAll(java.util.Collection<T> arg0,
-          java.util.List<io.vlingo.symbio.Source<E>> arg1,
-          io.vlingo.symbio.store.object.ObjectStoreWriter.PersistResultInterest arg2) {
+  public <T extends PersistentObject, E> void persistAll(final java.util.Collection<T> arg0,
+          final java.util.List<io.vlingo.symbio.Source<E>> arg1,
+          final io.vlingo.symbio.store.object.ObjectStoreWriter.PersistResultInterest arg2) {
     final java.util.function.Consumer<ObjectStore> consumer = (actor) -> actor.persistAll(arg0, arg1, arg2);
     send(ObjectStore__Proxy.persistAllRepresentation19, consumer);
   }
 
   @Override
-  public <T extends PersistentObject> void persistAll(java.util.Collection<T> arg0,
-          io.vlingo.symbio.store.object.ObjectStoreWriter.PersistResultInterest arg1, java.lang.Object arg2) {
+  public <T extends PersistentObject> void persistAll(final java.util.Collection<T> arg0,
+          final io.vlingo.symbio.store.object.ObjectStoreWriter.PersistResultInterest arg1, final java.lang.Object arg2) {
     final java.util.function.Consumer<ObjectStore> consumer = (actor) -> actor.persistAll(arg0, arg1, arg2);
     send(ObjectStore__Proxy.persistAllRepresentation20, consumer);
   }
 
   @Override
-  public <T extends PersistentObject, E> void persistAll(java.util.Collection<T> arg0,
-          java.util.List<io.vlingo.symbio.Source<E>> arg1,
-          io.vlingo.symbio.store.object.ObjectStoreWriter.PersistResultInterest arg2, java.lang.Object arg3) {
+  public <T extends PersistentObject, E> void persistAll(final java.util.Collection<T> arg0,
+          final java.util.List<io.vlingo.symbio.Source<E>> arg1,
+          final io.vlingo.symbio.store.object.ObjectStoreWriter.PersistResultInterest arg2, final java.lang.Object arg3) {
     final java.util.function.Consumer<ObjectStore> consumer = (actor) -> actor.persistAll(arg0, arg1, arg2, arg3);
     send(ObjectStore__Proxy.persistAllRepresentation21, consumer);
   }
 
   @Override
-  public <T extends PersistentObject> void persistAll(java.util.Collection<T> arg0, long arg1,
-          io.vlingo.symbio.store.object.ObjectStoreWriter.PersistResultInterest arg2) {
+  public <T extends PersistentObject> void persistAll(final java.util.Collection<T> arg0, final long arg1,
+          final io.vlingo.symbio.store.object.ObjectStoreWriter.PersistResultInterest arg2) {
     final java.util.function.Consumer<ObjectStore> consumer = (actor) -> actor.persistAll(arg0, arg1, arg2);
     send(ObjectStore__Proxy.persistAllRepresentation22, consumer);
   }
 
-  private void send(String representation, Consumer<ObjectStore> consumer) {
+  private void send(final String representation, final Consumer<ObjectStore> consumer) {
     if (!actor.isStopped()) {
       if (mailbox.isPreallocated()) {
         mailbox.send(actor, ObjectStore.class, consumer, null, representation);

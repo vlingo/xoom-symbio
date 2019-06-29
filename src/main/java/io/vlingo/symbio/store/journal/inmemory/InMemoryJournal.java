@@ -55,7 +55,7 @@ public class InMemoryJournal<T,RS extends State<?>> implements Journal<T> {
   }
 
   public InMemoryJournal(final Dispatcher<Dispatchable<Entry<T>,RS>> dispatcher, final World world,
-          long checkConfirmationExpirationInterval, final long confirmationExpiration) {
+          final long checkConfirmationExpirationInterval, final long confirmationExpiration) {
     this.entryAdapterProvider = EntryAdapterProvider.instance(world);
     this.stateAdapterProvider = StateAdapterProvider.instance(world);
     this.journal = new ArrayList<>();
@@ -81,8 +81,8 @@ public class InMemoryJournal<T,RS extends State<?>> implements Journal<T> {
   }
 
   @Override
-  public <S, ST> void append(String streamName, int streamVersion, Source<S> source, Metadata metadata,
-          AppendResultInterest interest, Object object) {
+  public <S, ST> void append(final String streamName, final int streamVersion, final Source<S> source, final Metadata metadata,
+          final AppendResultInterest interest, final Object object) {
     final Entry<T> entry = entryAdapterProvider.asEntry(source, metadata);
     insert(streamName, streamVersion, entry);
     dispatch(streamName, streamVersion, Collections.singletonList(entry), null);
@@ -90,8 +90,8 @@ public class InMemoryJournal<T,RS extends State<?>> implements Journal<T> {
   }
   
   @Override
-  public <S, ST> void appendWith(String streamName, int streamVersion, Source<S> source, Metadata metadata, ST snapshot,
-          AppendResultInterest interest, Object object) {
+  public <S, ST> void appendWith(final String streamName, final int streamVersion, final Source<S> source, final Metadata metadata, final ST snapshot,
+          final AppendResultInterest interest, final Object object) {
     final Entry<T> entry = entryAdapterProvider.asEntry(source, metadata);
     insert(streamName, streamVersion, entry);
     final RS raw;
@@ -111,8 +111,8 @@ public class InMemoryJournal<T,RS extends State<?>> implements Journal<T> {
 
   
   @Override
-  public <S, ST> void appendAll(String streamName, int fromStreamVersion, List<Source<S>> sources, Metadata metadata,
-          AppendResultInterest interest, Object object) {
+  public <S, ST> void appendAll(final String streamName, final int fromStreamVersion, final List<Source<S>> sources, final Metadata metadata,
+          final AppendResultInterest interest, final Object object) {
     final List<Entry<T>> entries = entryAdapterProvider.asEntries(sources, metadata);
     insert(streamName, fromStreamVersion, entries);
 
@@ -122,8 +122,8 @@ public class InMemoryJournal<T,RS extends State<?>> implements Journal<T> {
 
   
   @Override
-  public <S, ST> void appendAllWith(String streamName, int fromStreamVersion, List<Source<S>> sources,
-          Metadata metadata, ST snapshot, AppendResultInterest interest, Object object) {
+  public <S, ST> void appendAllWith(final String streamName, final int fromStreamVersion, final List<Source<S>> sources,
+          final Metadata metadata, final ST snapshot, final AppendResultInterest interest, final Object object) {
     final List<Entry<T>> entries = entryAdapterProvider.asEntries(sources, metadata);
     insert(streamName, fromStreamVersion, entries);
     final RS raw;
@@ -142,7 +142,7 @@ public class InMemoryJournal<T,RS extends State<?>> implements Journal<T> {
   }
 
   @Override
-  @SuppressWarnings({ "unchecked", "rawtypes" })
+  @SuppressWarnings({ "unchecked" })
   public <ET extends Entry<?>> Completes<JournalReader<ET>> journalReader(final String name) {
     JournalReader<?> reader = journalReaders.get(name);
     if (reader == null) {
@@ -153,7 +153,7 @@ public class InMemoryJournal<T,RS extends State<?>> implements Journal<T> {
   }
 
   @Override
-  @SuppressWarnings({ "unchecked", "rawtypes" })
+  @SuppressWarnings({ "unchecked" })
   public Completes<StreamReader<T>> streamReader(final String name) {
     StreamReader<T> reader = streamReaders.get(name);
     if (reader == null) {
@@ -169,7 +169,7 @@ public class InMemoryJournal<T,RS extends State<?>> implements Journal<T> {
     ((BaseEntry<T>) entry).__internal__setId(id); //questionable cast
     journal.add(entry);
     
-    Map<Integer, Integer> versionIndexes = streamIndexes.computeIfAbsent(streamName, k -> new HashMap<>());
+    final Map<Integer, Integer> versionIndexes = streamIndexes.computeIfAbsent(streamName, k -> new HashMap<>());
     versionIndexes.put(streamVersion, entryIndex);
   }
 
@@ -181,14 +181,14 @@ public class InMemoryJournal<T,RS extends State<?>> implements Journal<T> {
     }
   }
 
-  private void dispatch(final String streamName, final int streamVersion, final List<Entry<T>> entries, RS snapshot){
+  private void dispatch(final String streamName, final int streamVersion, final List<Entry<T>> entries, final RS snapshot){
     final String id = getDispatchId(streamName, streamVersion, entries);
     final Dispatchable<Entry<T>, RS> dispatchable = new Dispatchable<>(id,  LocalDateTime.now(), snapshot, entries);
     this.dispatchables.add(dispatchable);
     this.dispatcher.dispatch(dispatchable);
   }
 
-  private static <T> String getDispatchId(String streamName, int streamVersion, Collection<Entry<T>> entries) {
+  private static <T> String getDispatchId(final String streamName, final int streamVersion, final Collection<Entry<T>> entries) {
     return streamName + ":" + streamVersion + ":"
             + entries.stream().map(Entry::id).collect(Collectors.joining(":"));
   }

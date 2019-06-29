@@ -37,31 +37,31 @@ public class JournalAppendResultInterest__Proxy implements io.vlingo.symbio.stor
     this.mailbox = mailbox;
   }
 
-  public <S,ST>void appendResultedIn(io.vlingo.common.Outcome<io.vlingo.symbio.store.StorageException, io.vlingo.symbio.store.Result> arg0, java.lang.String arg1, int arg2, io.vlingo.symbio.Source<S> arg3, java.util.Optional<ST> arg4, java.lang.Object arg5) {
+  public <S,ST>void appendResultedIn(final io.vlingo.common.Outcome<io.vlingo.symbio.store.StorageException, io.vlingo.symbio.store.Result> arg0, final java.lang.String arg1, final int arg2, io.vlingo.symbio.Source<S> arg3, final java.util.Optional<ST> arg4, final java.lang.Object arg5) {
     final java.util.function.Consumer<AppendResultInterest> consumer = (actor) -> actor.appendResultedIn(arg0, arg1, arg2, arg3, arg4, arg5);
     send(JournalAppendResultInterest__Proxy.appendResultedInRepresentation1, consumer);
   }
 
   @Override
-  public <S, ST> void appendResultedIn(Outcome<StorageException, Result> outcome, String streamName, int streamVersion,
+  public <S, ST> void appendResultedIn(final Outcome<StorageException, Result> outcome, final String streamName, final int streamVersion,
           Source<S> source, Metadata metadata, Optional<ST> snapshot, Object object) {
     final java.util.function.Consumer<AppendResultInterest> consumer = (actor) -> actor.appendResultedIn(outcome, streamName, streamVersion, source, metadata, snapshot, object);
     send(JournalAppendResultInterest__Proxy.appendResultedInRepresentation2, consumer);
   }
 
-  public <S,ST>void appendAllResultedIn(io.vlingo.common.Outcome<io.vlingo.symbio.store.StorageException, io.vlingo.symbio.store.Result> arg0, java.lang.String arg1, int arg2, java.util.List<io.vlingo.symbio.Source<S>> arg3, java.util.Optional<ST> arg4, java.lang.Object arg5) {
+  public <S,ST>void appendAllResultedIn(final io.vlingo.common.Outcome<io.vlingo.symbio.store.StorageException, io.vlingo.symbio.store.Result> arg0, final java.lang.String arg1, final int arg2, java.util.List<io.vlingo.symbio.Source<S>> arg3, final java.util.Optional<ST> arg4, final java.lang.Object arg5) {
     final java.util.function.Consumer<AppendResultInterest> consumer = (actor) -> actor.appendAllResultedIn(arg0, arg1, arg2, arg3, arg4, arg5);
     send(JournalAppendResultInterest__Proxy.appendAllResultedInRepresentation1, consumer);
   }
 
   @Override
-  public <S, ST> void appendAllResultedIn(Outcome<StorageException, Result> outcome, String streamName,
-          int streamVersion, List<Source<S>> sources, Metadata metadata, Optional<ST> snapshot, Object object) {
+  public <S, ST> void appendAllResultedIn(final Outcome<StorageException, Result> outcome, final String streamName,
+          final int streamVersion, final List<Source<S>> sources, final Metadata metadata, Optional<ST> snapshot, final Object object) {
     final java.util.function.Consumer<AppendResultInterest> consumer = (actor) -> actor.appendAllResultedIn(outcome, streamName, streamVersion, sources, metadata, snapshot, object);
     send(JournalAppendResultInterest__Proxy.appendAllResultedInRepresentation2, consumer);
   }
 
-  private void send(String representation, Consumer<AppendResultInterest> consumer) {
+  private void send(final String representation, final Consumer<AppendResultInterest> consumer) {
     if (!actor.isStopped()) {
       if (mailbox.isPreallocated()) {
         mailbox.send(actor, AppendResultInterest.class, consumer, null, representation);

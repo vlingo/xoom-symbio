@@ -99,8 +99,9 @@ public class InMemoryObjectStoreActor extends Actor implements ObjectStore {
 
   /* @see io.vlingo.symbio.store.object.ObjectStore#persist(java.lang.Object, java.util.List, long, io.vlingo.symbio.store.object.ObjectStore.PersistResultInterest, java.lang.Object) */
   @Override
-  public <T extends PersistentObject, E> void persist(T persistentObject, List<Source<E>> sources, Metadata metadata,
-          long updateId, PersistResultInterest interest, Object object) {
+  public <T extends PersistentObject, E> void persist(
+          final T persistentObject, final List<Source<E>> sources, final Metadata metadata,
+          final long updateId, final PersistResultInterest interest, final Object object) {
     final State<?> raw = persistEach(persistentObject, metadata);
 
     final List<BaseEntry<?>> entries = entryAdapterProvider.asEntries(sources, metadata);
@@ -113,8 +114,8 @@ public class InMemoryObjectStoreActor extends Actor implements ObjectStore {
 
   /* @see io.vlingo.symbio.store.object.ObjectStore#persistAll(java.util.Collection, java.util.List, long, io.vlingo.symbio.store.object.ObjectStore.PersistResultInterest, java.lang.Object) */
   @Override
-  public <T extends PersistentObject, E> void persistAll(Collection<T> persistentObjects, List<Source<E>> sources,
-          Metadata metadata, long updateId, PersistResultInterest interest, Object object) {
+  public <T extends PersistentObject, E> void persistAll(final Collection<T> persistentObjects, final List<Source<E>> sources,
+          final Metadata metadata, final long updateId, final PersistResultInterest interest, final Object object) {
 
     final List<State<?>> states = new ArrayList<>(persistentObjects.size());
     for (final T persistentObject : persistentObjects) {
@@ -197,7 +198,7 @@ public class InMemoryObjectStoreActor extends Actor implements ObjectStore {
     return raw;
   }
 
-  private <E> void appendEntries(Collection<BaseEntry<?>> entries) {
+  private <E> void appendEntries(final Collection<BaseEntry<?>> entries) {
     this.entries.addAll(entries);
   }
 

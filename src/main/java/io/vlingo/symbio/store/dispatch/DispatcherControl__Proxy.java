@@ -32,7 +32,7 @@ public class DispatcherControl__Proxy implements DispatcherControl {
     send(consumer, DispatcherControl__Proxy.dispatchUnconfirmedRepresentation1);
   }
 
-  public void confirmDispatched(java.lang.String arg0, ConfirmDispatchedResultInterest arg1) {
+  public void confirmDispatched(final java.lang.String arg0, final ConfirmDispatchedResultInterest arg1) {
     final java.util.function.Consumer<DispatcherControl> consumer = (actor) -> actor.confirmDispatched(arg0, arg1);
     send(consumer, DispatcherControl__Proxy.confirmDispatchedRepresentation2);
   }
@@ -42,7 +42,7 @@ public class DispatcherControl__Proxy implements DispatcherControl {
     send(consumer, DispatcherControl__Proxy.dispatchUnconfirmedRepresentation1);
   }
 
-  private void send(Consumer<DispatcherControl> consumer, String representation) {
+  private void send(final Consumer<DispatcherControl> consumer,final String representation) {
     if (!actor.isStopped()) {
       if (mailbox.isPreallocated()) {
         mailbox.send(actor, DispatcherControl.class, consumer, null, representation);

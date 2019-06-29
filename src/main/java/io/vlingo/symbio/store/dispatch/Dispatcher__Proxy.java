@@ -28,18 +28,18 @@ public class Dispatcher__Proxy implements Dispatcher {
   }
 
   @Override
-  public void dispatch(Dispatchable arg0) {
+  public void dispatch(final Dispatchable arg0) {
     final java.util.function.Consumer<Dispatcher> consumer = (actor) -> actor.dispatch(arg0);
     send(consumer, dispatchRepresentation1);
   }
 
   @Override
-  public void controlWith(DispatcherControl arg0) {
+  public void controlWith(final DispatcherControl arg0) {
     final Consumer<Dispatcher> consumer = (actor) -> actor.controlWith(arg0);
     send(consumer, controlWithRepresentation2);
   }
 
-  private void send(Consumer<Dispatcher> consumer, String representation) {
+  private void send(final Consumer<Dispatcher> consumer, final String representation) {
     if (!actor.isStopped()) {
       if (mailbox.isPreallocated()) {
         mailbox.send(actor, Dispatcher.class, consumer, null, representation);

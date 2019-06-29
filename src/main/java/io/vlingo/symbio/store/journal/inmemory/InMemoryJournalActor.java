@@ -35,8 +35,8 @@ public class InMemoryJournalActor<T,RS extends State<?>> extends Actor implement
   }
 
   @Override
-  public <S, ST> void append(String streamName, int streamVersion, Source<S> source, Metadata metadata,
-          AppendResultInterest interest, Object object) {
+  public <S, ST> void append(final String streamName, final int streamVersion, final Source<S> source, final Metadata metadata,
+          final AppendResultInterest interest, final Object object) {
     journal.append(streamName, streamVersion, source, metadata, interest, object);
   }
 
@@ -46,8 +46,8 @@ public class InMemoryJournalActor<T,RS extends State<?>> extends Actor implement
   }
 
   @Override
-  public <S, ST> void appendWith(String streamName, int streamVersion, Source<S> source, Metadata metadata, ST snapshot,
-          AppendResultInterest interest, Object object) {
+  public <S, ST> void appendWith(final String streamName, final int streamVersion, final Source<S> source, final Metadata metadata, final ST snapshot,
+          final AppendResultInterest interest, final Object object) {
     journal.appendWith(streamName, streamVersion, source, metadata, snapshot, interest, object);
   }
 
@@ -57,8 +57,8 @@ public class InMemoryJournalActor<T,RS extends State<?>> extends Actor implement
   }
 
   @Override
-  public <S, ST> void appendAll(String streamName, int fromStreamVersion, List<Source<S>> sources, Metadata metadata,
-          AppendResultInterest interest, Object object) {
+  public <S, ST> void appendAll(final String streamName, final int fromStreamVersion, final List<Source<S>> sources, final Metadata metadata,
+          final AppendResultInterest interest, final Object object) {
     journal.appendAll(streamName, fromStreamVersion, sources, metadata, interest, object);
   }
 
@@ -68,8 +68,8 @@ public class InMemoryJournalActor<T,RS extends State<?>> extends Actor implement
   }
 
   @Override
-  public <S, ST> void appendAllWith(String streamName, int fromStreamVersion, List<Source<S>> sources,
-          Metadata metadata, ST snapshot, AppendResultInterest interest, Object object) {
+  public <S, ST> void appendAllWith(final String streamName, final int fromStreamVersion, final List<Source<S>> sources,
+          final Metadata metadata, final ST snapshot, final AppendResultInterest interest, final Object object) {
     journal.appendAllWith(streamName, fromStreamVersion, sources, metadata, snapshot, interest, object);
   }
 

@@ -51,7 +51,7 @@ public class InMemoryStateStoreActor<RS extends State<?>> extends Actor
     this(dispatcher, 1000L, 1000L);
   }
 
-  public InMemoryStateStoreActor(final Dispatcher<Dispatchable<Entry<?>, RS>> dispatcher, long checkConfirmationExpirationInterval, final long confirmationExpiration) {
+  public InMemoryStateStoreActor(final Dispatcher<Dispatchable<Entry<?>, RS>> dispatcher, final long checkConfirmationExpirationInterval, final long confirmationExpiration) {
     if (dispatcher == null) {
       throw new IllegalArgumentException("Dispatcher must not be null.");
     }
@@ -97,7 +97,7 @@ public class InMemoryStateStoreActor<RS extends State<?>> extends Actor
   }
 
   @Override
-  public void read(final String id, Class<?> type, final ReadResultInterest interest, final Object object) {
+  public void read(final String id, final Class<?> type, final ReadResultInterest interest, final Object object) {
     readFor(id, type, interest, object);
   }
 
@@ -133,7 +133,7 @@ public class InMemoryStateStoreActor<RS extends State<?>> extends Actor
         final Object state = stateAdapterProvider.fromRaw(raw);
         interest.readResultedIn(Success.of(Result.Success), id, state, raw.dataVersion, raw.metadata, object);
       } else {
-        for (String storeId : typeStore.keySet()) {
+        for (final String storeId : typeStore.keySet()) {
           logger().debug("UNFOUND STATES\n=====================");
           logger().debug("STORE ID: '" + storeId + "' STATE: " + typeStore.get(storeId));
         }
@@ -186,7 +186,7 @@ public class InMemoryStateStoreActor<RS extends State<?>> extends Actor
           dispatch(id, storeName, raw, entries);
 
           interest.writeResultedIn(Success.of(Result.Success), id, state, stateVersion, sources, object);
-        } catch (Exception e) {
+        } catch (final Exception e) {
           logger().error(getClass().getSimpleName() + " writeText() error because: " + e.getMessage(), e);
           interest.writeResultedIn(Failure.of(new StorageException(Result.Error, e.getMessage(), e)), id, state, stateVersion, sources, object);
         }
@@ -201,14 +201,14 @@ public class InMemoryStateStoreActor<RS extends State<?>> extends Actor
 
   private <C> List<Entry<?>> appendEntries(final List<Source<C>> sources, final Metadata metadata) {
     final List<Entry<?>> adapted = entryAdapterProvider.asEntries(sources, metadata);
-    for (Entry<?> each : adapted) {
+    for (final Entry<?> each : adapted) {
       ((BaseEntry<?>) each).__internal__setId(String.valueOf(entries.size()));
       entries.add(each);
     }
     return adapted;
   }
 
-  private void dispatch(String id, String storeName, RS raw, List<Entry<?>> entries) {
+  private void dispatch(final String id, final String storeName, final RS raw, final List<Entry<?>> entries) {
     final String dispatchId = storeName + ":" + id;
     final Dispatchable<Entry<?>, RS> dispatchable = new Dispatchable<>(dispatchId, LocalDateTime.now(), raw, entries);
     this.dispatchables.add(dispatchable);

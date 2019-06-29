@@ -36,7 +36,7 @@ public class MockDispatcher <T, ST extends State<?>> implements Dispatcher<Dispa
   }
 
   @Override
-  public void dispatch(Dispatchable dispatchable) {
+  public void dispatch(final Dispatchable dispatchable) {
     dispatchAttemptCount++;
     if (processDispatch.get()) {
       final String dispatchId = dispatchable.id();
