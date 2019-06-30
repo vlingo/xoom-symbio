@@ -12,13 +12,10 @@ import io.vlingo.common.Outcome;
 import io.vlingo.symbio.Entry;
 import io.vlingo.symbio.Metadata;
 import io.vlingo.symbio.Source;
-import io.vlingo.symbio.State;
 import io.vlingo.symbio.store.EntryReader;
 import io.vlingo.symbio.store.Result;
 import io.vlingo.symbio.store.StorageException;
-import io.vlingo.symbio.store.dispatch.Dispatchable;
 
-import java.util.Collection;
 import java.util.List;
 
 /**
@@ -75,23 +72,10 @@ public interface StateStore extends StateStoreReader, StateStoreWriter {
    * {@code vlingo-symbio-jdbc}.
    */
   public static interface StorageDelegate {
-    <S extends State<?>> Collection<Dispatchable<Entry<?>,S>> allUnconfirmedDispatchableStates() throws Exception;
-    <A,E> A appendExpressionFor(final Entry<E> entry) throws Exception;
-    <A> A appendIdentityExpression();
-    void beginRead() throws Exception;
-    void beginWrite() throws Exception;
     void close();
     boolean isClosed();
-    void complete() throws Exception;
-    void confirmDispatched(final String dispatchId);
-    <C> C connection();
-    <W,S> W dispatchableWriteExpressionFor(final String dispatchId, final State<S> state) throws Exception;
     EntryReader.Advice entryReaderAdvice();
-    void fail();
     String originatorId();
-    <R> R readExpressionFor(final String storeName, final String id) throws Exception;
-    <S> S session() throws Exception;
     <S,R> S stateFrom(final R result, final String id) throws Exception;
-    <W,S> W writeExpressionFor(final String storeName, final State<S> state) throws Exception;
   }
 }

@@ -23,7 +23,8 @@ import io.vlingo.symbio.store.StorageException;
 import io.vlingo.symbio.store.dispatch.Dispatchable;
 import io.vlingo.symbio.store.dispatch.Dispatcher;
 import io.vlingo.symbio.store.dispatch.DispatcherControl;
-import io.vlingo.symbio.store.dispatch.inmemory.InMemoryDispatcherControl;
+import io.vlingo.symbio.store.dispatch.control.DispatcherControlActor;
+import io.vlingo.symbio.store.dispatch.inmemory.InMemoryDispatcherControlDelegate;
 import io.vlingo.symbio.store.object.ObjectStore;
 import io.vlingo.symbio.store.object.PersistentObject;
 import io.vlingo.symbio.store.object.PersistentObjectMapper;
@@ -74,18 +75,17 @@ public class InMemoryObjectStoreActor extends Actor implements ObjectStore {
 
     this.dispatcher = dispatcher;
     this.dispatchables = new CopyOnWriteArrayList<>();
+    final InMemoryDispatcherControlDelegate<BaseEntry<?>, State<?>> dispatcherControlDelegate = new InMemoryDispatcherControlDelegate<>(dispatchables);
+
     this.dispatcherControl = stage().actorFor(
             DispatcherControl.class,
             Definition.has(
-                    InMemoryDispatcherControl.class,
+                    DispatcherControlActor.class,
                     Definition.parameters(
                             dispatcher,
-                            dispatchables,
+                            dispatcherControlDelegate,
                             checkConfirmationExpirationInterval,
                             confirmationExpiration)));
-
-    this.dispatcher.controlWith(dispatcherControl);
-    this.dispatcherControl.dispatchUnconfirmed();
   }
 
   /*

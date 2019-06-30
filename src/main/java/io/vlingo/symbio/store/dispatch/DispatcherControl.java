@@ -7,6 +7,11 @@
 
 package io.vlingo.symbio.store.dispatch;
 
+import io.vlingo.symbio.Entry;
+import io.vlingo.symbio.State;
+
+import java.util.Collection;
+
 /**
  * Defines the means to confirm previously dispatched results, and to
  * re-dispatch those that have not been successfully confirmed.
@@ -14,8 +19,9 @@ package io.vlingo.symbio.store.dispatch;
 public interface DispatcherControl {
   /**
    * Confirm that the {@code dispatchId} has been dispatched.
+   *
    * @param dispatchId the String unique identity of the dispatched state
-   * @param interest the ConfirmDispatchedResultInterest
+   * @param interest   the ConfirmDispatchedResultInterest
    */
   void confirmDispatched(final String dispatchId, final ConfirmDispatchedResultInterest interest);
 
@@ -28,4 +34,18 @@ public interface DispatcherControl {
    * Stop attempting to dispatch unconfirmed dispatchables.
    */
   void stop();
+
+  /**
+   * Defines the interface through which basic abstract storage implementations
+   * delegate to the technical implementations. See any of the existing concrete
+   * implementations for details, such as the Postgres or HSQL found in component
+   * {@code vlingo-symbio-jdbc}.
+   */
+  interface DispatcherControlDelegate<E extends Entry<?>, RS extends State<?>> {
+    Collection<Dispatchable<E, RS>> allUnconfirmedDispatchableStates() throws Exception;
+
+    void confirmDispatched(final String dispatchId);
+
+    void stop();
+  }
 }

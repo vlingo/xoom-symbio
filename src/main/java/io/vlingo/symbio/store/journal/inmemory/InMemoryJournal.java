@@ -22,7 +22,8 @@ import io.vlingo.symbio.store.Result;
 import io.vlingo.symbio.store.dispatch.Dispatchable;
 import io.vlingo.symbio.store.dispatch.Dispatcher;
 import io.vlingo.symbio.store.dispatch.DispatcherControl;
-import io.vlingo.symbio.store.dispatch.inmemory.InMemoryDispatcherControl;
+import io.vlingo.symbio.store.dispatch.control.DispatcherControlActor;
+import io.vlingo.symbio.store.dispatch.inmemory.InMemoryDispatcherControlDelegate;
 import io.vlingo.symbio.store.journal.Journal;
 import io.vlingo.symbio.store.journal.JournalReader;
 import io.vlingo.symbio.store.journal.StreamReader;
@@ -66,18 +67,17 @@ public class InMemoryJournal<T,RS extends State<?>> implements Journal<T> {
 
     this.dispatcher = dispatcher;
     this.dispatchables = new CopyOnWriteArrayList<>();
+    final InMemoryDispatcherControlDelegate<Entry<T>, RS> dispatcherControlDelegate = new InMemoryDispatcherControlDelegate<>(dispatchables);
+
     this.dispatcherControl = world.stage().actorFor(
             DispatcherControl.class,
             Definition.has(
-                    InMemoryDispatcherControl.class,
+                    DispatcherControlActor.class,
                     Definition.parameters(
                             dispatcher,
-                            dispatchables,
+                            dispatcherControlDelegate,
                             checkConfirmationExpirationInterval,
                             confirmationExpiration)));
-
-    this.dispatcher.controlWith(dispatcherControl);
-    this.dispatcherControl.dispatchUnconfirmed();
   }
 
   @Override
