@@ -45,6 +45,11 @@ public interface EntryReader<T extends Entry<?>> {
   static final String Query = "=";
 
   /**
+   * Closes this reader.
+   */
+  void close();
+
+  /**
    * Eventually answers the name of this reader.
    *
    * @return the {@code Completes<String>} reader's name

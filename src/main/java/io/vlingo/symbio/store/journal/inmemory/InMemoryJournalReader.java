@@ -26,6 +26,11 @@ public class InMemoryJournalReader<T extends Entry<?>> implements JournalReader<
   }
 
   @Override
+  public void close() {
+    journalView.clear();
+  }
+
+  @Override
   public Completes<String> name() {
     return Completes.withSuccess(name);
   }

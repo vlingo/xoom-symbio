@@ -22,6 +22,8 @@ public class NoOpStorageDelegate implements StorageDelegate {
 
   @Override public void beginWrite() {  }
 
+  @Override public StorageDelegate copy() { return new NoOpStorageDelegate(); }
+
   @Override public void close() { }
 
   @Override public boolean isClosed() { return true; }

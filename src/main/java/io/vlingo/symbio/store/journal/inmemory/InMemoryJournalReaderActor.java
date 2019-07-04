@@ -22,6 +22,11 @@ public class InMemoryJournalReaderActor<T extends Entry<?>> extends Actor implem
   }
 
   @Override
+  public void close() {
+    reader.close();
+  }
+
+  @Override
   public Completes<String> name() {
     return completes().with(reader.name().outcome());
   }

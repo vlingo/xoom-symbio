@@ -203,6 +203,7 @@ public interface StateStore extends StateStoreReader, StateStoreWriter {
     <A> A appendIdentityExpression();
     void beginRead() throws Exception;
     void beginWrite() throws Exception;
+    StorageDelegate copy();
     void close();
     boolean isClosed();
     void complete() throws Exception;
