@@ -27,6 +27,12 @@ public class InMemoryStateStoreEntryReaderActor<T extends Entry<?>> extends Acto
   }
 
   @Override
+  public void close() {
+    currentIndex = -1;
+    entriesView.clear();
+  }
+
+  @Override
   public Completes<String> name() {
     return completes().with(name);
   }

@@ -16,6 +16,9 @@ public class NoOpStorageDelegate implements StorageDelegate {
   }
 
   @Override
+  public StorageDelegate copy() { return new NoOpStorageDelegate(); }
+
+  @Override
   public boolean isClosed() {
     return false;
   }

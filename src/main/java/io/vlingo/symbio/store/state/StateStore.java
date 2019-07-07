@@ -72,6 +72,7 @@ public interface StateStore extends StateStoreReader, StateStoreWriter {
    * {@code vlingo-symbio-jdbc}.
    */
   public static interface StorageDelegate {
+    StorageDelegate copy();
     void close();
     boolean isClosed();
     EntryReader.Advice entryReaderAdvice();

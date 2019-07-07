@@ -16,6 +16,7 @@ import io.vlingo.symbio.Entry;
 
 public class JournalReader__Proxy<T extends Entry<?>> implements io.vlingo.symbio.store.journal.JournalReader<T> {
 
+  private static final String nameRepresentation0 = "close()";
   private static final String nameRepresentation1 = "name()";
   private static final String rewindRepresentation2 = "rewind()";
   private static final String seekToRepresentation3 = "seekTo(java.lang.String)";
@@ -28,6 +29,18 @@ public class JournalReader__Proxy<T extends Entry<?>> implements io.vlingo.symbi
   public JournalReader__Proxy(final Actor actor, final Mailbox mailbox){
     this.actor = actor;
     this.mailbox = mailbox;
+  }
+
+  @Override
+  @SuppressWarnings("rawtypes")
+  public void close() {
+    if (!actor.isStopped()) {
+      final java.util.function.Consumer<JournalReader> consumer = (actor) -> actor.close();
+      if (mailbox.isPreallocated()) { mailbox.send(actor, JournalReader.class, consumer, null, nameRepresentation0); }
+      else { mailbox.send(new LocalMessage<JournalReader>(actor, JournalReader.class, consumer, null, nameRepresentation0)); }
+    } else {
+      actor.deadLetters().failedDelivery(new DeadLetter(actor, nameRepresentation0));
+    }
   }
 
   @Override
