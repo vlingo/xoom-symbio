@@ -7,11 +7,11 @@
 
 package io.vlingo.symbio.store.state;
 
-import java.util.List;
-
 import io.vlingo.symbio.Metadata;
 import io.vlingo.symbio.Source;
 import io.vlingo.symbio.store.state.StateStore.WriteResultInterest;
+
+import java.util.List;
 
 /**
  * Defines the writer of the {@code StateStore}.
@@ -26,7 +26,7 @@ public interface StateStoreWriter {
    * @param <S> the concrete type of the state
    */
   default <S> void write(final String id, final S state, final int stateVersion, final WriteResultInterest interest) {
-    write(id, state, stateVersion, Source.none(), null, interest, null);
+    write(id, state, stateVersion, Source.none(), Metadata.nullMetadata(), interest, null);
   }
 
   /**
@@ -41,7 +41,7 @@ public interface StateStoreWriter {
    * @param <C> the concrete type of the sources
    */
   default <S,C> void write(final String id, final S state, final int stateVersion, final List<Source<C>> sources, final WriteResultInterest interest) {
-    write(id, state, stateVersion, sources, null, interest, null);
+    write(id, state, stateVersion, sources, Metadata.nullMetadata(), interest, null);
   }
 
   /**
@@ -83,7 +83,7 @@ public interface StateStoreWriter {
    * @param <S> the concrete type of the state
    */
   default <S> void write(final String id, final S state, final int stateVersion, final WriteResultInterest interest, final Object object) {
-    write(id, state, stateVersion, Source.none(), null, interest, object);
+    write(id, state, stateVersion, Source.none(), Metadata.nullMetadata(), interest, object);
   }
 
   /**
@@ -99,7 +99,7 @@ public interface StateStoreWriter {
    * @param <C> the concrete type of the sources
    */
   default <S,C> void write(final String id, final S state, final int stateVersion, final List<Source<C>> sources, final WriteResultInterest interest, final Object object) {
-    write(id, state, stateVersion, sources, null, interest, object);
+    write(id, state, stateVersion, sources, Metadata.nullMetadata(), interest, object);
   }
 
   /**

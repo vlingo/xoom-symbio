@@ -7,39 +7,56 @@
 
 package io.vlingo.symbio.store.journal.inmemory;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
+import io.vlingo.actors.Definition;
 import io.vlingo.actors.World;
 import io.vlingo.common.Completes;
 import io.vlingo.common.Success;
 import io.vlingo.symbio.BaseEntry;
 import io.vlingo.symbio.Entry;
 import io.vlingo.symbio.EntryAdapterProvider;
+import io.vlingo.symbio.Metadata;
 import io.vlingo.symbio.Source;
 import io.vlingo.symbio.State;
 import io.vlingo.symbio.StateAdapterProvider;
 import io.vlingo.symbio.store.Result;
+import io.vlingo.symbio.store.dispatch.Dispatchable;
+import io.vlingo.symbio.store.dispatch.Dispatcher;
+import io.vlingo.symbio.store.dispatch.DispatcherControl;
+import io.vlingo.symbio.store.dispatch.control.DispatcherControlActor;
+import io.vlingo.symbio.store.dispatch.inmemory.InMemoryDispatcherControlDelegate;
 import io.vlingo.symbio.store.journal.Journal;
-import io.vlingo.symbio.store.journal.JournalListener;
 import io.vlingo.symbio.store.journal.JournalReader;
 import io.vlingo.symbio.store.journal.StreamReader;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.Collectors;
 
 public class InMemoryJournal<T,RS extends State<?>> implements Journal<T> {
   private final EntryAdapterProvider entryAdapterProvider;
   private final StateAdapterProvider stateAdapterProvider;
   private final List<Entry<T>> journal;
-  private final JournalListener<T> listener;
   private final Map<String,JournalReader<? extends Entry<?>>> journalReaders;
   private final Map<String,StreamReader<T>> streamReaders;
   private final Map<String, Map<Integer,Integer>> streamIndexes;
   private final Map<String,RS> snapshots;
+  private final List<Dispatchable<Entry<T>, RS>> dispatchables;
+  private final Dispatcher<Dispatchable<Entry<T>,RS>> dispatcher;
+  private final DispatcherControl dispatcherControl;
 
-  public InMemoryJournal(final JournalListener<T> listener, final World world) {
-    this.listener = listener;
+  public InMemoryJournal(final Dispatcher<Dispatchable<Entry<T>, RS>> dispatcher, final World world ) {
+    this(dispatcher, world, 1000L, 1000L);
+  }
+
+  public InMemoryJournal(final Dispatcher<Dispatchable<Entry<T>,RS>> dispatcher, final World world,
+          final long checkConfirmationExpirationInterval, final long confirmationExpiration) {
     this.entryAdapterProvider = EntryAdapterProvider.instance(world);
     this.stateAdapterProvider = StateAdapterProvider.instance(world);
     this.journal = new ArrayList<>();
@@ -47,20 +64,35 @@ public class InMemoryJournal<T,RS extends State<?>> implements Journal<T> {
     this.streamReaders = new HashMap<>(1);
     this.streamIndexes = new HashMap<>();
     this.snapshots = new HashMap<>();
+
+    this.dispatcher = dispatcher;
+    this.dispatchables = new CopyOnWriteArrayList<>();
+    final InMemoryDispatcherControlDelegate<Entry<T>, RS> dispatcherControlDelegate = new InMemoryDispatcherControlDelegate<>(dispatchables);
+
+    this.dispatcherControl = world.stage().actorFor(
+            DispatcherControl.class,
+            Definition.has(
+                    DispatcherControlActor.class,
+                    Definition.parameters(
+                            dispatcher,
+                            dispatcherControlDelegate,
+                            checkConfirmationExpirationInterval,
+                            confirmationExpiration)));
   }
 
   @Override
-  public <S,ST> void append(final String streamName, final int streamVersion, final Source<S> source, final AppendResultInterest interest, final Object object) {
-    final Entry<T> entry = entryAdapterProvider.asEntry(source);
+  public <S, ST> void append(final String streamName, final int streamVersion, final Source<S> source, final Metadata metadata,
+          final AppendResultInterest interest, final Object object) {
+    final Entry<T> entry = entryAdapterProvider.asEntry(source, metadata);
     insert(streamName, streamVersion, entry);
-    listener.appended(entry);
+    dispatch(streamName, streamVersion, Collections.singletonList(entry), null);
     interest.appendResultedIn(Success.of(Result.Success), streamName, streamVersion, source, Optional.empty(), object);
   }
-
+  
   @Override
-  @SuppressWarnings("unchecked")
-  public <S,ST> void appendWith(final String streamName, final int streamVersion, final Source<S> source, final ST snapshot, final AppendResultInterest interest, final Object object) {
-    final Entry<T> entry = entryAdapterProvider.asEntry(source);
+  public <S, ST> void appendWith(final String streamName, final int streamVersion, final Source<S> source, final Metadata metadata, final ST snapshot,
+          final AppendResultInterest interest, final Object object) {
+    final Entry<T> entry = entryAdapterProvider.asEntry(source, metadata);
     insert(streamName, streamVersion, entry);
     final RS raw;
     final Optional<ST> snapshotResult;
@@ -72,22 +104,27 @@ public class InMemoryJournal<T,RS extends State<?>> implements Journal<T> {
       raw = null;
       snapshotResult = Optional.empty();
     }
-    listener.appendedWith(entry, (State<T>) raw);
+
+    dispatch(streamName, streamVersion, Collections.singletonList(entry), raw);
     interest.appendResultedIn(Success.of(Result.Success), streamName, streamVersion, source, snapshotResult, object);
   }
 
+  
   @Override
-  public <S,ST> void appendAll(final String streamName, final int fromStreamVersion, final List<Source<S>> sources, final AppendResultInterest interest, final Object object) {
-    final List<Entry<T>> entries = entryAdapterProvider.asEntries(sources);
+  public <S, ST> void appendAll(final String streamName, final int fromStreamVersion, final List<Source<S>> sources, final Metadata metadata,
+          final AppendResultInterest interest, final Object object) {
+    final List<Entry<T>> entries = entryAdapterProvider.asEntries(sources, metadata);
     insert(streamName, fromStreamVersion, entries);
-    listener.appendedAll(entries);
+
+    dispatch(streamName, fromStreamVersion, entries, null);
     interest.appendAllResultedIn(Success.of(Result.Success), streamName, fromStreamVersion, sources, Optional.empty(), object);
   }
 
+  
   @Override
-  @SuppressWarnings("unchecked")
-  public <S,ST> void appendAllWith(final String streamName, final int fromStreamVersion, final List<Source<S>> sources, final ST snapshot, final AppendResultInterest interest, final Object object) {
-    final List<Entry<T>> entries = entryAdapterProvider.asEntries(sources);
+  public <S, ST> void appendAllWith(final String streamName, final int fromStreamVersion, final List<Source<S>> sources,
+          final Metadata metadata, final ST snapshot, final AppendResultInterest interest, final Object object) {
+    final List<Entry<T>> entries = entryAdapterProvider.asEntries(sources, metadata);
     insert(streamName, fromStreamVersion, entries);
     final RS raw;
     final Optional<ST> snapshotResult;
@@ -99,12 +136,13 @@ public class InMemoryJournal<T,RS extends State<?>> implements Journal<T> {
       raw = null;
       snapshotResult = Optional.empty();
     }
-    listener.appendedAllWith(entries, (State<T>) raw);
+
+    dispatch(streamName, fromStreamVersion, entries, raw);
     interest.appendAllResultedIn(Success.of(Result.Success), streamName, fromStreamVersion, sources, snapshotResult, object);
   }
 
   @Override
-  @SuppressWarnings({ "unchecked", "rawtypes" })
+  @SuppressWarnings({ "unchecked" })
   public <ET extends Entry<?>> Completes<JournalReader<ET>> journalReader(final String name) {
     JournalReader<?> reader = journalReaders.get(name);
     if (reader == null) {
@@ -115,7 +153,7 @@ public class InMemoryJournal<T,RS extends State<?>> implements Journal<T> {
   }
 
   @Override
-  @SuppressWarnings({ "unchecked", "rawtypes" })
+  @SuppressWarnings({ "unchecked" })
   public Completes<StreamReader<T>> streamReader(final String name) {
     StreamReader<T> reader = streamReaders.get(name);
     if (reader == null) {
@@ -130,11 +168,8 @@ public class InMemoryJournal<T,RS extends State<?>> implements Journal<T> {
     final String id = "" + (entryIndex + 1);
     ((BaseEntry<T>) entry).__internal__setId(id); //questionable cast
     journal.add(entry);
-    Map<Integer,Integer> versionIndexes = streamIndexes.get(streamName);
-    if (versionIndexes == null) {
-      versionIndexes = new HashMap<>();
-      streamIndexes.put(streamName, versionIndexes);
-    }
+    
+    final Map<Integer, Integer> versionIndexes = streamIndexes.computeIfAbsent(streamName, k -> new HashMap<>());
     versionIndexes.put(streamVersion, entryIndex);
   }
 
@@ -144,5 +179,17 @@ public class InMemoryJournal<T,RS extends State<?>> implements Journal<T> {
       insert(streamName, fromStreamVersion + index, entry);
       ++index;
     }
+  }
+
+  private void dispatch(final String streamName, final int streamVersion, final List<Entry<T>> entries, final RS snapshot){
+    final String id = getDispatchId(streamName, streamVersion, entries);
+    final Dispatchable<Entry<T>, RS> dispatchable = new Dispatchable<>(id,  LocalDateTime.now(), snapshot, entries);
+    this.dispatchables.add(dispatchable);
+    this.dispatcher.dispatch(dispatchable);
+  }
+
+  private static <T> String getDispatchId(final String streamName, final int streamVersion, final Collection<Entry<T>> entries) {
+    return streamName + ":" + streamVersion + ":"
+            + entries.stream().map(Entry::id).collect(Collectors.joining(":"));
   }
 }

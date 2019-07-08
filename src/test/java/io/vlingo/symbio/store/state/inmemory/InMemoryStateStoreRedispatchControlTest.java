@@ -6,22 +6,21 @@
 // one at https://mozilla.org/MPL/2.0/.
 package io.vlingo.symbio.store.state.inmemory;
 
-import static org.junit.Assert.assertTrue;
-
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-
 import io.vlingo.actors.World;
 import io.vlingo.actors.testkit.AccessSafely;
 import io.vlingo.symbio.EntryAdapterProvider;
 import io.vlingo.symbio.StateAdapterProvider;
 import io.vlingo.symbio.store.state.Entity1;
 import io.vlingo.symbio.store.state.Entity1.Entity1StateAdapter;
-import io.vlingo.symbio.store.state.MockDispatcher;
+import io.vlingo.symbio.store.state.MockStateStoreDispatcher;
 import io.vlingo.symbio.store.state.MockStateStoreResultInterest;
 import io.vlingo.symbio.store.state.StateStore;
 import io.vlingo.symbio.store.state.StateTypeStateStoreMap;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+import static org.junit.Assert.assertTrue;
 
 /**
  * RedispatchControlTest
@@ -30,7 +29,7 @@ public class InMemoryStateStoreRedispatchControlTest {
 
   private final static String StoreName = Entity1.class.getSimpleName();
 
-  private MockDispatcher dispatcher;
+  private MockStateStoreDispatcher dispatcher;
   private MockStateStoreResultInterest interest;
   private StateStore store;
   private World world;
@@ -65,7 +64,7 @@ public class InMemoryStateStoreRedispatchControlTest {
     world = World.startWithDefaults("test-store");
 
     interest = new MockStateStoreResultInterest();
-    dispatcher = new MockDispatcher(interest);
+    dispatcher = new MockStateStoreDispatcher(interest);
 
     final StateAdapterProvider stateAdapterProvider = new StateAdapterProvider(world);
     new EntryAdapterProvider(world);

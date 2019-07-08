@@ -21,12 +21,16 @@ import io.vlingo.symbio.State;
 import io.vlingo.symbio.StateAdapterProvider;
 import io.vlingo.symbio.store.Result;
 import io.vlingo.symbio.store.StorageException;
+import io.vlingo.symbio.store.dispatch.Dispatchable;
+import io.vlingo.symbio.store.dispatch.Dispatcher;
+import io.vlingo.symbio.store.dispatch.DispatcherControl;
+import io.vlingo.symbio.store.dispatch.control.DispatcherControlActor;
+import io.vlingo.symbio.store.dispatch.inmemory.InMemoryDispatcherControlDelegate;
 import io.vlingo.symbio.store.state.StateStore;
 import io.vlingo.symbio.store.state.StateStoreEntryReader;
 import io.vlingo.symbio.store.state.StateTypeStateStoreMap;
 
 import java.time.LocalDateTime;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,8 +39,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class InMemoryStateStoreActor<RS extends State<?>> extends Actor
     implements StateStore {
 
-  private final List<Dispatchable<RS>> dispatchables;
-  private final Dispatcher dispatcher;
+  private final List<Dispatchable<Entry<?>,RS>> dispatchables;
+  private final Dispatcher<Dispatchable<Entry<?>,RS>> dispatcher;
   private final DispatcherControl dispatcherControl;
   private final List<Entry<?>> entries;
   private final Map<String,StateStoreEntryReader<?>> entryReaders;
@@ -44,11 +48,11 @@ public class InMemoryStateStoreActor<RS extends State<?>> extends Actor
   private final StateAdapterProvider stateAdapterProvider;
   private final Map<String, Map<String, RS>> store;
 
-  public InMemoryStateStoreActor(final Dispatcher dispatcher) {
+  public InMemoryStateStoreActor(final Dispatcher<Dispatchable<Entry<?>, RS>> dispatcher) {
     this(dispatcher, 1000L, 1000L);
   }
 
-  public InMemoryStateStoreActor(final Dispatcher dispatcher, long checkConfirmationExpirationInterval, final long confirmationExpiration) {
+  public InMemoryStateStoreActor(final Dispatcher<Dispatchable<Entry<?>, RS>> dispatcher, final long checkConfirmationExpirationInterval, final long confirmationExpiration) {
     if (dispatcher == null) {
       throw new IllegalArgumentException("Dispatcher must not be null.");
     }
@@ -60,18 +64,17 @@ public class InMemoryStateStoreActor<RS extends State<?>> extends Actor
     this.store = new HashMap<>();
     this.dispatchables = new CopyOnWriteArrayList<>();
 
+    final InMemoryDispatcherControlDelegate<Entry<?>, RS> dispatcherControlDelegate = new InMemoryDispatcherControlDelegate<>(dispatchables);
+
     this.dispatcherControl = stage().actorFor(
       DispatcherControl.class,
       Definition.has(
-        InMemoryDispatcherControl.class,
+        DispatcherControlActor.class,
         Definition.parameters(
           dispatcher,
-          dispatchables,
+          dispatcherControlDelegate,
           checkConfirmationExpirationInterval,
           confirmationExpiration)));
-
-    dispatcher.controlWith(dispatcherControl);
-    dispatcherControl.dispatchUnconfirmed();
   }
 
   @Override
@@ -94,7 +97,7 @@ public class InMemoryStateStoreActor<RS extends State<?>> extends Actor
   }
 
   @Override
-  public void read(final String id, Class<?> type, final ReadResultInterest interest, final Object object) {
+  public void read(final String id, final Class<?> type, final ReadResultInterest interest, final Object object) {
     readFor(id, type, interest, object);
   }
 
@@ -130,7 +133,7 @@ public class InMemoryStateStoreActor<RS extends State<?>> extends Actor
         final Object state = stateAdapterProvider.fromRaw(raw);
         interest.readResultedIn(Success.of(Result.Success), id, state, raw.dataVersion, raw.metadata, object);
       } else {
-        for (String storeId : typeStore.keySet()) {
+        for (final String storeId : typeStore.keySet()) {
           logger().debug("UNFOUND STATES\n=====================");
           logger().debug("STORE ID: '" + storeId + "' STATE: " + typeStore.get(storeId));
         }
@@ -179,13 +182,11 @@ public class InMemoryStateStoreActor<RS extends State<?>> extends Actor
             }
           }
           typeStore.put(id, raw);
-          final List<Entry<?>> entries = appendEntries(sources);
-          final String dispatchId = storeName + ":" + id;
-          dispatchables.add(new Dispatchable<RS>(dispatchId, LocalDateTime.now(), raw));
-          dispatch(dispatchId, raw, entries);
+          final List<Entry<?>> entries = appendEntries(sources, metadata);
+          dispatch(id, storeName, raw, entries);
 
           interest.writeResultedIn(Success.of(Result.Success), id, state, stateVersion, sources, object);
-        } catch (Exception e) {
+        } catch (final Exception e) {
           logger().error(getClass().getSimpleName() + " writeText() error because: " + e.getMessage(), e);
           interest.writeResultedIn(Failure.of(new StorageException(Result.Error, e.getMessage(), e)), id, state, stateVersion, sources, object);
         }
@@ -198,16 +199,19 @@ public class InMemoryStateStoreActor<RS extends State<?>> extends Actor
     }
   }
 
-  private <C> List<Entry<?>> appendEntries(final List<Source<C>> sources) {
-    final List<Entry<?>> adapted = entryAdapterProvider.asEntries(sources);
-    for (Entry<?> each : adapted) {
+  private <C> List<Entry<?>> appendEntries(final List<Source<C>> sources, final Metadata metadata) {
+    final List<Entry<?>> adapted = entryAdapterProvider.asEntries(sources, metadata);
+    for (final Entry<?> each : adapted) {
       ((BaseEntry<?>) each).__internal__setId(String.valueOf(entries.size()));
       entries.add(each);
     }
     return adapted;
   }
 
-  private <ST extends State<?>, E extends Entry<?>> void dispatch(final String dispatchId, final ST state, final Collection<E> entries) {
-    dispatcher.dispatch(dispatchId, state, entries);
+  private void dispatch(final String id, final String storeName, final RS raw, final List<Entry<?>> entries) {
+    final String dispatchId = storeName + ":" + id;
+    final Dispatchable<Entry<?>, RS> dispatchable = new Dispatchable<>(dispatchId, LocalDateTime.now(), raw, entries);
+    this.dispatchables.add(dispatchable);
+    this.dispatcher.dispatch(dispatchable);
   }
 }

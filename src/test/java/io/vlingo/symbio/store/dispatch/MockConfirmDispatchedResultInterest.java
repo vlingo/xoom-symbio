@@ -5,12 +5,13 @@
 // was not distributed with this file, You can obtain
 // one at https://mozilla.org/MPL/2.0/.
 
-package io.vlingo.symbio.store.journal.inmemory;
+package io.vlingo.symbio.store.dispatch;
 
-import io.vlingo.symbio.State;
+import io.vlingo.symbio.store.Result;
 
-public class SnapshotState extends State<String> {
-  public SnapshotState() {
-    super("1", String.class, 1, "data", 1, null);
+public class MockConfirmDispatchedResultInterest implements ConfirmDispatchedResultInterest {
+  @Override
+  public void confirmDispatchedResultedIn(Result result, String dispatchId) {
+    // not used
   }
 }

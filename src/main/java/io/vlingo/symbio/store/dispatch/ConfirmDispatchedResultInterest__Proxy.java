@@ -5,22 +5,21 @@
 // was not distributed with this file, You can obtain
 // one at https://mozilla.org/MPL/2.0/.
 
-package io.vlingo.symbio.store.state;
+package io.vlingo.symbio.store.dispatch;
 
 import io.vlingo.actors.Actor;
 import io.vlingo.actors.DeadLetter;
 import io.vlingo.actors.LocalMessage;
 import io.vlingo.actors.Mailbox;
-import io.vlingo.symbio.store.state.StateStore.ConfirmDispatchedResultInterest;
 
-public class StateStoreConfirmDispatchedResultInterest__Proxy implements io.vlingo.symbio.store.state.StateStore.ConfirmDispatchedResultInterest {
+public class ConfirmDispatchedResultInterest__Proxy implements ConfirmDispatchedResultInterest {
 
   private static final String confirmDispatchedResultedInRepresentation1 = "confirmDispatchedResultedIn(io.vlingo.symbio.store.Result, java.lang.String)";
 
   private final Actor actor;
   private final Mailbox mailbox;
 
-  public StateStoreConfirmDispatchedResultInterest__Proxy(final Actor actor, final Mailbox mailbox){
+  public ConfirmDispatchedResultInterest__Proxy(final Actor actor, final Mailbox mailbox){
     this.actor = actor;
     this.mailbox = mailbox;
   }

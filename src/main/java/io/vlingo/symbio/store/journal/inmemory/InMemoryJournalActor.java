@@ -7,24 +7,26 @@
 
 package io.vlingo.symbio.store.journal.inmemory;
 
-import java.util.List;
-
 import io.vlingo.actors.Actor;
 import io.vlingo.actors.Definition;
 import io.vlingo.common.Completes;
 import io.vlingo.symbio.Entry;
+import io.vlingo.symbio.Metadata;
 import io.vlingo.symbio.Source;
 import io.vlingo.symbio.State;
+import io.vlingo.symbio.store.dispatch.Dispatchable;
+import io.vlingo.symbio.store.dispatch.Dispatcher;
 import io.vlingo.symbio.store.journal.Journal;
-import io.vlingo.symbio.store.journal.JournalListener;
 import io.vlingo.symbio.store.journal.JournalReader;
 import io.vlingo.symbio.store.journal.StreamReader;
+
+import java.util.List;
 
 public class InMemoryJournalActor<T,RS extends State<?>> extends Actor implements Journal<T> {
   private final InMemoryJournal<T,RS> journal;
 
-  public InMemoryJournalActor(final JournalListener<T> listener) {
-    this.journal = new InMemoryJournal<>(listener, stage().world());
+  public InMemoryJournalActor(final Dispatcher<Dispatchable<Entry<T>,RS>> dispatcher) {
+    this.journal = new InMemoryJournal<>(dispatcher, stage().world());
   }
 
   @Override
@@ -33,8 +35,20 @@ public class InMemoryJournalActor<T,RS extends State<?>> extends Actor implement
   }
 
   @Override
+  public <S, ST> void append(final String streamName, final int streamVersion, final Source<S> source, final Metadata metadata,
+          final AppendResultInterest interest, final Object object) {
+    journal.append(streamName, streamVersion, source, metadata, interest, object);
+  }
+
+  @Override
   public <S,ST> void appendWith(final String streamName, final int streamVersion, final Source<S> source, final ST snapshot, final AppendResultInterest interest, final Object object) {
     journal.appendWith(streamName, streamVersion, source, snapshot, interest, object);
+  }
+
+  @Override
+  public <S, ST> void appendWith(final String streamName, final int streamVersion, final Source<S> source, final Metadata metadata, final ST snapshot,
+          final AppendResultInterest interest, final Object object) {
+    journal.appendWith(streamName, streamVersion, source, metadata, snapshot, interest, object);
   }
 
   @Override
@@ -43,8 +57,20 @@ public class InMemoryJournalActor<T,RS extends State<?>> extends Actor implement
   }
 
   @Override
+  public <S, ST> void appendAll(final String streamName, final int fromStreamVersion, final List<Source<S>> sources, final Metadata metadata,
+          final AppendResultInterest interest, final Object object) {
+    journal.appendAll(streamName, fromStreamVersion, sources, metadata, interest, object);
+  }
+
+  @Override
   public <S,ST> void appendAllWith(final String streamName, final int fromStreamVersion, final List<Source<S>> sources, final ST snapshot, final AppendResultInterest interest, final Object object) {
     journal.appendAllWith(streamName, fromStreamVersion, sources, snapshot, interest, object);
+  }
+
+  @Override
+  public <S, ST> void appendAllWith(final String streamName, final int fromStreamVersion, final List<Source<S>> sources,
+          final Metadata metadata, final ST snapshot, final AppendResultInterest interest, final Object object) {
+    journal.appendAllWith(streamName, fromStreamVersion, sources, metadata, snapshot, interest, object);
   }
 
   @Override

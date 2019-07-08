@@ -7,36 +7,36 @@
 
 package io.vlingo.symbio.store.state.inmemory;
 
-import static org.junit.Assert.assertEquals;
-
-import java.util.Arrays;
-
-import org.junit.Before;
-import org.junit.Test;
-
 import io.vlingo.actors.World;
 import io.vlingo.actors.testkit.AccessSafely;
 import io.vlingo.actors.testkit.TestWorld;
 import io.vlingo.common.Completes;
 import io.vlingo.symbio.BaseEntry.TextEntry;
 import io.vlingo.symbio.EntryAdapterProvider;
+import io.vlingo.symbio.Metadata;
 import io.vlingo.symbio.Source;
 import io.vlingo.symbio.StateAdapterProvider;
 import io.vlingo.symbio.store.state.Entity1;
 import io.vlingo.symbio.store.state.Entity1.Entity1StateAdapter;
 import io.vlingo.symbio.store.state.Entity2;
-import io.vlingo.symbio.store.state.MockDispatcher;
+import io.vlingo.symbio.store.state.MockStateStoreDispatcher;
 import io.vlingo.symbio.store.state.MockStateStoreResultInterest;
 import io.vlingo.symbio.store.state.StateStore;
 import io.vlingo.symbio.store.state.StateStoreEntryReader;
 import io.vlingo.symbio.store.state.StateTypeStateStoreMap;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.util.Arrays;
+
+import static org.junit.Assert.assertEquals;
 
 public class InMemoryStateStoreEntryReaderActorTest {
   private static final String Id1 = "123-A";
   private static final String Id2 = "123-B";
   private static final String Id3 = "123-C";
 
-  private MockDispatcher dispatcher;
+  private MockStateStoreDispatcher dispatcher;
   private EntryAdapterProvider entryAdapterProvider;
   private MockStateStoreResultInterest interest;
   private StateStoreEntryReader<TextEntry> reader;
@@ -58,11 +58,11 @@ public class InMemoryStateStoreEntryReaderActorTest {
     assertEquals(new Event3(), access.readFrom("sources"));
 
     final TextEntry entry1 = reader.readNext().await();
-    assertEquals(entryAdapterProvider.asEntry(new Event1()).withId("0"), entry1);
+    assertEquals(entryAdapterProvider.asEntry(new Event1(), Metadata.nullMetadata()).withId("0"), entry1);
     final TextEntry entry2 = reader.readNext().await();
-    assertEquals(entryAdapterProvider.asEntry(new Event2()).withId("1"), entry2);
+    assertEquals(entryAdapterProvider.asEntry(new Event2(), Metadata.nullMetadata()).withId("1"), entry2);
     final TextEntry entry3 = reader.readNext().await();
-    assertEquals(entryAdapterProvider.asEntry(new Event3()).withId("2"), entry3);
+    assertEquals(entryAdapterProvider.asEntry(new Event3(), Metadata.nullMetadata()).withId("2"), entry3);
 
     reader.rewind();
     assertEquals(Arrays.asList(entry1, entry2, entry3), reader.readNext(3).await());
@@ -74,7 +74,7 @@ public class InMemoryStateStoreEntryReaderActorTest {
     world = testWorld.world();
 
     interest = new MockStateStoreResultInterest();
-    dispatcher = new MockDispatcher(interest);
+    dispatcher = new MockStateStoreDispatcher(interest);
 
     final StateAdapterProvider stateAdapterProvider = new StateAdapterProvider(world);
     entryAdapterProvider = new EntryAdapterProvider(world);
