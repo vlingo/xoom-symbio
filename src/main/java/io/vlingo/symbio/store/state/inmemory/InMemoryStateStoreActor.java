@@ -177,7 +177,7 @@ public class InMemoryStateStoreActor<RS extends State<?>> extends Actor
           final RS persistedState = typeStore.putIfAbsent(raw.id, raw);
           if (persistedState != null) {
             if (persistedState.dataVersion >= raw.dataVersion) {
-              interest.writeResultedIn(Failure.of(new StorageException(Result.ConcurrentyViolation, "Version conflict.")), id, state, stateVersion, sources, object);
+              interest.writeResultedIn(Failure.of(new StorageException(Result.ConcurrencyViolation, "Version conflict.")), id, state, stateVersion, sources, object);
               return;
             }
           }

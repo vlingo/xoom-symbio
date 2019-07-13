@@ -8,8 +8,8 @@
 package io.vlingo.symbio.store;
 
 public enum Result {
-  ConcurrentyViolation {
-    @Override public boolean isConcurrentyViolation() { return true; }
+  ConcurrencyViolation {
+    @Override public boolean isConcurrencyViolation() { return true; }
   },
   Error {
     @Override public boolean isError() { return true; }
@@ -27,7 +27,7 @@ public enum Result {
     @Override public boolean isSuccess() { return true; }
   };
 
-  public boolean isConcurrentyViolation() { return false; }
+  public boolean isConcurrencyViolation() { return false; }
   public boolean isError() { return false; }
   public boolean isFailure() { return false; }
   public boolean isNotFound() { return false; }
