@@ -7,6 +7,8 @@
 
 package io.vlingo.symbio.store.journal.inmemory;
 
+import java.util.List;
+
 import io.vlingo.actors.Actor;
 import io.vlingo.actors.Definition;
 import io.vlingo.common.Completes;
@@ -19,8 +21,6 @@ import io.vlingo.symbio.store.dispatch.Dispatcher;
 import io.vlingo.symbio.store.journal.Journal;
 import io.vlingo.symbio.store.journal.JournalReader;
 import io.vlingo.symbio.store.journal.StreamReader;
-
-import java.util.List;
 
 public class InMemoryJournalActor<T,RS extends State<?>> extends Actor implements Journal<T> {
   private final InMemoryJournal<T,RS> journal;
@@ -87,5 +87,11 @@ public class InMemoryJournalActor<T,RS extends State<?>> extends Actor implement
     @SuppressWarnings("unchecked")
     final StreamReader<T> actor = childActorFor(StreamReader.class, Definition.has(InMemoryStreamReaderActor.class, Definition.parameters(inmemory)));
     return completes().with(actor);
+  }
+
+  @Override
+  public void stop() {
+    journal.stop();
+    super.stop();
   }
 }

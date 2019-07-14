@@ -7,13 +7,13 @@
 
 package io.vlingo.symbio.store.dispatch;
 
-import io.vlingo.symbio.Entry;
-import io.vlingo.symbio.State;
-
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+
+import io.vlingo.symbio.Entry;
+import io.vlingo.symbio.State;
 
 /**
  * Defines the data holder for identity and state that has been
@@ -68,6 +68,7 @@ public class Dispatchable<E extends Entry<?>, RS extends State<?>> {
   }
 
   @Override
+  @SuppressWarnings({ "rawtypes" })
   public boolean equals(Object o) {
     if (this == o)
       return true;

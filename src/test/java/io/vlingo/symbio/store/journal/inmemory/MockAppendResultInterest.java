@@ -7,6 +7,12 @@
 
 package io.vlingo.symbio.store.journal.inmemory;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Consumer;
+
 import io.vlingo.actors.testkit.AccessSafely;
 import io.vlingo.common.Outcome;
 import io.vlingo.symbio.Metadata;
@@ -15,12 +21,7 @@ import io.vlingo.symbio.store.Result;
 import io.vlingo.symbio.store.StorageException;
 import io.vlingo.symbio.store.journal.Journal.AppendResultInterest;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.function.Consumer;
-
+@SuppressWarnings("hiding")
 public class MockAppendResultInterest<T, ST> implements AppendResultInterest {
   private AccessSafely access;
   private final List<JournalData<T, ST>> entries = new ArrayList<>();

@@ -7,15 +7,16 @@
 
 package io.vlingo.symbio.store.dispatch;
 
-import io.vlingo.actors.testkit.AccessSafely;
-import io.vlingo.symbio.Entry;
-import io.vlingo.symbio.State;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
+import io.vlingo.actors.testkit.AccessSafely;
+import io.vlingo.symbio.Entry;
+import io.vlingo.symbio.State;
+
+@SuppressWarnings("rawtypes")
 public class MockDispatcher <T, ST extends State<?>> implements Dispatcher<Dispatchable<Entry<T>,ST>> {
   private AccessSafely access;
 
@@ -45,7 +46,6 @@ public class MockDispatcher <T, ST extends State<?>> implements Dispatcher<Dispa
     }
   }
 
-  @SuppressWarnings({ "rawtypes" })
   public AccessSafely afterCompleting(final int times) {
     access = AccessSafely.afterCompleting(times)
             .writingWith("dispatched", (Consumer<Dispatchable>) this.dispatched::add)

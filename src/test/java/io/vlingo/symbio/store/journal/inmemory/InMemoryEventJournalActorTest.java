@@ -7,6 +7,21 @@
 
 package io.vlingo.symbio.store.journal.inmemory;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+
 import io.vlingo.actors.World;
 import io.vlingo.actors.testkit.AccessSafely;
 import io.vlingo.common.serialization.JsonSerialization;
@@ -25,21 +40,8 @@ import io.vlingo.symbio.store.dispatch.MockDispatcher;
 import io.vlingo.symbio.store.journal.Journal;
 import io.vlingo.symbio.store.journal.inmemory.MockAppendResultInterest.JournalData;
 import io.vlingo.symbio.store.state.SnapshotStateAdapter;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-
+@SuppressWarnings({ "unchecked", "rawtypes" })
 public class InMemoryEventJournalActorTest {
   private Object object = new Object();
   private MockAppendResultInterest interest = new MockAppendResultInterest<String, SnapshotState>();
@@ -268,7 +270,6 @@ public class InMemoryEventJournalActorTest {
     AccessSafely access;
     public final List<BaseEntry<String>> entries = new ArrayList<>();
 
-    @SuppressWarnings("unchecked")
     public AccessSafely afterCompleting(final int times) {
       access = AccessSafely.afterCompleting(times)
               .writingWith("addAll", (values) -> this.entries.addAll((Collection<BaseEntry<String>>) values))

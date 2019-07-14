@@ -7,7 +7,19 @@
 
 package io.vlingo.symbio.store.journal.inmemory;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.Collectors;
+
 import io.vlingo.actors.Definition;
+import io.vlingo.actors.Stoppable;
 import io.vlingo.actors.World;
 import io.vlingo.common.Completes;
 import io.vlingo.common.Success;
@@ -28,18 +40,7 @@ import io.vlingo.symbio.store.journal.Journal;
 import io.vlingo.symbio.store.journal.JournalReader;
 import io.vlingo.symbio.store.journal.StreamReader;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.stream.Collectors;
-
-public class InMemoryJournal<T,RS extends State<?>> implements Journal<T> {
+public class InMemoryJournal<T,RS extends State<?>> implements Journal<T>, Stoppable {
   private final EntryAdapterProvider entryAdapterProvider;
   private final StateAdapterProvider stateAdapterProvider;
   private final List<Entry<T>> journal;
@@ -88,7 +89,7 @@ public class InMemoryJournal<T,RS extends State<?>> implements Journal<T> {
     dispatch(streamName, streamVersion, Collections.singletonList(entry), null);
     interest.appendResultedIn(Success.of(Result.Success), streamName, streamVersion, source, Optional.empty(), object);
   }
-  
+
   @Override
   public <S, ST> void appendWith(final String streamName, final int streamVersion, final Source<S> source, final Metadata metadata, final ST snapshot,
           final AppendResultInterest interest, final Object object) {
@@ -109,7 +110,7 @@ public class InMemoryJournal<T,RS extends State<?>> implements Journal<T> {
     interest.appendResultedIn(Success.of(Result.Success), streamName, streamVersion, source, snapshotResult, object);
   }
 
-  
+
   @Override
   public <S, ST> void appendAll(final String streamName, final int fromStreamVersion, final List<Source<S>> sources, final Metadata metadata,
           final AppendResultInterest interest, final Object object) {
@@ -120,7 +121,7 @@ public class InMemoryJournal<T,RS extends State<?>> implements Journal<T> {
     interest.appendAllResultedIn(Success.of(Result.Success), streamName, fromStreamVersion, sources, Optional.empty(), object);
   }
 
-  
+
   @Override
   public <S, ST> void appendAllWith(final String streamName, final int fromStreamVersion, final List<Source<S>> sources,
           final Metadata metadata, final ST snapshot, final AppendResultInterest interest, final Object object) {
@@ -142,7 +143,7 @@ public class InMemoryJournal<T,RS extends State<?>> implements Journal<T> {
   }
 
   @Override
-  @SuppressWarnings({ "unchecked" })
+  @SuppressWarnings({ "unchecked", "rawtypes" })
   public <ET extends Entry<?>> Completes<JournalReader<ET>> journalReader(final String name) {
     JournalReader<?> reader = journalReaders.get(name);
     if (reader == null) {
@@ -153,7 +154,7 @@ public class InMemoryJournal<T,RS extends State<?>> implements Journal<T> {
   }
 
   @Override
-  @SuppressWarnings({ "unchecked" })
+  @SuppressWarnings({ "unchecked", "rawtypes" })
   public Completes<StreamReader<T>> streamReader(final String name) {
     StreamReader<T> reader = streamReaders.get(name);
     if (reader == null) {
@@ -163,12 +164,27 @@ public class InMemoryJournal<T,RS extends State<?>> implements Journal<T> {
     return Completes.withSuccess(reader);
   }
 
+  @Override
+  public void conclude() {
+
+  }
+
+  @Override
+  public boolean isStopped() {
+    return false;
+  }
+
+  @Override
+  public void stop() {
+    dispatcherControl.stop();
+  }
+
   private void insert(final String streamName, final int streamVersion, final Entry<T> entry) {
     final int entryIndex = journal.size();
     final String id = "" + (entryIndex + 1);
     ((BaseEntry<T>) entry).__internal__setId(id); //questionable cast
     journal.add(entry);
-    
+
     final Map<Integer, Integer> versionIndexes = streamIndexes.computeIfAbsent(streamName, k -> new HashMap<>());
     versionIndexes.put(streamVersion, entryIndex);
   }

@@ -10,6 +10,7 @@ package io.vlingo.symbio.store.dispatch;
 /**
  * Defines the support for dispatching.
  */
+@SuppressWarnings("rawtypes")
 public interface Dispatcher<D extends Dispatchable> {
   /**
    * Register the {@code control} with the receiver.

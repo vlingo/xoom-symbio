@@ -7,6 +7,17 @@
 
 package io.vlingo.symbio.store.object.inmemory;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.Collectors;
+
 import io.vlingo.actors.Actor;
 import io.vlingo.actors.Definition;
 import io.vlingo.common.Failure;
@@ -29,17 +40,6 @@ import io.vlingo.symbio.store.object.ObjectStore;
 import io.vlingo.symbio.store.object.PersistentObject;
 import io.vlingo.symbio.store.object.PersistentObjectMapper;
 import io.vlingo.symbio.store.object.QueryExpression;
-
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.stream.Collectors;
 
 /**
  * In-memory implementation of {@code ObjectStore}. Note that {@code queryAll()} variations
@@ -64,7 +64,7 @@ public class InMemoryObjectStoreActor extends Actor implements ObjectStore {
   public InMemoryObjectStoreActor(final Dispatcher<Dispatchable<BaseEntry<?>,State<?>>> dispatcher){
     this(dispatcher, 1000L, 1000L);
   }
-  
+
   public InMemoryObjectStoreActor(final Dispatcher<Dispatchable<BaseEntry<?>,State<?>>> dispatcher,
          final long checkConfirmationExpirationInterval, final long confirmationExpiration ) {
     this.store = new HashMap<>();
@@ -179,6 +179,12 @@ public class InMemoryObjectStoreActor extends Actor implements ObjectStore {
   @Override
   public void registerMapper(final PersistentObjectMapper mapper) {
     mappers.put(mapper.type(), mapper);
+  }
+
+  @Override
+  public void stop() {
+    dispatcherControl.stop();
+    super.stop();
   }
 
   private String idParameterAsString(final Object id) {

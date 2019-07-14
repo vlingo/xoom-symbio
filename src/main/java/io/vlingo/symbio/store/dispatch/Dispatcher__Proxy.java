@@ -7,13 +7,14 @@
 
 package io.vlingo.symbio.store.dispatch;
 
+import java.util.function.Consumer;
+
 import io.vlingo.actors.Actor;
 import io.vlingo.actors.DeadLetter;
 import io.vlingo.actors.LocalMessage;
 import io.vlingo.actors.Mailbox;
 
-import java.util.function.Consumer;
-
+@SuppressWarnings({ "unchecked", "rawtypes" })
 public class Dispatcher__Proxy implements Dispatcher {
 
   private static final String dispatchRepresentation1 = "dispatch(io.vlingo.symbio.store.dispatch.Dispatchable)";

@@ -1,5 +1,7 @@
 package io.vlingo.symbio.store.journal;
 
+import java.util.function.Consumer;
+
 import io.vlingo.actors.Actor;
 import io.vlingo.actors.DeadLetter;
 import io.vlingo.actors.LocalMessage;
@@ -7,8 +9,7 @@ import io.vlingo.actors.Mailbox;
 import io.vlingo.common.BasicCompletes;
 import io.vlingo.symbio.Entry;
 
-import java.util.function.Consumer;
-
+@SuppressWarnings({ "rawtypes", "unchecked" })
 public class Journal__Proxy<T> implements io.vlingo.symbio.store.journal.Journal<T> {
 
   private static final String appendRepresentation1 = "append(java.lang.String, int, io.vlingo.symbio.Source<S>, io.vlingo.symbio.store.journal.Journal.AppendResultInterest<ST>, java.lang.Object)";
@@ -31,7 +32,6 @@ public class Journal__Proxy<T> implements io.vlingo.symbio.store.journal.Journal
   }
 
   @Override
-  @SuppressWarnings({ "rawtypes" })
   public <S, ST> void append(final java.lang.String arg0, final int arg1, final io.vlingo.symbio.Source<S> arg2,
           final io.vlingo.symbio.store.journal.Journal.AppendResultInterest arg3, final java.lang.Object arg4) {
     final java.util.function.Consumer<Journal> consumer = (actor) -> actor.append(arg0, arg1, arg2, arg3, arg4);
@@ -47,7 +47,6 @@ public class Journal__Proxy<T> implements io.vlingo.symbio.store.journal.Journal
   }
 
   @Override
-  @SuppressWarnings({ "rawtypes" })
   public <S, ST> void appendAll(final java.lang.String arg0, final int arg1,
           final java.util.List<io.vlingo.symbio.Source<S>> arg2,
           final io.vlingo.symbio.store.journal.Journal.AppendResultInterest arg3, final java.lang.Object arg4) {
@@ -65,7 +64,6 @@ public class Journal__Proxy<T> implements io.vlingo.symbio.store.journal.Journal
   }
 
   @Override
-  @SuppressWarnings({ "rawtypes" })
   public <S, ST> void appendAllWith(final java.lang.String arg0, final int arg1,
           final java.util.List<io.vlingo.symbio.Source<S>> arg2, final ST arg3,
           final io.vlingo.symbio.store.journal.Journal.AppendResultInterest arg4, final java.lang.Object arg5) {
@@ -84,7 +82,6 @@ public class Journal__Proxy<T> implements io.vlingo.symbio.store.journal.Journal
   }
 
   @Override
-  @SuppressWarnings({ "rawtypes" })
   public <S, ST> void appendWith(final java.lang.String arg0, final int arg1, final io.vlingo.symbio.Source<S> arg2,
           final ST arg3, final io.vlingo.symbio.store.journal.Journal.AppendResultInterest arg4,
           final java.lang.Object arg5) {
@@ -115,7 +112,6 @@ public class Journal__Proxy<T> implements io.vlingo.symbio.store.journal.Journal
   }
 
   @Override
-  @SuppressWarnings("rawtypes")
   public <ET extends Entry<?>> io.vlingo.common.Completes<io.vlingo.symbio.store.journal.JournalReader<ET>> journalReader(final java.lang.String arg0) {
     if (!actor.isStopped()) {
       final java.util.function.Consumer<Journal> consumer = (actor) -> actor.journalReader(arg0);
@@ -134,7 +130,6 @@ public class Journal__Proxy<T> implements io.vlingo.symbio.store.journal.Journal
   }
 
   @Override
-  @SuppressWarnings("rawtypes")
   public io.vlingo.common.Completes<io.vlingo.symbio.store.journal.StreamReader<T>> streamReader(final java.lang.String arg0) {
     if (!actor.isStopped()) {
       final java.util.function.Consumer<Journal> consumer = (actor) -> actor.streamReader(arg0);

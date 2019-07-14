@@ -7,6 +7,12 @@
 
 package io.vlingo.symbio.store.state;
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import io.vlingo.actors.testkit.AccessSafely;
 import io.vlingo.symbio.Entry;
 import io.vlingo.symbio.State;
@@ -15,12 +21,7 @@ import io.vlingo.symbio.store.dispatch.Dispatchable;
 import io.vlingo.symbio.store.dispatch.Dispatcher;
 import io.vlingo.symbio.store.dispatch.DispatcherControl;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.atomic.AtomicBoolean;
-
+@SuppressWarnings({"unchecked", "rawtypes"})
 public class MockStateStoreDispatcher implements Dispatcher<Dispatchable<?,?>> {
   private AccessSafely access = AccessSafely.afterCompleting(0);
 
@@ -51,7 +52,6 @@ public class MockStateStoreDispatcher implements Dispatcher<Dispatchable<?,?>> {
     }
   }
 
-  @SuppressWarnings({"unchecked", "rawtypes"})
   public AccessSafely afterCompleting(final int times) {
     access = AccessSafely
               .afterCompleting(times)
