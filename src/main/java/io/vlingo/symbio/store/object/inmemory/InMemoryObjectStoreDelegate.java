@@ -65,7 +65,7 @@ public class InMemoryObjectStoreDelegate
    */
   @Override
   public void registerMapper(final PersistentObjectMapper mapper) {
-    throw new UnsupportedOperationException("InMemory store does not support PersistentObjectMapper");
+    //InMemory store does not require mappers
   }
 
   /**
