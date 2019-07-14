@@ -66,7 +66,7 @@ public class InMemoryObjectStoreActorTest {
     final List<Entry<?>> dispatchedEntries = dispatched.entries();
     Assert.assertEquals(1, dispatchedEntries.size());
     final Entry<?> entry = dispatchedEntries.get(0);
-    Assert.assertEquals(source.id(), entry.id());
+    Assert.assertNotNull(entry.id());
     Assert.assertEquals(source.getClass().getName(), entry.type());
     Assert.assertEquals(Metadata.nullMetadata(), entry.metadata());
   }

@@ -14,7 +14,6 @@ import java.util.function.Consumer;
 public class ObjectStore__Proxy implements io.vlingo.symbio.store.object.ObjectStore {
 
   private static final String closeRepresentation1 = "close()";
-  private static final String registerMapperRepresentation2 = "registerMapper(io.vlingo.symbio.store.object.PersistentObjectMapper)";
   private static final String queryObjectRepresentation3 = "queryObject(io.vlingo.symbio.store.object.QueryExpression, io.vlingo.symbio.store.object.ObjectStoreReader.QueryResultInterest, java.lang.Object)";
   private static final String queryObjectRepresentation4 = "queryObject(io.vlingo.symbio.store.object.QueryExpression, io.vlingo.symbio.store.object.ObjectStoreReader.QueryResultInterest)";
   private static final String queryAllRepresentation5 = "queryAll(io.vlingo.symbio.store.object.QueryExpression, io.vlingo.symbio.store.object.ObjectStoreReader.QueryResultInterest, java.lang.Object)";
@@ -50,13 +49,7 @@ public class ObjectStore__Proxy implements io.vlingo.symbio.store.object.ObjectS
   public void close() {
     send(ObjectStore__Proxy.closeRepresentation1, ObjectStore::close);
   }
-
-  @Override
-  public void registerMapper(final io.vlingo.symbio.store.object.PersistentObjectMapper arg0) {
-    final java.util.function.Consumer<ObjectStore> consumer = (actor) -> actor.registerMapper(arg0);
-    send(ObjectStore__Proxy.registerMapperRepresentation2, consumer);
-  }
-
+  
   @Override
   public void queryObject(final io.vlingo.symbio.store.object.QueryExpression arg0,
           final io.vlingo.symbio.store.object.ObjectStoreReader.QueryResultInterest arg1, final java.lang.Object arg2) {
