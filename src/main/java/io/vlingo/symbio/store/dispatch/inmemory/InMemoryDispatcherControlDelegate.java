@@ -37,6 +37,6 @@ public class InMemoryDispatcherControlDelegate<E extends Entry<?>, RS extends St
 
   @Override
   public void stop() {
-    
+     this.dispatchables.clear();
   }
 }

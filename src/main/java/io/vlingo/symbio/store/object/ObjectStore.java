@@ -5,6 +5,7 @@
 // was not distributed with this file, You can obtain
 // one at https://mozilla.org/MPL/2.0/.
 package io.vlingo.symbio.store.object;
+
 /**
  * An object storage in which {@link PersistentObject}s are self defined,
  * including their identity. This is often thought of as object-relational
@@ -16,11 +17,5 @@ public interface ObjectStore extends ObjectStoreReader, ObjectStoreWriter {
    * Close me.
    */
   void close();
-
-  /**
-   * Register the {@code mapper} for a given persistent type.
-   * @param mapper the PersistentObjectMapper
-   */
-  void registerMapper(final PersistentObjectMapper mapper);
 
 }
