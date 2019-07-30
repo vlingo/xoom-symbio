@@ -79,10 +79,7 @@ public interface EntryReader<T extends Entry<?>> {
    *
    * @return the {@code Completes<T>} next available entry or null if none
    */
-  default Completes<T> readNext(final String fromId) {
-    seekTo(fromId);
-    return readNext();
-  }
+  Completes<T> readNext(final String fromId);
 
   /**
    * Eventually answers the next available {@code Entry<T>} instances as a {@code List}, which may be
@@ -113,10 +110,7 @@ public interface EntryReader<T extends Entry<?>> {
    *
    * @return the {@code Completes<List<T>>} of at most maximumEntries or empty if none
    */
-  default Completes<List<T>> readNext(final String fromId, final int maximumEntries) {
-    seekTo(fromId);
-    return readNext(maximumEntries);
-  }
+  Completes<List<T>> readNext(final String fromId, final int maximumEntries);
 
   /**
    * Rewinds the reader so that the next available {@code Entry<T>} is the first one in the storage.
