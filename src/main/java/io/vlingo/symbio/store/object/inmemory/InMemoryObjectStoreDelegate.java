@@ -6,6 +6,16 @@
 // one at https://mozilla.org/MPL/2.0/.
 package io.vlingo.symbio.store.object.inmemory;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
+
 import io.vlingo.common.identity.IdentityGenerator;
 import io.vlingo.symbio.BaseEntry;
 import io.vlingo.symbio.Metadata;
@@ -21,16 +31,6 @@ import io.vlingo.symbio.store.object.ObjectStoreReader.QuerySingleResult;
 import io.vlingo.symbio.store.object.PersistentObject;
 import io.vlingo.symbio.store.object.PersistentObjectMapper;
 import io.vlingo.symbio.store.object.QueryExpression;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 public class InMemoryObjectStoreDelegate
         implements ObjectStoreDelegate<BaseEntry<?>, State<?>>, DispatcherControl.DispatcherControlDelegate<BaseEntry<?>, State<?>> {
@@ -90,6 +90,7 @@ public class InMemoryObjectStoreDelegate
    * {@inheritDoc}
    */
   @Override
+  @SuppressWarnings("rawtypes")
   public ObjectStoreDelegate copy() {
     return new InMemoryObjectStoreDelegate(this.stateAdapterProvider);
   }
