@@ -16,11 +16,11 @@ public final class DefaultTextEntryAdapter implements EntryAdapter {
   @Override
   public Source fromEntry(final Entry entry) {
     try {
-      final Class<?> sourceType = Class.forName(entry.type());
+      final Class<?> sourceType = Class.forName(entry.typeName());
       final Object bland = JsonSerialization.deserialized((String) entry.entryData(), sourceType);
       return (Source) bland;
     } catch (Exception e) {
-      throw new IllegalStateException("Cannot convert to type: " + entry.type());
+      throw new IllegalStateException("Cannot convert to type: " + entry.typeName());
     }
   }
 
