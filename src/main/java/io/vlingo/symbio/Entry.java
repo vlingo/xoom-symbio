@@ -63,11 +63,20 @@ public interface Entry<T> extends Comparable<Entry<T>> {
   Metadata metadata();
 
   /**
+   * Returns my typeName.
+   *
+   * @return my type
+   */
+  String typeName();
+
+  /**
    * Returns my type.
    *
    * @return my type
    */
-  String type();
+  default String type() {
+    return typeName();
+  }
 
   /**
    * Returns my type version.
