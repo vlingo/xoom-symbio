@@ -104,7 +104,7 @@ public class EntryAdapterProvider {
 
   @SuppressWarnings("unchecked")
   private <S extends Source<?>,E extends Entry<?>> EntryAdapter<S,E> namedAdapter(final E entry) {
-    final EntryAdapter<S,E> adapter = (EntryAdapter<S,E>) namedAdapters.get(entry.type());
+    final EntryAdapter<S,E> adapter = (EntryAdapter<S,E>) namedAdapters.get(entry.typeName());
     return adapter;
   }
 }
