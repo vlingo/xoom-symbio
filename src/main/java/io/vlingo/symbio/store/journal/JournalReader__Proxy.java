@@ -12,6 +12,7 @@ import io.vlingo.actors.DeadLetter;
 import io.vlingo.actors.LocalMessage;
 import io.vlingo.actors.Mailbox;
 import io.vlingo.common.BasicCompletes;
+import io.vlingo.common.Completes;
 import io.vlingo.symbio.Entry;
 
 public class JournalReader__Proxy<T extends Entry<?>> implements io.vlingo.symbio.store.journal.JournalReader<T> {
@@ -22,6 +23,7 @@ public class JournalReader__Proxy<T extends Entry<?>> implements io.vlingo.symbi
   private static final String seekToRepresentation3 = "seekTo(java.lang.String)";
   private static final String readNextRepresentation4 = "readNext()";
   private static final String readNextRepresentation5 = "readNext(int)";
+  private static final String sizeRepresentation6 = "size()";
 
   private final Actor actor;
   private final Mailbox mailbox;
@@ -107,6 +109,21 @@ public class JournalReader__Proxy<T extends Entry<?>> implements io.vlingo.symbi
       return completes;
     } else {
       actor.deadLetters().failedDelivery(new DeadLetter(actor, readNextRepresentation5));
+    }
+    return null;
+  }
+
+  @Override
+  @SuppressWarnings("rawtypes")
+  public Completes<Long> size() {
+    if (!actor.isStopped()) {
+      final java.util.function.Consumer<JournalReader> consumer = (actor) -> actor.size();
+      final io.vlingo.common.Completes<Long> completes = new BasicCompletes<>(actor.scheduler());
+      if (mailbox.isPreallocated()) { mailbox.send(actor, JournalReader.class, consumer, completes, sizeRepresentation6); }
+      else { mailbox.send(new LocalMessage<JournalReader>(actor, JournalReader.class, consumer, completes, sizeRepresentation6)); }
+      return completes;
+    } else {
+      actor.deadLetters().failedDelivery(new DeadLetter(actor, sizeRepresentation6));
     }
     return null;
   }
