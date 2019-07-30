@@ -6,6 +6,8 @@
 // one at https://mozilla.org/MPL/2.0/.
 package io.vlingo.symbio.store.object;
 
+import java.util.Collection;
+
 import io.vlingo.symbio.Entry;
 import io.vlingo.symbio.Metadata;
 import io.vlingo.symbio.State;
@@ -14,8 +16,6 @@ import io.vlingo.symbio.store.dispatch.Dispatchable;
 import io.vlingo.symbio.store.dispatch.DispatcherControl;
 import io.vlingo.symbio.store.object.ObjectStoreReader.QueryMultiResults;
 import io.vlingo.symbio.store.object.ObjectStoreReader.QuerySingleResult;
-
-import java.util.Collection;
 
 public interface ObjectStoreDelegate<E extends Entry<?>, ST extends State<?>> extends DispatcherControl.DispatcherControlDelegate<E, ST> {
 
@@ -36,6 +36,7 @@ public interface ObjectStoreDelegate<E extends Entry<?>, ST extends State<?>> ex
    *
    * @return a copy of this delegate
    */
+  @SuppressWarnings("rawtypes")
   ObjectStoreDelegate copy();
 
   /**
