@@ -38,8 +38,7 @@ public class InMemoryJournalReaderActor<T extends Entry<?>> extends Actor implem
 
   @Override
   public Completes<T> readNext(final String fromId) {
-    seekTo(fromId);
-    return readNext();
+    return completes().with(reader.readNext(fromId).outcome());
   }
 
   @Override
@@ -49,8 +48,7 @@ public class InMemoryJournalReaderActor<T extends Entry<?>> extends Actor implem
 
   @Override
   public Completes<List<T>> readNext(final String fromId, final int maximumEntries) {
-    seekTo(fromId);
-    return readNext(maximumEntries);
+    return completes().with(reader.readNext(fromId, maximumEntries).outcome());
   }
 
   @Override
