@@ -89,6 +89,11 @@ public class InMemoryJournalReader<T extends Entry<?>> implements JournalReader<
     return Completes.withSuccess(currentId);
   }
 
+  @Override
+  public Completes<Long> size() {
+    return Completes.withSuccess((long) journalView.size());
+  }
+
   private void end() {
     currentIndex = journalView.size() - 1;
   }
