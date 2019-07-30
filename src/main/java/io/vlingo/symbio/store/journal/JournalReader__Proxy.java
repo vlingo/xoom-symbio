@@ -100,9 +100,37 @@ public class JournalReader__Proxy<T extends Entry<?>> implements io.vlingo.symbi
   }
   @Override
   @SuppressWarnings("rawtypes")
+  public io.vlingo.common.Completes<T> readNext(final String fromId) {
+    if (!actor.isStopped()) {
+      final java.util.function.Consumer<JournalReader> consumer = (actor) -> actor.readNext(fromId);
+      final io.vlingo.common.Completes<T> completes = new BasicCompletes<>(actor.scheduler());
+      if (mailbox.isPreallocated()) { mailbox.send(actor, JournalReader.class, consumer, completes, readNextRepresentation4); }
+      else { mailbox.send(new LocalMessage<JournalReader>(actor, JournalReader.class, consumer, completes, readNextRepresentation4)); }
+      return completes;
+    } else {
+      actor.deadLetters().failedDelivery(new DeadLetter(actor, readNextRepresentation4));
+    }
+    return null;
+  }
+  @Override
+  @SuppressWarnings("rawtypes")
   public io.vlingo.common.Completes<java.util.List<T>> readNext(int arg0) {
     if (!actor.isStopped()) {
       final java.util.function.Consumer<JournalReader> consumer = (actor) -> actor.readNext(arg0);
+      final io.vlingo.common.Completes<java.util.List<T>> completes = new BasicCompletes<>(actor.scheduler());
+      if (mailbox.isPreallocated()) { mailbox.send(actor, JournalReader.class, consumer, completes, readNextRepresentation5); }
+      else { mailbox.send(new LocalMessage<JournalReader>(actor, JournalReader.class, consumer, completes, readNextRepresentation5)); }
+      return completes;
+    } else {
+      actor.deadLetters().failedDelivery(new DeadLetter(actor, readNextRepresentation5));
+    }
+    return null;
+  }
+  @Override
+  @SuppressWarnings("rawtypes")
+  public io.vlingo.common.Completes<java.util.List<T>> readNext(final String fromId, int arg0) {
+    if (!actor.isStopped()) {
+      final java.util.function.Consumer<JournalReader> consumer = (actor) -> actor.readNext(fromId, arg0);
       final io.vlingo.common.Completes<java.util.List<T>> completes = new BasicCompletes<>(actor.scheduler());
       if (mailbox.isPreallocated()) { mailbox.send(actor, JournalReader.class, consumer, completes, readNextRepresentation5); }
       else { mailbox.send(new LocalMessage<JournalReader>(actor, JournalReader.class, consumer, completes, readNextRepresentation5)); }
