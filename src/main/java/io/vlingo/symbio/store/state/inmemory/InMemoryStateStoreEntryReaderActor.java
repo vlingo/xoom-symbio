@@ -91,6 +91,11 @@ public class InMemoryStateStoreEntryReaderActor<T extends Entry<?>> extends Acto
     return completes().with(currentId);
   }
 
+  @Override
+  public Completes<Long> size() {
+    return completes().with((long) entriesView.size());
+  }
+
   private void end() {
     currentIndex = entriesView.size();
   }
