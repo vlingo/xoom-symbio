@@ -93,7 +93,7 @@ public abstract class BaseEntry<T> implements Entry<T> {
 
   /* @see io.vlingo.symbio.Entry#type() */
   @Override
-  public String type() {
+  public String typeName() {
     return type;
   }
 
