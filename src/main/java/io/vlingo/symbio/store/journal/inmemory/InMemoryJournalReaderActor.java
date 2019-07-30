@@ -50,4 +50,9 @@ public class InMemoryJournalReaderActor<T extends Entry<?>> extends Actor implem
   public Completes<String> seekTo(final String id) {
     return completes().with(reader.seekTo(id).outcome());
   }
+
+  @Override
+  public Completes<Long> size() {
+    return completes().with(reader.size().outcome());
+  }
 }
