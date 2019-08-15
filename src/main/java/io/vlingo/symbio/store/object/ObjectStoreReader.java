@@ -8,7 +8,10 @@ package io.vlingo.symbio.store.object;
 
 import java.util.Collection;
 
+import io.vlingo.common.Completes;
 import io.vlingo.common.Outcome;
+import io.vlingo.symbio.Entry;
+import io.vlingo.symbio.store.EntryReader;
 import io.vlingo.symbio.store.Result;
 import io.vlingo.symbio.store.StorageException;
 /**
@@ -38,6 +41,8 @@ public interface ObjectStoreReader {
   static boolean isId(final long id) {
     return id > NoId;
   }
+
+  public Completes<EntryReader<? extends Entry<?>>> entryReader(final String name);
 
   /**
    * Executes the query defined by {@code expression} that may result in zero to many objects,
