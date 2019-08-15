@@ -7,8 +7,16 @@
 
 package io.vlingo.symbio.store.object.inmemory;
 
+import java.time.LocalDateTime;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import io.vlingo.actors.Actor;
 import io.vlingo.actors.Definition;
+import io.vlingo.common.Completes;
 import io.vlingo.common.Failure;
 import io.vlingo.common.Success;
 import io.vlingo.symbio.BaseEntry;
@@ -18,6 +26,7 @@ import io.vlingo.symbio.Metadata;
 import io.vlingo.symbio.Source;
 import io.vlingo.symbio.State;
 import io.vlingo.symbio.StateAdapterProvider;
+import io.vlingo.symbio.store.EntryReader;
 import io.vlingo.symbio.store.Result;
 import io.vlingo.symbio.store.StorageException;
 import io.vlingo.symbio.store.dispatch.Dispatchable;
@@ -26,13 +35,10 @@ import io.vlingo.symbio.store.dispatch.DispatcherControl;
 import io.vlingo.symbio.store.dispatch.control.DispatcherControlActor;
 import io.vlingo.symbio.store.object.ObjectStore;
 import io.vlingo.symbio.store.object.ObjectStoreDelegate;
+import io.vlingo.symbio.store.object.ObjectStoreEntryReader;
 import io.vlingo.symbio.store.object.PersistentObject;
 import io.vlingo.symbio.store.object.QueryExpression;
-
-import java.time.LocalDateTime;
-import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
+import io.vlingo.symbio.store.state.StateStoreEntryReader;
 
 /**
  * In-memory implementation of {@code ObjectStore}. Note that {@code queryAll()} variations
@@ -43,6 +49,7 @@ public class InMemoryObjectStoreActor extends Actor implements ObjectStore {
 
   private final Dispatcher<Dispatchable<BaseEntry<?>,State<?>>> dispatcher;
   private final DispatcherControl dispatcherControl;
+  private final Map<String,StateStoreEntryReader<?>> entryReaders;
 
   private final ObjectStoreDelegate<BaseEntry<?>,State<?>> storeDelegate;
 
@@ -58,6 +65,8 @@ public class InMemoryObjectStoreActor extends Actor implements ObjectStore {
          final long checkConfirmationExpirationInterval, final long confirmationExpiration ) {
     this.entryAdapterProvider = EntryAdapterProvider.instance(stage().world());
     this.dispatcher = dispatcher;
+
+    this.entryReaders = new HashMap<>();
 
     this.storeDelegate = new InMemoryObjectStoreDelegate(StateAdapterProvider.instance(stage().world()));
 
@@ -80,6 +89,19 @@ public class InMemoryObjectStoreActor extends Actor implements ObjectStore {
     this.storeDelegate.close();
   }
 
+  /*
+   * @see io.vlingo.symbio.store.object.ObjectStoreReader#entryReader(java.lang.String)
+   */
+  @Override
+  @SuppressWarnings("unchecked")
+  public Completes<EntryReader<? extends Entry<?>>> entryReader(final String name) {
+    EntryReader<? extends Entry<?>> reader = entryReaders.get(name);
+    if (reader == null) {
+      final Definition definition = Definition.has(InMemoryObjectStoreEntryReaderActor.class, Definition.parameters(readOnlyJournal(), name));
+      reader = childActorFor(ObjectStoreEntryReader.class, definition);
+    }
+    return completes().with(reader);
+  }
 
   /* @see io.vlingo.symbio.store.object.ObjectStore#persist(java.lang.Object, java.util.List, long, io.vlingo.symbio.store.object.ObjectStore.PersistResultInterest, java.lang.Object) */
   @Override
@@ -171,5 +193,9 @@ public class InMemoryObjectStoreActor extends Actor implements ObjectStore {
 
   private static String getDispatchId(final State<?> raw, final List<BaseEntry<?>> entries) {
     return raw.id + ":" + entries.stream().map(Entry::id).collect(Collectors.joining(":"));
+  }
+
+  private List<BaseEntry<?>> readOnlyJournal() {
+    return ((InMemoryObjectStoreDelegate) storeDelegate).readOnlyJournal();
   }
 }
