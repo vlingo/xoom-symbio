@@ -224,5 +224,7 @@ public class InMemoryObjectStoreDelegate
             .ifPresent(dispatchables::remove);
   }
 
-
+  List<BaseEntry<?>> readOnlyJournal() {
+    return entries;
+  }
 }
