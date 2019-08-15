@@ -7,6 +7,7 @@
 package io.vlingo.symbio.store.object;
 
 import java.util.Collection;
+import java.util.Collections;
 
 import io.vlingo.symbio.Entry;
 import io.vlingo.symbio.Metadata;
@@ -20,11 +21,21 @@ import io.vlingo.symbio.store.object.ObjectStoreReader.QuerySingleResult;
 public interface ObjectStoreDelegate<E extends Entry<?>, ST extends State<?>> extends DispatcherControl.DispatcherControlDelegate<E, ST> {
 
   /**
+   * Answer the {@code Collection<PersistentObjectMapper>} that are registered.
+   * @return {@code Collection<PersistentObjectMapper>}
+   */
+  default Collection<PersistentObjectMapper> registeredMappers() {
+    return Collections.emptyList();
+  }
+
+  /**
    * Register the {@code mapper} for a given persistent type.
    *
    * @param mapper the PersistentObjectMapper
    */
-  void registerMapper(final PersistentObjectMapper mapper);
+  default void registerMapper(final PersistentObjectMapper mapper) {
+    // no op
+  }
 
   /**
    * Close me.
