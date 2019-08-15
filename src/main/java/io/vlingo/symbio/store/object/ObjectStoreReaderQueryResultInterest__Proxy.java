@@ -4,14 +4,7 @@ import io.vlingo.actors.Actor;
 import io.vlingo.actors.DeadLetter;
 import io.vlingo.actors.LocalMessage;
 import io.vlingo.actors.Mailbox;
-import io.vlingo.common.BasicCompletes;
 import io.vlingo.symbio.store.object.ObjectStoreReader.QueryResultInterest;
-import java.lang.Object;
-import io.vlingo.symbio.store.object.ObjectStoreReader.QueryMultiResults;
-import io.vlingo.common.Outcome;
-import io.vlingo.symbio.store.object.ObjectStoreReader.QuerySingleResult;
-import io.vlingo.symbio.store.Result;
-import io.vlingo.symbio.store.StorageException;
 
 public class ObjectStoreReaderQueryResultInterest__Proxy implements io.vlingo.symbio.store.object.ObjectStoreReader.QueryResultInterest {
 
@@ -26,6 +19,7 @@ public class ObjectStoreReaderQueryResultInterest__Proxy implements io.vlingo.sy
     this.mailbox = mailbox;
   }
 
+  @Override
   public void queryAllResultedIn(io.vlingo.common.Outcome<io.vlingo.symbio.store.StorageException, io.vlingo.symbio.store.Result> arg0, io.vlingo.symbio.store.object.ObjectStoreReader.QueryMultiResults arg1, java.lang.Object arg2) {
     if (!actor.isStopped()) {
       final java.util.function.Consumer<QueryResultInterest> consumer = (actor) -> actor.queryAllResultedIn(arg0, arg1, arg2);
@@ -35,6 +29,7 @@ public class ObjectStoreReaderQueryResultInterest__Proxy implements io.vlingo.sy
       actor.deadLetters().failedDelivery(new DeadLetter(actor, queryAllResultedInRepresentation1));
     }
   }
+  @Override
   public void queryObjectResultedIn(io.vlingo.common.Outcome<io.vlingo.symbio.store.StorageException, io.vlingo.symbio.store.Result> arg0, io.vlingo.symbio.store.object.ObjectStoreReader.QuerySingleResult arg1, java.lang.Object arg2) {
     if (!actor.isStopped()) {
       final java.util.function.Consumer<QueryResultInterest> consumer = (actor) -> actor.queryObjectResultedIn(arg0, arg1, arg2);
