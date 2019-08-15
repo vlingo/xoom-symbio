@@ -18,6 +18,18 @@ import io.vlingo.symbio.Entry;
  * This reads sequentially over all {@code Entry<T>} instances in the entire storage, from the
  * first written {@code Entry<T>} to the current last written {@code Entry<T>}, and is prepared to read
  * all newly appended {@code Entry<T>} instances beyond that point when they become available.
+ * <p>
+ * The {@code EntryReader} implementor may choose to provide the optional "gap prevention." Gaps
+ * may occur in databases that support sequences or auto-increment columns used as a total ordering
+ * for the {@code Journal} or other {@code Entry<T>} store. This happens when a sequenced value is
+ * obtained, but the table row inserts are not serialized in the same order. The threads inserting
+ * race to the physical writes, causing logical ordering with gaps for small time windows. Thus, a
+ * range query may see gaps in the sequences if run during inserts at the tail of the table rows.
+ * Performing gap prevention involves time-delayed retries, allowing the database inserts to fill
+ * the gaps caused by thread races. The gaps are easy to detect, but since they may also be caused
+ * by transactions that roll back where with sequence values that are wasted/lost, following the
+ * number of retries with time delays the reader should still provide results with gaps. This
+ * recognizes that following best effort the gaps may never close, and thus be warranted.
  *
  * @param <T> the concrete type of {@code Entry<T>} stored and read, which maybe be String, byte[], or Object
  */
@@ -43,6 +55,13 @@ public interface EntryReader<T extends Entry<?>> {
    * regardless of internal id type.
    */
   static final String Query = "=";
+
+  /** The default number of retries used to prevent gaps in feed items. */
+  static final int DefaultGapPreventionRetries = 3;
+
+  /** The default interval between retries used to prevent gaps in feed items. */
+  static final long DefaultGapPreventionRetryInterval = 10L;
+
 
   /**
    * Closes this reader.
@@ -136,7 +155,8 @@ public interface EntryReader<T extends Entry<?>> {
   Completes<String> seekTo(final String id);
 
   /**
-   * Eventually answer the size in {@code Entry} instances.
+   * Eventually answer the size in {@code Entry} instances. If the size
+   * is not known or not queryable, the value of {@code -1L} is answered.
    * @return {@code Completes<Long>}
    */
   Completes<Long> size();
@@ -174,6 +194,30 @@ public interface EntryReader<T extends Entry<?>> {
     @SuppressWarnings("unchecked")
     public <C> C specificConfiguration() {
       return (C) configuration;
+    }
+  }
+
+  /**
+   * Provides values to assist in detecting and preventing
+   * gaps between entries in a stream.
+   */
+  public static class GapPrevention {
+    /**
+     * Answer the number of retries used to prevent gaps in {@code Entry} instances
+     * due to race conditions in database sequences and transactions.
+     * @return int
+     */
+    public int retries() {
+      return DefaultGapPreventionRetries;
+    }
+
+    /**
+     * Answer the interval between retries used to prevent gaps in {@code Entry}
+     * instances due to race conditions in database sequences and transactions.
+     * @return long
+     */
+    public long retryInterval() {
+      return DefaultGapPreventionRetryInterval;
     }
   }
 }
