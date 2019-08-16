@@ -12,7 +12,7 @@ import java.io.Serializable;
  * A base type for persistent objects.
  */
 public abstract class PersistentObject implements Serializable {
-  private static final long Unidentified = -1;
+  protected static final long Unidentified = -1;
   private static final long InitialVersion = 0L;
   private static final long serialVersionUID = 1L;
 
@@ -35,6 +35,14 @@ public abstract class PersistentObject implements Serializable {
   }
 
   /**
+   * Answer the value of the {@code Unidentified} id.
+   * @return long
+   */
+  public static long unidentified() {
+    return Unidentified;
+  }
+
+  /**
    * Answer my persistenceId.
    * @return long
    */
@@ -54,13 +62,13 @@ public abstract class PersistentObject implements Serializable {
   /**
    * Answers my persistence version, which can be used
    * to implement optimistic concurrency conflict detection.
-   * 
+   *
    * @return int
    */
   public long version() {
     return version;
   }
-  
+
   /**
    * Increments my {@link version}. This method is necessary for
    * application-managed optimistic concurrency control, but should
@@ -70,7 +78,7 @@ public abstract class PersistentObject implements Serializable {
   public void incrementVersion() {
     version++;
   }
-  
+
   /**
    * Construct my default state with {@code persistenceId} and {@link version}
    * @param persistenceId the long unique identity used for my persistence
@@ -81,7 +89,7 @@ public abstract class PersistentObject implements Serializable {
     this.persistenceId = persistenceId;
     this.version = version;
   }
-  
+
   /**
    * Construct my default state with {@code persistenceId}.
    * @param persistenceId the long unique identity used for my persistence
