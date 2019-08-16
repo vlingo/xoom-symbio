@@ -12,10 +12,12 @@ import java.io.Serializable;
  * A base type for persistent objects.
  */
 public abstract class PersistentObject implements Serializable {
+  /** May be used by subclasses to indicate they have not yet been persisted. */
   protected static final long Unidentified = -1;
   private static final long InitialVersion = 0L;
   private static final long serialVersionUID = 1L;
 
+  /** My surrogate (non-business) identity used by the database. */
   private long persistenceId = Unidentified;
 
   /**
