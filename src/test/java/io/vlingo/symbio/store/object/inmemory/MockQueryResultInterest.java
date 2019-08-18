@@ -21,7 +21,7 @@ import io.vlingo.symbio.store.object.ObjectStoreReader.QuerySingleResult;
 
 public class MockQueryResultInterest implements QueryResultInterest {
   private AccessSafely access = AccessSafely.afterCompleting(1);
-  private final List<Object> persistentObjects = new ArrayList<>();
+  private final List<Object> stateObjects = new ArrayList<>();
 
   @Override
   public void queryAllResultedIn(
@@ -29,7 +29,7 @@ public class MockQueryResultInterest implements QueryResultInterest {
           final QueryMultiResults results,
           final Object object) {
 
-    access.writeUsing("addAll", results.persistentObjects);
+    access.writeUsing("addAll", results.stateObjects);
   }
 
   @Override
@@ -42,7 +42,7 @@ public class MockQueryResultInterest implements QueryResultInterest {
       .andThen(good -> good)
       .otherwise(bad -> { throw new IllegalStateException("Bogus outcome: " + bad.getMessage()); });
 
-    access.writeUsing("add", result.persistentObject);
+    access.writeUsing("add", result.stateObject);
   }
 
   @SuppressWarnings("unchecked")
@@ -50,10 +50,10 @@ public class MockQueryResultInterest implements QueryResultInterest {
     access =
             AccessSafely
               .afterCompleting(times)
-              .writingWith("add", (value) -> persistentObjects.add(value))
-              .writingWith("addAll", (values) -> persistentObjects.addAll((Collection<Object>) values))
-              .readingWith("object", (index) -> persistentObjects.get((int) index))
-              .readingWith("size", () -> persistentObjects.size());
+              .writingWith("add", (value) -> stateObjects.add(value))
+              .writingWith("addAll", (values) -> stateObjects.addAll((Collection<Object>) values))
+              .readingWith("object", (index) -> stateObjects.get((int) index))
+              .readingWith("size", () -> stateObjects.size());
 
     return access;
   }
