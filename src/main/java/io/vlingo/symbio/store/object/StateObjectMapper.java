@@ -8,27 +8,27 @@
 package io.vlingo.symbio.store.object;
 
 /**
- * Holder and provider of {@code PersistentObject} type mappers.
+ * Holder and provider of {@code StateObject} type mappers.
  * The {@code persistMapper} and {@code queryMapper} are received
  * and held as {@code Object} instances, but the underlying type
  * is implementation specific (e.g. JPA, Jdbi, Hibernate, etc.).
  * The specific types are cast when retrieving by means of the
  * methods {@code persistMapper()} and {@code queryMapper()}.
  */
-public class PersistentObjectMapper {
+public class StateObjectMapper {
   private final Object persistMapper;
   private final Object queryMapper;
   private final Class<?> type;
 
   /**
-   * Answer a new {@code PersistentObjectMapper} with {@code type}, {@code persistMapper}, and {@code queryMapper}.
+   * Answer a new {@code StateObjectMapper} with {@code type}, {@code persistMapper}, and {@code queryMapper}.
    * @param type the {@code Class<?>} type of the persistent object to be mapped
    * @param persistMapper the Object mapper of persistence information
    * @param queryMapper the Object mapper of query information
-   * @return PersistentObjectMapper
+   * @return StateObjectMapper
    */
-  public static PersistentObjectMapper with(final Class<?> type, final Object persistMapper, final Object queryMapper) {
-    return new PersistentObjectMapper(type, persistMapper, queryMapper);
+  public static StateObjectMapper with(final Class<?> type, final Object persistMapper, final Object queryMapper) {
+    return new StateObjectMapper(type, persistMapper, queryMapper);
   }
 
   /**
@@ -37,7 +37,7 @@ public class PersistentObjectMapper {
    * @param persistMapper the Object mapper of persistence information
    * @param queryMapper the Object mapper of query information
    */
-  public PersistentObjectMapper(final Class<?> type, final Object persistMapper, final Object queryMapper) {
+  public StateObjectMapper(final Class<?> type, final Object persistMapper, final Object queryMapper) {
     this.type = type;
     this.persistMapper = persistMapper;
     this.queryMapper = queryMapper;
