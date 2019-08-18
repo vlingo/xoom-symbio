@@ -29,7 +29,7 @@ import io.vlingo.symbio.store.object.ObjectStoreDelegate;
 import io.vlingo.symbio.store.object.ObjectStoreReader.QueryMultiResults;
 import io.vlingo.symbio.store.object.ObjectStoreReader.QuerySingleResult;
 import io.vlingo.symbio.store.object.StateObject;
-import io.vlingo.symbio.store.object.PersistentObjectMapper;
+import io.vlingo.symbio.store.object.StateObjectMapper;
 import io.vlingo.symbio.store.object.QueryExpression;
 
 public class InMemoryObjectStoreDelegate
@@ -64,7 +64,7 @@ public class InMemoryObjectStoreDelegate
    * {@inheritDoc}
    */
   @Override
-  public void registerMapper(final PersistentObjectMapper mapper) {
+  public void registerMapper(final StateObjectMapper mapper) {
     //InMemory store does not require mappers
   }
 
@@ -123,19 +123,19 @@ public class InMemoryObjectStoreDelegate
    * {@inheritDoc}
    */
   @Override
-  public <T extends StateObject> Collection<State<?>> persistAll(final Collection<T> persistentObjects, final long updateId, final Metadata metadata) {
-    final List<State<?>> states = new ArrayList<>(persistentObjects.size());
-    for (final T persistentObject : persistentObjects) {
-      final State<?> raw = persist(persistentObject, metadata);
+  public <T extends StateObject> Collection<State<?>> persistAll(final Collection<T> stateObjects, final long updateId, final Metadata metadata) {
+    final List<State<?>> states = new ArrayList<>(stateObjects.size());
+    for (final T stateObject : stateObjects) {
+      final State<?> raw = persist(stateObject, metadata);
       states.add(raw);
     }
 
     return states;
   }
 
-  private <T extends StateObject> State<?> persist(final T persistentObject, final Metadata metadata) {
-    final State<?> raw = this.stateAdapterProvider.asRaw(String.valueOf(persistentObject.persistenceId()), persistentObject, 1, metadata);
-    store.put(persistentObject.persistenceId(), raw);
+  private <T extends StateObject> State<?> persist(final T stateObject, final Metadata metadata) {
+    final State<?> raw = this.stateAdapterProvider.asRaw(String.valueOf(stateObject.persistenceId()), stateObject, 1, metadata);
+    store.put(stateObject.persistenceId(), raw);
     return raw;
   }
 
@@ -143,8 +143,8 @@ public class InMemoryObjectStoreDelegate
    * {@inheritDoc}
    */
   @Override
-  public <T extends StateObject> State<?> persist(final T persistentObject, final long updateId, final Metadata metadata) {
-    return persist(persistentObject, metadata);
+  public <T extends StateObject> State<?> persist(final T stateObject, final long updateId, final Metadata metadata) {
+    return persist(stateObject, metadata);
   }
 
   /**
@@ -175,8 +175,8 @@ public class InMemoryObjectStoreDelegate
 
     final Set<Object> all = new HashSet<>();
     for (final State<?> entry : store.values()) {
-      final Object persistentObject = stateAdapterProvider.fromRaw(entry);
-      all.add(persistentObject);
+      final Object stateObject = stateAdapterProvider.fromRaw(entry);
+      all.add(stateObject);
     }
 
     return new QueryMultiResults(all);
