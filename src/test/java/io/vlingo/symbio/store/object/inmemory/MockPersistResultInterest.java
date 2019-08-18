@@ -19,20 +19,20 @@ import io.vlingo.symbio.store.object.ObjectStoreWriter.PersistResultInterest;
 
 public class MockPersistResultInterest implements PersistResultInterest {
   private AccessSafely access = AccessSafely.afterCompleting(1);
-  private final List<Object> persistentObjects = new ArrayList<>();
+  private final List<Object> stateObjects = new ArrayList<>();
 
   @Override
   public void persistResultedIn(
           final Outcome<StorageException, Result> outcome,
-          final Object persistentObject,
+          final Object stateObject,
           final int possible,
           final int actual,
           final Object object) {
 
     if (actual == 1) {
-      access.writeUsing("add", persistentObject);
+      access.writeUsing("add", stateObject);
     } else if (actual > 1) {
-      access.writeUsing("addAll", persistentObject);
+      access.writeUsing("addAll", stateObject);
     } else {
       throw new IllegalArgumentException("Possible is:" + possible + " Actual is: " + actual);
     }
@@ -43,10 +43,10 @@ public class MockPersistResultInterest implements PersistResultInterest {
     access =
             AccessSafely
               .afterCompleting(times)
-              .writingWith("add", (value) -> persistentObjects.add(value))
-              .writingWith("addAll", (values) -> persistentObjects.addAll((Collection<Object>) values))
-              .readingWith("object", (index) -> persistentObjects.get((int) index))
-              .readingWith("size", () -> persistentObjects.size());
+              .writingWith("add", (value) -> stateObjects.add(value))
+              .writingWith("addAll", (values) -> stateObjects.addAll((Collection<Object>) values))
+              .readingWith("object", (index) -> stateObjects.get((int) index))
+              .readingWith("size", () -> stateObjects.size());
 
     return access;
   }
