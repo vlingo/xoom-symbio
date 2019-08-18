@@ -7,7 +7,7 @@
 package io.vlingo.symbio.store.object;
 
 /**
- * An object storage in which {@link PersistentObject}s are self defined,
+ * An object storage in which {@link StateObject}s are self defined,
  * including their identity. This is often thought of as object-relational
  * mapping, which certainly can be and is supported, but is not limited to such.
  */
