@@ -143,62 +143,62 @@ public interface ObjectStoreReader {
   }
 
   /**
-   * The single {@code persistentObject} result of the completed query and a possible {@code updateId}.
+   * The single {@code stateObject} result of the completed query and a possible {@code updateId}.
    */
   public static class QuerySingleResult extends QueryResult {
-    public final Object persistentObject;
+    public final Object stateObject;
 
-    public static QuerySingleResult of(final Object persistentObject) {
-      return new QuerySingleResult(persistentObject);
+    public static QuerySingleResult of(final Object stateObject) {
+      return new QuerySingleResult(stateObject);
     }
 
-    public static QuerySingleResult of(final Object persistentObject, final long updateId) {
-      return new QuerySingleResult(persistentObject, updateId);
+    public static QuerySingleResult of(final Object stateObject, final long updateId) {
+      return new QuerySingleResult(stateObject, updateId);
     }
 
-    public QuerySingleResult(final Object persistentObject) {
+    public QuerySingleResult(final Object stateObject) {
       super();
-      this.persistentObject = persistentObject;
+      this.stateObject = stateObject;
     }
 
-    public QuerySingleResult(final Object persistentObject, final long updateId) {
+    public QuerySingleResult(final Object stateObject, final long updateId) {
       super(updateId);
-      this.persistentObject = persistentObject;
+      this.stateObject = stateObject;
     }
 
     @SuppressWarnings("unchecked")
-    public <T> T persistentObject() {
-      return (T) persistentObject;
+    public <T> T stateObject() {
+      return (T) stateObject;
     }
   }
 
   /**
-   * The collection of {@code persistentObjects} results of the completed query and a possible {@code updateId}.
+   * The collection of {@code stateObjects} results of the completed query and a possible {@code updateId}.
    */
   public static class QueryMultiResults extends QueryResult {
-    public final Collection<?> persistentObjects;
+    public final Collection<?> stateObjects;
 
-    public static QueryMultiResults of(final Collection<?> persistentObjects) {
-      return new QueryMultiResults(persistentObjects);
+    public static QueryMultiResults of(final Collection<?> stateObjects) {
+      return new QueryMultiResults(stateObjects);
     }
 
-    public static QueryMultiResults of(final Collection<?> persistentObjects, final long updateId) {
-      return new QueryMultiResults(persistentObjects, updateId);
+    public static QueryMultiResults of(final Collection<?> stateObjects, final long updateId) {
+      return new QueryMultiResults(stateObjects, updateId);
     }
 
-    public QueryMultiResults(final Collection<?> persistentObjects) {
+    public QueryMultiResults(final Collection<?> stateObjects) {
       super();
-      this.persistentObjects = persistentObjects;
+      this.stateObjects = stateObjects;
     }
 
-    public QueryMultiResults(final Collection<?> persistentObjects, final long updateId) {
+    public QueryMultiResults(final Collection<?> stateObjects, final long updateId) {
       super(updateId);
-      this.persistentObjects = persistentObjects;
+      this.stateObjects = stateObjects;
     }
 
     @SuppressWarnings("unchecked")
-    public <T> Collection<T> persistentObjects() {
-      return (Collection<T>) persistentObjects;
+    public <T> Collection<T> stateObjects() {
+      return (Collection<T>) stateObjects;
     }
   }
 }
