@@ -106,10 +106,10 @@ public class InMemoryObjectStoreActor extends Actor implements ObjectStore {
   /* @see io.vlingo.symbio.store.object.ObjectStore#persist(java.lang.Object, java.util.List, long, io.vlingo.symbio.store.object.ObjectStore.PersistResultInterest, java.lang.Object) */
   @Override
   public <T extends StateObject, E> void persist(
-          final T persistentObject, final List<Source<E>> sources, final Metadata metadata,
+          final T stateObject, final List<Source<E>> sources, final Metadata metadata,
           final long updateId, final PersistResultInterest interest, final Object object) {
     try {
-      final State<?> raw = storeDelegate.persist(persistentObject, updateId, metadata);
+      final State<?> raw = storeDelegate.persist(stateObject, updateId, metadata);
 
       final List<BaseEntry<?>> entries = entryAdapterProvider.asEntries(sources, metadata);
       final Dispatchable<BaseEntry<?>, State<?>> dispatchable = buildDispatchable(raw, entries);
@@ -118,7 +118,7 @@ public class InMemoryObjectStoreActor extends Actor implements ObjectStore {
       this.storeDelegate.persistDispatchable(dispatchable);
 
       dispatch(dispatchable);
-      interest.persistResultedIn(Success.of(Result.Success), persistentObject, 1, 1, object);
+      interest.persistResultedIn(Success.of(Result.Success), stateObject, 1, 1, object);
     } catch (StorageException e){
       logger().error("Failed to persist all objects", e);
       interest.persistResultedIn(Failure.of(e), null, 0, 0, object);
@@ -128,11 +128,11 @@ public class InMemoryObjectStoreActor extends Actor implements ObjectStore {
 
   /* @see io.vlingo.symbio.store.object.ObjectStore#persistAll(java.util.Collection, java.util.List, long, io.vlingo.symbio.store.object.ObjectStore.PersistResultInterest, java.lang.Object) */
   @Override
-  public <T extends StateObject, E> void persistAll(final Collection<T> persistentObjects, final List<Source<E>> sources,
+  public <T extends StateObject, E> void persistAll(final Collection<T> stateObjects, final List<Source<E>> sources,
           final Metadata metadata, final long updateId, final PersistResultInterest interest, final Object object) {
 
     try {
-      final Collection<State<?>> states = storeDelegate.persistAll(persistentObjects, updateId, metadata);
+      final Collection<State<?>> states = storeDelegate.persistAll(stateObjects, updateId, metadata);
 
       final List<BaseEntry<?>> entries = entryAdapterProvider.asEntries(sources, metadata);
 
@@ -145,7 +145,7 @@ public class InMemoryObjectStoreActor extends Actor implements ObjectStore {
         dispatch(buildDispatchable(state, entries));
       });
 
-      interest.persistResultedIn(Success.of(Result.Success), persistentObjects, persistentObjects.size(), persistentObjects.size(), object);
+      interest.persistResultedIn(Success.of(Result.Success), stateObjects, stateObjects.size(), stateObjects.size(), object);
     } catch (final StorageException e){
       logger().error("Failed to persist all objects", e);
       interest.persistResultedIn(Failure.of(e), null, 0, 0, object);
@@ -168,7 +168,7 @@ public class InMemoryObjectStoreActor extends Actor implements ObjectStore {
   public void queryObject(final QueryExpression expression, final QueryResultInterest interest, final Object object) {
     final QuerySingleResult result = this.storeDelegate.queryObject(expression);
 
-    if (result.persistentObject != null) {
+    if (result.stateObject != null) {
       interest.queryObjectResultedIn(Success.of(Result.Success), result, object);
     } else {
       interest.queryObjectResultedIn(Failure.of(new StorageException(Result.NotFound, "No object identified by expression: " + expression)), QuerySingleResult.of(null), object);
