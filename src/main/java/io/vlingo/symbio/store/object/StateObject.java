@@ -28,12 +28,12 @@ public abstract class StateObject implements Serializable {
   private long version = InitialVersion;
 
   /**
-   * Answer {@code persistentObject} as a {@code PersistentObject}.
-   * @param persistentObject the Object
-   * @return PersistentObject
+   * Answer {@code stateObject} as a {@code stateObject}.
+   * @param stateObject the Object
+   * @return stateObject
    */
-  public static StateObject from(final Object persistentObject) {
-    return (StateObject) persistentObject;
+  public static StateObject from(final Object stateObject) {
+    return (StateObject) stateObject;
   }
 
   /**
