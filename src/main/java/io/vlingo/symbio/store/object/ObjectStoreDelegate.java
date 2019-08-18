@@ -68,27 +68,27 @@ public interface ObjectStoreDelegate<E extends Entry<?>, ST extends State<?>> ex
   /**
    * Persists the {@code persistentObjects} with {@code metadata}.
    *
-   * @param <T>               the concrete type of {@link PersistentObject}s to persist
+   * @param <T>               the concrete type of {@link StateObject}s to persist
    * @param persistentObjects the {@code Collection<Object>} to persist
    * @param metadata          the Metadata associated with the persistentObjects and sources
    * @param updateId          the long identity to facilitate update; &lt; 0 for create &gt; 0 for update
    * @return the {@code Collection<ST>} with persisted {@code State<?>}, created from {@code persistentObjects}
    * @throws StorageException in case persistence failed
    */
-  <T extends PersistentObject> Collection<ST> persistAll(final Collection<T> persistentObjects, final long updateId, final Metadata metadata)
+  <T extends StateObject> Collection<ST> persistAll(final Collection<T> persistentObjects, final long updateId, final Metadata metadata)
           throws StorageException;
 
   /**
    * Persists the {@code persistentObject} with {@code metadata}.
    *
-   * @param <T>              the concrete type of {@link PersistentObject} to persist
+   * @param <T>              the concrete type of {@link StateObject} to persist
    * @param persistentObject the Object to persist
    * @param metadata         the Metadata associated with the persistentObject and sources
    * @param updateId         the long identity to facilitate update; &lt; 0 for create &gt; 0 for update
    * @return the persisted {@code State<?>}, created from {@code persistentObject}
    * @throws StorageException in case persistence failed
    */
-  <T extends PersistentObject> ST persist(final T persistentObject, final long updateId, final Metadata metadata) throws StorageException;
+  <T extends StateObject> ST persist(final T persistentObject, final long updateId, final Metadata metadata) throws StorageException;
 
   /**
    * Persist the {@code Collection<E>} of entries, that originated from {@code sources}.
