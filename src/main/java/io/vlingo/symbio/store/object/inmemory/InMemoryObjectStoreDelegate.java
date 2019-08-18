@@ -28,7 +28,7 @@ import io.vlingo.symbio.store.dispatch.DispatcherControl;
 import io.vlingo.symbio.store.object.ObjectStoreDelegate;
 import io.vlingo.symbio.store.object.ObjectStoreReader.QueryMultiResults;
 import io.vlingo.symbio.store.object.ObjectStoreReader.QuerySingleResult;
-import io.vlingo.symbio.store.object.PersistentObject;
+import io.vlingo.symbio.store.object.StateObject;
 import io.vlingo.symbio.store.object.PersistentObjectMapper;
 import io.vlingo.symbio.store.object.QueryExpression;
 
@@ -123,7 +123,7 @@ public class InMemoryObjectStoreDelegate
    * {@inheritDoc}
    */
   @Override
-  public <T extends PersistentObject> Collection<State<?>> persistAll(final Collection<T> persistentObjects, final long updateId, final Metadata metadata) {
+  public <T extends StateObject> Collection<State<?>> persistAll(final Collection<T> persistentObjects, final long updateId, final Metadata metadata) {
     final List<State<?>> states = new ArrayList<>(persistentObjects.size());
     for (final T persistentObject : persistentObjects) {
       final State<?> raw = persist(persistentObject, metadata);
@@ -133,7 +133,7 @@ public class InMemoryObjectStoreDelegate
     return states;
   }
 
-  private <T extends PersistentObject> State<?> persist(final T persistentObject, final Metadata metadata) {
+  private <T extends StateObject> State<?> persist(final T persistentObject, final Metadata metadata) {
     final State<?> raw = this.stateAdapterProvider.asRaw(String.valueOf(persistentObject.persistenceId()), persistentObject, 1, metadata);
     store.put(persistentObject.persistenceId(), raw);
     return raw;
@@ -143,7 +143,7 @@ public class InMemoryObjectStoreDelegate
    * {@inheritDoc}
    */
   @Override
-  public <T extends PersistentObject> State<?> persist(final T persistentObject, final long updateId, final Metadata metadata) {
+  public <T extends StateObject> State<?> persist(final T persistentObject, final long updateId, final Metadata metadata) {
     return persist(persistentObject, metadata);
   }
 

@@ -36,7 +36,7 @@ import io.vlingo.symbio.store.dispatch.control.DispatcherControlActor;
 import io.vlingo.symbio.store.object.ObjectStore;
 import io.vlingo.symbio.store.object.ObjectStoreDelegate;
 import io.vlingo.symbio.store.object.ObjectStoreEntryReader;
-import io.vlingo.symbio.store.object.PersistentObject;
+import io.vlingo.symbio.store.object.StateObject;
 import io.vlingo.symbio.store.object.QueryExpression;
 import io.vlingo.symbio.store.state.StateStoreEntryReader;
 
@@ -105,7 +105,7 @@ public class InMemoryObjectStoreActor extends Actor implements ObjectStore {
 
   /* @see io.vlingo.symbio.store.object.ObjectStore#persist(java.lang.Object, java.util.List, long, io.vlingo.symbio.store.object.ObjectStore.PersistResultInterest, java.lang.Object) */
   @Override
-  public <T extends PersistentObject, E> void persist(
+  public <T extends StateObject, E> void persist(
           final T persistentObject, final List<Source<E>> sources, final Metadata metadata,
           final long updateId, final PersistResultInterest interest, final Object object) {
     try {
@@ -128,7 +128,7 @@ public class InMemoryObjectStoreActor extends Actor implements ObjectStore {
 
   /* @see io.vlingo.symbio.store.object.ObjectStore#persistAll(java.util.Collection, java.util.List, long, io.vlingo.symbio.store.object.ObjectStore.PersistResultInterest, java.lang.Object) */
   @Override
-  public <T extends PersistentObject, E> void persistAll(final Collection<T> persistentObjects, final List<Source<E>> sources,
+  public <T extends StateObject, E> void persistAll(final Collection<T> persistentObjects, final List<Source<E>> sources,
           final Metadata metadata, final long updateId, final PersistResultInterest interest, final Object object) {
 
     try {
