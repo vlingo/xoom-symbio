@@ -20,406 +20,406 @@ import java.util.List;
 public interface ObjectStoreWriter {
 
   /**
-   * Persists the new {@code persistentObject}.
+   * Persists the new {@code stateObject}.
    * @param <T> the concrete type of {@link StateObject} to persist
-   * @param persistentObject the Object to persist
+   * @param stateObject the Object to persist
    * @param interest the PersistResultInterest to which the result is dispatched
    */
-  default <T extends StateObject> void persist(final T persistentObject, final PersistResultInterest interest) {
-    persist(persistentObject, Source.none(), Metadata.nullMetadata(), -1, interest, null);
+  default <T extends StateObject> void persist(final T stateObject, final PersistResultInterest interest) {
+    persist(stateObject, Source.none(), Metadata.nullMetadata(), -1, interest, null);
   }
 
   /**
-   * Persists the new {@code persistentObject} with {@code metadata}.
+   * Persists the new {@code stateObject} with {@code metadata}.
    * @param <T> the concrete type of {@link StateObject} to persist
-   * @param persistentObject the Object to persist
-   * @param metadata the Metadata associated with the persistentObject and sources
+   * @param stateObject the Object to persist
+   * @param metadata the Metadata associated with the stateObject and sources
    * @param interest the PersistResultInterest to which the result is dispatched
    */
-  default <T extends StateObject> void persist(final T persistentObject, final Metadata metadata, final PersistResultInterest interest) {
-    persist(persistentObject, Source.none(), metadata, -1, interest, null);
+  default <T extends StateObject> void persist(final T stateObject, final Metadata metadata, final PersistResultInterest interest) {
+    persist(stateObject, Source.none(), metadata, -1, interest, null);
   }
 
   /**
-   * Persists the new {@code persistentObject} with {@code sources}.
+   * Persists the new {@code stateObject} with {@code sources}.
    * @param <T> the concrete type of {@link StateObject} to persist
    * @param <E> the concrete type of the {@link Source}
-   * @param persistentObject the Object to persist
-   * @param sources the domain events to journal related to <code>persistentObject</code>
+   * @param stateObject the Object to persist
+   * @param sources the domain events to journal related to <code>stateObject</code>
    * @param interest the PersistResultInterest to which the result is dispatched
    */
-  default <T extends StateObject, E> void persist(final T persistentObject, final List<Source<E>> sources, final PersistResultInterest interest) {
-    persist(persistentObject, sources, Metadata.nullMetadata(), -1, interest, null);
+  default <T extends StateObject, E> void persist(final T stateObject, final List<Source<E>> sources, final PersistResultInterest interest) {
+    persist(stateObject, sources, Metadata.nullMetadata(), -1, interest, null);
   }
 
   /**
-   * Persists the new {@code persistentObject} with {@code sources} and {@code metadata}.
+   * Persists the new {@code stateObject} with {@code sources} and {@code metadata}.
    * @param <T> the concrete type of {@link StateObject} to persist
    * @param <E> the concrete type of the {@link Source}
-   * @param persistentObject the Object to persist
-   * @param sources the domain events to journal related to <code>persistentObject</code>
-   * @param metadata the Metadata associated with the persistentObject and sources
+   * @param stateObject the Object to persist
+   * @param sources the domain events to journal related to <code>stateObject</code>
+   * @param metadata the Metadata associated with the stateObject and sources
    * @param interest the PersistResultInterest to which the result is dispatched
    */
-  default <T extends StateObject, E> void persist(final T persistentObject, final List<Source<E>> sources, final Metadata metadata, final PersistResultInterest interest) {
-    persist(persistentObject, sources, metadata, -1, interest, null);
+  default <T extends StateObject, E> void persist(final T stateObject, final List<Source<E>> sources, final Metadata metadata, final PersistResultInterest interest) {
+    persist(stateObject, sources, metadata, -1, interest, null);
   }
 
   /**
-   * Persists the new {@code persistentObject}.
+   * Persists the new {@code stateObject}.
    * @param <T> the concrete type of {@link StateObject} to persist
-   * @param persistentObject the Object to persist
+   * @param stateObject the Object to persist
    * @param interest the PersistResultInterest to which the result is dispatched
    * @param object an Object sent to the PersistResultInterest when the persist has succeeded or failed
    */
-  default <T extends StateObject> void persist(final T persistentObject, final PersistResultInterest interest, final Object object) {
-    persist(persistentObject, Source.none(), Metadata.nullMetadata(), -1, interest, object);
+  default <T extends StateObject> void persist(final T stateObject, final PersistResultInterest interest, final Object object) {
+    persist(stateObject, Source.none(), Metadata.nullMetadata(), -1, interest, object);
   }
 
   /**
-   * Persists the new {@code persistentObject} with {@code metadata}.
+   * Persists the new {@code stateObject} with {@code metadata}.
    * @param <T> the concrete type of {@link StateObject} to persist
-   * @param persistentObject the Object to persist
-   * @param metadata the Metadata associated with the persistentObject and sources
+   * @param stateObject the Object to persist
+   * @param metadata the Metadata associated with the stateObject and sources
    * @param interest the PersistResultInterest to which the result is dispatched
    * @param object an Object sent to the PersistResultInterest when the persist has succeeded or failed
    */
-  default <T extends StateObject> void persist(final T persistentObject, final Metadata metadata, final PersistResultInterest interest, final Object object) {
-    persist(persistentObject, Source.none(), metadata, -1, interest, object);
+  default <T extends StateObject> void persist(final T stateObject, final Metadata metadata, final PersistResultInterest interest, final Object object) {
+    persist(stateObject, Source.none(), metadata, -1, interest, object);
   }
 
   /**
-   * Persists the new {@code persistentObject} with {@code sources}.
+   * Persists the new {@code stateObject} with {@code sources}.
    * @param <T> the concrete type of {@link StateObject} to persist
    * @param <E> the concrete type of the {@link Source}
-   * @param persistentObject the Object to persist
-   * @param sources the domain events to journal related to <code>persistentObject</code>
+   * @param stateObject the Object to persist
+   * @param sources the domain events to journal related to <code>stateObject</code>
    * @param interest the PersistResultInterest to which the result is dispatched
    * @param object an Object sent to the PersistResultInterest when the persist has succeeded or failed
    */
-  default <T extends StateObject, E> void persist(final T persistentObject, final List<Source<E>> sources, final PersistResultInterest interest, final Object object) {
-    persist(persistentObject, sources, Metadata.nullMetadata(), -1, interest, object);
+  default <T extends StateObject, E> void persist(final T stateObject, final List<Source<E>> sources, final PersistResultInterest interest, final Object object) {
+    persist(stateObject, sources, Metadata.nullMetadata(), -1, interest, object);
   }
 
   /**
-   * Persists the new {@code persistentObject} with {@code sources} and {@code metadata}.
+   * Persists the new {@code stateObject} with {@code sources} and {@code metadata}.
    * @param <T> the concrete type of {@link StateObject} to persist
    * @param <E> the concrete type of the {@link Source}
-   * @param persistentObject the Object to persist
-   * @param sources the domain events to journal related to <code>persistentObject</code>
-   * @param metadata the Metadata associated with the persistentObject and sources
+   * @param stateObject the Object to persist
+   * @param sources the domain events to journal related to <code>stateObject</code>
+   * @param metadata the Metadata associated with the stateObject and sources
    * @param interest the PersistResultInterest to which the result is dispatched
    * @param object an Object sent to the PersistResultInterest when the persist has succeeded or failed
    */
-  default <T extends StateObject, E> void persist(final T persistentObject, final List<Source<E>> sources, final Metadata metadata, final PersistResultInterest interest, final Object object) {
-    persist(persistentObject, sources, metadata, -1, interest, object);
+  default <T extends StateObject, E> void persist(final T stateObject, final List<Source<E>> sources, final Metadata metadata, final PersistResultInterest interest, final Object object) {
+    persist(stateObject, sources, metadata, -1, interest, object);
   }
 
   /**
-   * Persists the {@code persistentObject} as new or updated depending on the value of {@code updateId}.
+   * Persists the {@code stateObject} as new or updated depending on the value of {@code updateId}.
    * @param <T> the concrete type of {@link StateObject} to persist
-   * @param persistentObject the Object to persist
+   * @param stateObject the Object to persist
    * @param updateId the long identity to facilitate update; &lt; 0 for create &gt; 0 for update
    * @param interest the PersistResultInterest to which the result is dispatched
    */
-  default <T extends StateObject> void persist(final T persistentObject, final long updateId, final PersistResultInterest interest) {
-    persist(persistentObject, Source.none(), Metadata.nullMetadata(), updateId, interest, null);
+  default <T extends StateObject> void persist(final T stateObject, final long updateId, final PersistResultInterest interest) {
+    persist(stateObject, Source.none(), Metadata.nullMetadata(), updateId, interest, null);
   }
 
   /**
-   * Persists the {@code persistentObject} with {@code metadata}
+   * Persists the {@code stateObject} with {@code metadata}
    * as new or updated depending on the value of {@code updateId}.
    * @param <T> the concrete type of {@link StateObject} to persist
-   * @param persistentObject the Object to persist
-   * @param metadata the Metadata associated with the persistentObject
+   * @param stateObject the Object to persist
+   * @param metadata the Metadata associated with the stateObject
    * @param updateId the long identity to facilitate update; &lt; 0 for create &gt; 0 for update
    * @param interest the PersistResultInterest to which the result is dispatched
    */
-  default <T extends StateObject> void persist(final T persistentObject, final Metadata metadata, final long updateId, final PersistResultInterest interest) {
-    persist(persistentObject, Source.none(), metadata, updateId, interest, null);
+  default <T extends StateObject> void persist(final T stateObject, final Metadata metadata, final long updateId, final PersistResultInterest interest) {
+    persist(stateObject, Source.none(), metadata, updateId, interest, null);
   }
 
   /**
-   * Persists the {@code persistentObject} with {@code sources} as new or updated depending on the value of {@code updateId}.
+   * Persists the {@code stateObject} with {@code sources} as new or updated depending on the value of {@code updateId}.
    * @param <T> the concrete type of {@link StateObject} to persist
    * @param <E> the concrete type of the {@link Source}
-   * @param persistentObject the Object to persist
-   * @param sources the domain events to journal related to <code>persistentObject</code>
+   * @param stateObject the Object to persist
+   * @param sources the domain events to journal related to <code>stateObject</code>
    * @param updateId the long identity to facilitate update; &lt; 0 for create &gt; 0 for update
    * @param interest the PersistResultInterest to which the result is dispatched
    */
-  default <T extends StateObject, E> void persist(final T persistentObject, final List<Source<E>> sources, final long updateId, final PersistResultInterest interest) {
-    persist(persistentObject, sources, Metadata.nullMetadata(), updateId, interest, null);
+  default <T extends StateObject, E> void persist(final T stateObject, final List<Source<E>> sources, final long updateId, final PersistResultInterest interest) {
+    persist(stateObject, sources, Metadata.nullMetadata(), updateId, interest, null);
   }
 
   /**
-   * Persists the {@code persistentObject} with {@code sources} and {@code metadata}
+   * Persists the {@code stateObject} with {@code sources} and {@code metadata}
    * as new or updated depending on the value of {@code updateId}.
    * @param <T> the concrete type of {@link StateObject} to persist
    * @param <E> the concrete type of the {@link Source}
-   * @param persistentObject the Object to persist
-   * @param sources the domain events to journal related to <code>persistentObject</code>
-   * @param metadata the Metadata associated with the persistentObject and sources
+   * @param stateObject the Object to persist
+   * @param sources the domain events to journal related to <code>stateObject</code>
+   * @param metadata the Metadata associated with the stateObject and sources
    * @param updateId the long identity to facilitate update; &lt; 0 for create &gt; 0 for update
    * @param interest the PersistResultInterest to which the result is dispatched
    */
-  default <T extends StateObject, E> void persist(final T persistentObject, final List<Source<E>> sources, final Metadata metadata, final long updateId, final PersistResultInterest interest) {
-    persist(persistentObject, sources, metadata, updateId, interest, null);
+  default <T extends StateObject, E> void persist(final T stateObject, final List<Source<E>> sources, final Metadata metadata, final long updateId, final PersistResultInterest interest) {
+    persist(stateObject, sources, metadata, updateId, interest, null);
   }
 
   /**
-   * Persists the {@code persistentObject}.
+   * Persists the {@code stateObject}.
    * @param <T> the concrete type of {@link StateObject} to persist
-   * @param persistentObject the Object to persist
+   * @param stateObject the Object to persist
    * @param updateId the long identity to facilitate update; &lt; 0 for create &gt; 0 for update
    * @param interest the PersistResultInterest to which the result is dispatched
    * @param object an Object sent to the PersistResultInterest when the persist has succeeded or failed
    */
-  default <T extends StateObject> void persist(final T persistentObject, final long updateId, final PersistResultInterest interest, final Object object) {
-    persist(persistentObject, Source.none(), Metadata.nullMetadata(), updateId, interest, object);
+  default <T extends StateObject> void persist(final T stateObject, final long updateId, final PersistResultInterest interest, final Object object) {
+    persist(stateObject, Source.none(), Metadata.nullMetadata(), updateId, interest, object);
   }
 
   /**
-   * Persists the {@code persistentObject} with {@code metadata}.
+   * Persists the {@code stateObject} with {@code metadata}.
    * @param <T> the concrete type of {@link StateObject} to persist
-   * @param persistentObject the Object to persist
-   * @param metadata the Metadata associated with the persistentObject
+   * @param stateObject the Object to persist
+   * @param metadata the Metadata associated with the stateObject
    * @param updateId the long identity to facilitate update; &lt; 0 for create &gt; 0 for update
    * @param interest the PersistResultInterest to which the result is dispatched
    * @param object an Object sent to the PersistResultInterest when the persist has succeeded or failed
    */
-  default <T extends StateObject> void persist(final T persistentObject, final Metadata metadata, final long updateId, final PersistResultInterest interest, final Object object) {
-    persist(persistentObject, Source.none(), metadata, updateId, interest, object);
+  default <T extends StateObject> void persist(final T stateObject, final Metadata metadata, final long updateId, final PersistResultInterest interest, final Object object) {
+    persist(stateObject, Source.none(), metadata, updateId, interest, object);
   }
 
   /**
-   * Persists the {@code persistentObject} with {@code sources}.
-   * @param <T> the concrete type of {@link StateObject} to persist
-   * @param <E> the concrete type of the {@link Source}
-   * @param persistentObject the Object to persist
-   * @param sources the domain events to journal related to <code>persistentObject</code>
-   * @param updateId the long identity to facilitate update; &lt; 0 for create &gt; 0 for update
-   * @param interest the PersistResultInterest to which the result is dispatched
-   * @param object an Object sent to the PersistResultInterest when the persist has succeeded or failed
-   */
-  default <T extends StateObject, E> void persist(final T persistentObject, final List<Source<E>> sources, final long updateId, final PersistResultInterest interest, final Object object) {
-    persist(persistentObject, sources, Metadata.nullMetadata(), updateId, interest, object);
-  }
-
-  /**
-   * Persists the {@code persistentObject} with {@code sources} and {@code metadata}.
+   * Persists the {@code stateObject} with {@code sources}.
    * @param <T> the concrete type of {@link StateObject} to persist
    * @param <E> the concrete type of the {@link Source}
-   * @param persistentObject the Object to persist
-   * @param sources the domain events to journal related to <code>persistentObject</code>
-   * @param metadata the Metadata associated with the persistentObject and sources
+   * @param stateObject the Object to persist
+   * @param sources the domain events to journal related to <code>stateObject</code>
    * @param updateId the long identity to facilitate update; &lt; 0 for create &gt; 0 for update
    * @param interest the PersistResultInterest to which the result is dispatched
    * @param object an Object sent to the PersistResultInterest when the persist has succeeded or failed
    */
-  <T extends StateObject, E> void persist(final T persistentObject, final List<Source<E>> sources, final Metadata metadata, final long updateId, final PersistResultInterest interest, final Object object);
-
-
-  /**
-   * Persists the new {@code persistentObjects}.
-   * @param <T> the concrete type of {@link StateObject}s to persist
-   * @param persistentObjects the {@code Collection<Object>} to persist
-   * @param interest the PersistResultInterest to which the result is dispatched
-   */
-  default <T extends StateObject> void persistAll(final Collection<T> persistentObjects, final PersistResultInterest interest) {
-    persistAll(persistentObjects, Source.none(), Metadata.nullMetadata(), -1, interest, null);
+  default <T extends StateObject, E> void persist(final T stateObject, final List<Source<E>> sources, final long updateId, final PersistResultInterest interest, final Object object) {
+    persist(stateObject, sources, Metadata.nullMetadata(), updateId, interest, object);
   }
 
   /**
-   * Persists the new {@code persistentObjects} with {@code metadata}.
-   * @param <T> the concrete type of {@link StateObject}s to persist
-   * @param persistentObjects the {@code Collection<Object>} to persist
-   * @param metadata the Metadata associated with the persistentObject
-   * @param interest the PersistResultInterest to which the result is dispatched
-   */
-  default <T extends StateObject> void persistAll(final Collection<T> persistentObjects, final Metadata metadata, final PersistResultInterest interest) {
-    persistAll(persistentObjects, Source.none(), metadata, -1, interest, null);
-  }
-
-  /**
-   * Persists the new {@code persistentObjects} with {@code sources}.
-   * @param <T> the concrete type of {@link StateObject}s to persist
+   * Persists the {@code stateObject} with {@code sources} and {@code metadata}.
+   * @param <T> the concrete type of {@link StateObject} to persist
    * @param <E> the concrete type of the {@link Source}
-   * @param persistentObjects the {@code Collection<Object>} to persist
-   * @param sources the domain events to journal related to <code>persistentObjects</code>
-   * @param interest the PersistResultInterest to which the result is dispatched
-   */
-  default <T extends StateObject, E> void persistAll(final Collection<T> persistentObjects, final List<Source<E>> sources, final PersistResultInterest interest) {
-    persistAll(persistentObjects, sources, Metadata.nullMetadata(), -1, interest, null);
-  }
-
-  /**
-   * Persists the new {@code persistentObjects} with {@code sources} and {@code metadata}.
-   * @param <T> the concrete type of {@link StateObject}s to persist
-   * @param <E> the concrete type of the {@link Source}
-   * @param persistentObjects the {@code Collection<Object>} to persist
-   * @param sources the domain events to journal related to <code>persistentObjects</code>
-   * @param metadata the Metadata associated with the persistentObjects and sources
-   * @param interest the PersistResultInterest to which the result is dispatched
-   */
-  default <T extends StateObject, E> void persistAll(final Collection<T> persistentObjects, final List<Source<E>> sources, final Metadata metadata, final PersistResultInterest interest) {
-    persistAll(persistentObjects, sources, metadata, -1, interest, null);
-  }
-
-  /**
-   * Persists the new {@code persistentObjects}.
-   * @param <T> the concrete type of {@link StateObject}s to persist
-   * @param persistentObjects the {@code Collection<Object>} to persist
+   * @param stateObject the Object to persist
+   * @param sources the domain events to journal related to <code>stateObject</code>
+   * @param metadata the Metadata associated with the stateObject and sources
+   * @param updateId the long identity to facilitate update; &lt; 0 for create &gt; 0 for update
    * @param interest the PersistResultInterest to which the result is dispatched
    * @param object an Object sent to the PersistResultInterest when the persist has succeeded or failed
    */
-  default <T extends StateObject> void persistAll(final Collection<T> persistentObjects, final PersistResultInterest interest, final Object object) {
-    persistAll(persistentObjects, Source.none(), Metadata.nullMetadata(), -1, interest, object);
-  }
+  <T extends StateObject, E> void persist(final T stateObject, final List<Source<E>> sources, final Metadata metadata, final long updateId, final PersistResultInterest interest, final Object object);
+
 
   /**
-   * Persists the new {@code persistentObjects} with {@code metadata}.
+   * Persists the new {@code stateObjects}.
    * @param <T> the concrete type of {@link StateObject}s to persist
-   * @param persistentObjects the {@code Collection<Object>} to persist
-   * @param metadata the Metadata associated with the persistentObjects
+   * @param stateObjects the {@code Collection<Object>} to persist
    * @param interest the PersistResultInterest to which the result is dispatched
-   * @param object an Object sent to the PersistResultInterest when the persist has succeeded or failed
    */
-  default <T extends StateObject> void persistAll(final Collection<T> persistentObjects, final Metadata metadata, final PersistResultInterest interest, final Object object) {
-    persistAll(persistentObjects, Source.none(), metadata, -1, interest, object);
+  default <T extends StateObject> void persistAll(final Collection<T> stateObjects, final PersistResultInterest interest) {
+    persistAll(stateObjects, Source.none(), Metadata.nullMetadata(), -1, interest, null);
   }
 
   /**
-   * Persists the new {@code persistentObjects} with {@code sources}.
+   * Persists the new {@code stateObjects} with {@code metadata}.
+   * @param <T> the concrete type of {@link StateObject}s to persist
+   * @param stateObjects the {@code Collection<Object>} to persist
+   * @param metadata the Metadata associated with the stateObject
+   * @param interest the PersistResultInterest to which the result is dispatched
+   */
+  default <T extends StateObject> void persistAll(final Collection<T> stateObjects, final Metadata metadata, final PersistResultInterest interest) {
+    persistAll(stateObjects, Source.none(), metadata, -1, interest, null);
+  }
+
+  /**
+   * Persists the new {@code stateObjects} with {@code sources}.
    * @param <T> the concrete type of {@link StateObject}s to persist
    * @param <E> the concrete type of the {@link Source}
-   * @param persistentObjects the {@code Collection<Object>} to persist
-   * @param sources the domain events to journal related to <code>persistentObjects</code>
+   * @param stateObjects the {@code Collection<Object>} to persist
+   * @param sources the domain events to journal related to <code>stateObjects</code>
    * @param interest the PersistResultInterest to which the result is dispatched
-   * @param object an Object sent to the PersistResultInterest when the persist has succeeded or failed
    */
-  default <T extends StateObject, E> void persistAll(final Collection<T> persistentObjects, final List<Source<E>> sources, final PersistResultInterest interest, final Object object) {
-    persistAll(persistentObjects, sources, Metadata.nullMetadata(), -1, interest, object);
+  default <T extends StateObject, E> void persistAll(final Collection<T> stateObjects, final List<Source<E>> sources, final PersistResultInterest interest) {
+    persistAll(stateObjects, sources, Metadata.nullMetadata(), -1, interest, null);
   }
 
   /**
-   * Persists the new {@code persistentObjects} with {@code sources} and {@code metadata}.
+   * Persists the new {@code stateObjects} with {@code sources} and {@code metadata}.
    * @param <T> the concrete type of {@link StateObject}s to persist
    * @param <E> the concrete type of the {@link Source}
-   * @param persistentObjects the {@code Collection<Object>} to persist
-   * @param sources the domain events to journal related to <code>persistentObjects</code>
-   * @param metadata the Metadata associated with the persistentObjects and sources
+   * @param stateObjects the {@code Collection<Object>} to persist
+   * @param sources the domain events to journal related to <code>stateObjects</code>
+   * @param metadata the Metadata associated with the stateObjects and sources
    * @param interest the PersistResultInterest to which the result is dispatched
-   * @param object an Object sent to the PersistResultInterest when the persist has succeeded or failed
    */
-  default <T extends StateObject, E> void persistAll(final Collection<T> persistentObjects, final List<Source<E>> sources, final Metadata metadata, final PersistResultInterest interest, final Object object) {
-    persistAll(persistentObjects, sources, metadata, -1, interest, object);
+  default <T extends StateObject, E> void persistAll(final Collection<T> stateObjects, final List<Source<E>> sources, final Metadata metadata, final PersistResultInterest interest) {
+    persistAll(stateObjects, sources, metadata, -1, interest, null);
   }
 
   /**
-   * Persists the {@code persistentObjects} as new or updated depending on the value of {@code updateId}.
+   * Persists the new {@code stateObjects}.
    * @param <T> the concrete type of {@link StateObject}s to persist
-   * @param persistentObjects the {@code Collection<Object>} to persist
+   * @param stateObjects the {@code Collection<Object>} to persist
+   * @param interest the PersistResultInterest to which the result is dispatched
+   * @param object an Object sent to the PersistResultInterest when the persist has succeeded or failed
+   */
+  default <T extends StateObject> void persistAll(final Collection<T> stateObjects, final PersistResultInterest interest, final Object object) {
+    persistAll(stateObjects, Source.none(), Metadata.nullMetadata(), -1, interest, object);
+  }
+
+  /**
+   * Persists the new {@code stateObjects} with {@code metadata}.
+   * @param <T> the concrete type of {@link StateObject}s to persist
+   * @param stateObjects the {@code Collection<Object>} to persist
+   * @param metadata the Metadata associated with the stateObjects
+   * @param interest the PersistResultInterest to which the result is dispatched
+   * @param object an Object sent to the PersistResultInterest when the persist has succeeded or failed
+   */
+  default <T extends StateObject> void persistAll(final Collection<T> stateObjects, final Metadata metadata, final PersistResultInterest interest, final Object object) {
+    persistAll(stateObjects, Source.none(), metadata, -1, interest, object);
+  }
+
+  /**
+   * Persists the new {@code stateObjects} with {@code sources}.
+   * @param <T> the concrete type of {@link StateObject}s to persist
+   * @param <E> the concrete type of the {@link Source}
+   * @param stateObjects the {@code Collection<Object>} to persist
+   * @param sources the domain events to journal related to <code>stateObjects</code>
+   * @param interest the PersistResultInterest to which the result is dispatched
+   * @param object an Object sent to the PersistResultInterest when the persist has succeeded or failed
+   */
+  default <T extends StateObject, E> void persistAll(final Collection<T> stateObjects, final List<Source<E>> sources, final PersistResultInterest interest, final Object object) {
+    persistAll(stateObjects, sources, Metadata.nullMetadata(), -1, interest, object);
+  }
+
+  /**
+   * Persists the new {@code stateObjects} with {@code sources} and {@code metadata}.
+   * @param <T> the concrete type of {@link StateObject}s to persist
+   * @param <E> the concrete type of the {@link Source}
+   * @param stateObjects the {@code Collection<Object>} to persist
+   * @param sources the domain events to journal related to <code>stateObjects</code>
+   * @param metadata the Metadata associated with the stateObjects and sources
+   * @param interest the PersistResultInterest to which the result is dispatched
+   * @param object an Object sent to the PersistResultInterest when the persist has succeeded or failed
+   */
+  default <T extends StateObject, E> void persistAll(final Collection<T> stateObjects, final List<Source<E>> sources, final Metadata metadata, final PersistResultInterest interest, final Object object) {
+    persistAll(stateObjects, sources, metadata, -1, interest, object);
+  }
+
+  /**
+   * Persists the {@code stateObjects} as new or updated depending on the value of {@code updateId}.
+   * @param <T> the concrete type of {@link StateObject}s to persist
+   * @param stateObjects the {@code Collection<Object>} to persist
    * @param updateId the long identity to facilitate update; &lt; 0 for create &gt; 0 for update
    * @param interest the PersistResultInterest to which the result is dispatched
    */
-  default <T extends StateObject> void persistAll(final Collection<T> persistentObjects, final long updateId, final PersistResultInterest interest) {
-    persistAll(persistentObjects, Source.none(), Metadata.nullMetadata(), updateId, interest, null);
+  default <T extends StateObject> void persistAll(final Collection<T> stateObjects, final long updateId, final PersistResultInterest interest) {
+    persistAll(stateObjects, Source.none(), Metadata.nullMetadata(), updateId, interest, null);
   }
 
   /**
-   * Persists the {@code persistentObjects} with {@code metadata}
+   * Persists the {@code stateObjects} with {@code metadata}
    * as new or updated depending on the value of {@code updateId}.
    * @param <T> the concrete type of {@link StateObject}s to persist
-   * @param persistentObjects the {@code Collection<Object>} to persist
-   * @param metadata the Metadata associated with the persistentObjects
+   * @param stateObjects the {@code Collection<Object>} to persist
+   * @param metadata the Metadata associated with the stateObjects
    * @param updateId the long identity to facilitate update; &lt; 0 for create &gt; 0 for update
    * @param interest the PersistResultInterest to which the result is dispatched
    */
-  default <T extends StateObject> void persistAll(final Collection<T> persistentObjects, final Metadata metadata, final long updateId, final PersistResultInterest interest) {
-    persistAll(persistentObjects, Source.none(), metadata, updateId, interest, null);
+  default <T extends StateObject> void persistAll(final Collection<T> stateObjects, final Metadata metadata, final long updateId, final PersistResultInterest interest) {
+    persistAll(stateObjects, Source.none(), metadata, updateId, interest, null);
   }
 
   /**
-   * Persists the {@code persistentObjects} with {@code sources}
-   * as new or updated depending on the value of {@code updateId}.
-   * @param <T> the concrete type of {@link StateObject}s to persist
-   * @param <E> the concrete type of the {@link Source}
-   * @param persistentObjects the {@code Collection<Object>} to persist
-   * @param sources the domain events to journal related to <code>persistentObjects</code>
-   * @param updateId the long identity to facilitate update; &lt; 0 for create &gt; 0 for update
-   * @param interest the PersistResultInterest to which the result is dispatched
-   */
-  default <T extends StateObject, E> void persistAll(final Collection<T> persistentObjects, final List<Source<E>> sources, final long updateId, final PersistResultInterest interest) {
-    persistAll(persistentObjects, sources, Metadata.nullMetadata(), updateId, interest, null);
-  }
-
-  /**
-   * Persists the {@code persistentObjects} with {@code sources} and {@code metadata}
+   * Persists the {@code stateObjects} with {@code sources}
    * as new or updated depending on the value of {@code updateId}.
    * @param <T> the concrete type of {@link StateObject}s to persist
    * @param <E> the concrete type of the {@link Source}
-   * @param persistentObjects the {@code Collection<Object>} to persist
-   * @param sources the domain events to journal related to <code>persistentObjects</code>
-   * @param metadata the Metadata associated with the persistentObjects and sources
+   * @param stateObjects the {@code Collection<Object>} to persist
+   * @param sources the domain events to journal related to <code>stateObjects</code>
    * @param updateId the long identity to facilitate update; &lt; 0 for create &gt; 0 for update
    * @param interest the PersistResultInterest to which the result is dispatched
    */
-  default <T extends StateObject, E> void persistAll(final Collection<T> persistentObjects, final List<Source<E>> sources, final Metadata metadata, final long updateId, final PersistResultInterest interest) {
-    persistAll(persistentObjects, sources, metadata, updateId, interest, null);
+  default <T extends StateObject, E> void persistAll(final Collection<T> stateObjects, final List<Source<E>> sources, final long updateId, final PersistResultInterest interest) {
+    persistAll(stateObjects, sources, Metadata.nullMetadata(), updateId, interest, null);
   }
 
   /**
-   * Persists the {@code persistentObjects}.
-   * @param <T> the concrete type of {@link StateObject}s to persist
-   * @param persistentObjects the {@code Collection<Object>} to persist
-   * @param updateId the long identity to facilitate update; &lt; 0 for create &gt; 0 for update
-   * @param interest the PersistResultInterest to which the result is dispatched
-   * @param object an Object sent to the PersistResultInterest when the persist has succeeded or failed
-   */
-  default <T extends StateObject> void persistAll(final Collection<T> persistentObjects, final long updateId, final PersistResultInterest interest, final Object object) {
-    persistAll(persistentObjects, Source.none(), Metadata.nullMetadata(), updateId, interest, object);
-  }
-
-  /**
-   * Persists the {@code persistentObjects} with {@code metadata}.
-   * @param <T> the concrete type of {@link StateObject}s to persist
-   * @param persistentObjects the {@code Collection<Object>} to persist
-   * @param metadata the Metadata associated with the persistentObjects
-   * @param updateId the long identity to facilitate update; &lt; 0 for create &gt; 0 for update
-   * @param interest the PersistResultInterest to which the result is dispatched
-   * @param object an Object sent to the PersistResultInterest when the persist has succeeded or failed
-   */
-  default <T extends StateObject> void persistAll(final Collection<T> persistentObjects, final Metadata metadata, final long updateId, final PersistResultInterest interest, final Object object) {
-    persistAll(persistentObjects, Source.none(), metadata, updateId, interest, object);
-  }
-
-  /**
-   * Persists the {@code persistentObjects} with {@code sources}.
+   * Persists the {@code stateObjects} with {@code sources} and {@code metadata}
+   * as new or updated depending on the value of {@code updateId}.
    * @param <T> the concrete type of {@link StateObject}s to persist
    * @param <E> the concrete type of the {@link Source}
-   * @param persistentObjects the {@code Collection<Object>} to persist
-   * @param sources the domain events to journal related to <code>persistentObjects</code>
+   * @param stateObjects the {@code Collection<Object>} to persist
+   * @param sources the domain events to journal related to <code>stateObjects</code>
+   * @param metadata the Metadata associated with the stateObjects and sources
    * @param updateId the long identity to facilitate update; &lt; 0 for create &gt; 0 for update
    * @param interest the PersistResultInterest to which the result is dispatched
-   * @param object an Object sent to the PersistResultInterest when the persist has succeeded or failed
    */
-  default <T extends StateObject, E> void persistAll(final Collection<T> persistentObjects, final List<Source<E>> sources, final long updateId, final PersistResultInterest interest, final Object object) {
-    persistAll(persistentObjects, sources, Metadata.nullMetadata(), updateId, interest, object);
+  default <T extends StateObject, E> void persistAll(final Collection<T> stateObjects, final List<Source<E>> sources, final Metadata metadata, final long updateId, final PersistResultInterest interest) {
+    persistAll(stateObjects, sources, metadata, updateId, interest, null);
   }
 
   /**
-   * Persists the {@code persistentObjects} with {@code sources} and {@code metadata}.
+   * Persists the {@code stateObjects}.
    * @param <T> the concrete type of {@link StateObject}s to persist
-   * @param <E> the concrete type of the {@link Source}
-   * @param persistentObjects the {@code Collection<Object>} to persist
-   * @param sources the domain events to journal related to <code>persistentObjects</code>
-   * @param metadata the Metadata associated with the persistentObjects and sources
+   * @param stateObjects the {@code Collection<Object>} to persist
    * @param updateId the long identity to facilitate update; &lt; 0 for create &gt; 0 for update
    * @param interest the PersistResultInterest to which the result is dispatched
    * @param object an Object sent to the PersistResultInterest when the persist has succeeded or failed
    */
-  <T extends StateObject, E> void persistAll(final Collection<T> persistentObjects, final List<Source<E>> sources, final Metadata metadata, final long updateId, final PersistResultInterest interest, final Object object);
+  default <T extends StateObject> void persistAll(final Collection<T> stateObjects, final long updateId, final PersistResultInterest interest, final Object object) {
+    persistAll(stateObjects, Source.none(), Metadata.nullMetadata(), updateId, interest, object);
+  }
+
+  /**
+   * Persists the {@code stateObjects} with {@code metadata}.
+   * @param <T> the concrete type of {@link StateObject}s to persist
+   * @param stateObjects the {@code Collection<Object>} to persist
+   * @param metadata the Metadata associated with the stateObjects
+   * @param updateId the long identity to facilitate update; &lt; 0 for create &gt; 0 for update
+   * @param interest the PersistResultInterest to which the result is dispatched
+   * @param object an Object sent to the PersistResultInterest when the persist has succeeded or failed
+   */
+  default <T extends StateObject> void persistAll(final Collection<T> stateObjects, final Metadata metadata, final long updateId, final PersistResultInterest interest, final Object object) {
+    persistAll(stateObjects, Source.none(), metadata, updateId, interest, object);
+  }
+
+  /**
+   * Persists the {@code stateObjects} with {@code sources}.
+   * @param <T> the concrete type of {@link StateObject}s to persist
+   * @param <E> the concrete type of the {@link Source}
+   * @param stateObjects the {@code Collection<Object>} to persist
+   * @param sources the domain events to journal related to <code>stateObjects</code>
+   * @param updateId the long identity to facilitate update; &lt; 0 for create &gt; 0 for update
+   * @param interest the PersistResultInterest to which the result is dispatched
+   * @param object an Object sent to the PersistResultInterest when the persist has succeeded or failed
+   */
+  default <T extends StateObject, E> void persistAll(final Collection<T> stateObjects, final List<Source<E>> sources, final long updateId, final PersistResultInterest interest, final Object object) {
+    persistAll(stateObjects, sources, Metadata.nullMetadata(), updateId, interest, object);
+  }
+
+  /**
+   * Persists the {@code stateObjects} with {@code sources} and {@code metadata}.
+   * @param <T> the concrete type of {@link StateObject}s to persist
+   * @param <E> the concrete type of the {@link Source}
+   * @param stateObjects the {@code Collection<Object>} to persist
+   * @param sources the domain events to journal related to <code>stateObjects</code>
+   * @param metadata the Metadata associated with the stateObjects and sources
+   * @param updateId the long identity to facilitate update; &lt; 0 for create &gt; 0 for update
+   * @param interest the PersistResultInterest to which the result is dispatched
+   * @param object an Object sent to the PersistResultInterest when the persist has succeeded or failed
+   */
+  <T extends StateObject, E> void persistAll(final Collection<T> stateObjects, final List<Source<E>> sources, final Metadata metadata, final long updateId, final PersistResultInterest interest, final Object object);
 
   /**
    * Defines the result of persisting to the store with a persistent object.
@@ -428,11 +428,11 @@ public interface ObjectStoreWriter {
     /**
      * Implemented by the interest of a given Object Store for persist operation results.
      * @param outcome the {@code Outcome<StorageException,Result>} of the persist operation
-     * @param persistentObject the Object to persist; for persistAll() this will be a {@code Collection<Object>}
+     * @param stateObject the Object to persist; for persistAll() this will be a {@code Collection<Object>}
      * @param possible the int number of possible objects to persist
      * @param actual the int number of actual objects persisted
      * @param object the Object passed to persist() that is sent back to the receiver, or null if not passed
      */
-    void persistResultedIn(final Outcome<StorageException,Result> outcome, final Object persistentObject, final int possible, final int actual, final Object object);
+    void persistResultedIn(final Outcome<StorageException,Result> outcome, final Object stateObject, final int possible, final int actual, final Object object);
   }
 }
