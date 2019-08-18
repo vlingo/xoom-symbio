@@ -9,9 +9,9 @@ package io.vlingo.symbio.store.object;
 
 import java.io.Serializable;
 /**
- * A base type for persistent objects.
+ * A base type for persistent object states.
  */
-public abstract class PersistentObject implements Serializable {
+public abstract class StateObject implements Serializable {
   /** May be used by subclasses to indicate they have not yet been persisted. */
   protected static final long Unidentified = -1;
   private static final long InitialVersion = 0L;
@@ -32,8 +32,8 @@ public abstract class PersistentObject implements Serializable {
    * @param persistentObject the Object
    * @return PersistentObject
    */
-  public static PersistentObject from(final Object persistentObject) {
-    return (PersistentObject) persistentObject;
+  public static StateObject from(final Object persistentObject) {
+    return (StateObject) persistentObject;
   }
 
   /**
@@ -86,7 +86,7 @@ public abstract class PersistentObject implements Serializable {
    * @param persistenceId the long unique identity used for my persistence
    * @param version the persistent version
    */
-  protected PersistentObject(final long persistenceId, final long version) {
+  protected StateObject(final long persistenceId, final long version) {
     this();
     this.persistenceId = persistenceId;
     this.version = version;
@@ -96,7 +96,7 @@ public abstract class PersistentObject implements Serializable {
    * Construct my default state with {@code persistenceId}.
    * @param persistenceId the long unique identity used for my persistence
    */
-  protected PersistentObject(final long persistenceId) {
+  protected StateObject(final long persistenceId) {
     this();
     this.persistenceId = persistenceId;
   }
@@ -104,7 +104,7 @@ public abstract class PersistentObject implements Serializable {
   /**
    * Construct my default state.
    */
-  protected PersistentObject() {
+  protected StateObject() {
   }
 
   /* @see java.lang.Object#hashCode() */
@@ -125,7 +125,7 @@ public abstract class PersistentObject implements Serializable {
       return false;
     if (getClass() != obj.getClass())
       return false;
-    PersistentObject other = (PersistentObject) obj;
+    StateObject other = (StateObject) obj;
     if (persistenceId != other.persistenceId)
       return false;
     return true;
