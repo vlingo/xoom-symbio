@@ -28,7 +28,7 @@ public class ObjectStorePersistResultInterest__Proxy implements io.vlingo.symbio
     this.mailbox = mailbox;
   }
 
-  /* @see io.vlingo.symbio.store.object.ObjectStoreWriter.PersistResultInterest#persistResultedIn(io.vlingo.common.Outcome, io.vlingo.symbio.store.object.PersistentObject, int, int, java.lang.Object) */
+  /* @see io.vlingo.symbio.store.object.ObjectStoreWriter.PersistResultInterest#persistResultedIn(io.vlingo.common.Outcome, io.vlingo.symbio.store.object.stateObject, int, int, java.lang.Object) */
   @Override
   public void persistResultedIn(Outcome<StorageException, Result> arg0, java.lang.Object arg1, int arg2, int arg3, Object arg4) {
     if (!actor.isStopped()) {
