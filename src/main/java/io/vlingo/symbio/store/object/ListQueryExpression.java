@@ -30,6 +30,18 @@ public class ListQueryExpression extends QueryExpression {
   }
 
   /**
+   * Answer a new {@code ListQueryExpression} with {@code type}, {@code query}, and {@code parameters}.
+   * @param type the {@code Class<?>} of the objects to be queried
+   * @param query the String describing the query
+   * @param mode the QueryMode
+   * @param parameters the {@code List<?>} containing query parameters
+   * @return ListQueryExpression
+   */
+  public static ListQueryExpression using(final Class<?> type, final String query, final QueryMode mode, final List<?> parameters) {
+    return new ListQueryExpression(type, query, mode, parameters);
+  }
+
+  /**
    * Constructs my default state.
    * @param type the {@code Class<?>} of the objects to be queried
    * @param query the String describing the query
