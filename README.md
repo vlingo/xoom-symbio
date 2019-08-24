@@ -2,7 +2,7 @@
 
 [![Javadocs](http://javadoc.io/badge/io.vlingo/vlingo-symbio.svg?color=brightgreen)](http://javadoc.io/doc/io.vlingo/vlingo-symbio) [![Build Status](https://travis-ci.org/vlingo/vlingo-symbio.svg?branch=master)](https://travis-ci.org/vlingo/vlingo-symbio) [ ![Download](https://api.bintray.com/packages/vlingo/vlingo-platform-java/vlingo-symbio/images/download.svg) ](https://bintray.com/vlingo/vlingo-platform-java/vlingo-symbio/_latestVersion) [![Gitter chat](https://badges.gitter.im/gitterHQ/gitter.png)](https://gitter.im/vlingo-platform-java/symbio)
 
-The reactive, scalable, and resilient Object, CQRS, and Event Sourcing storage and projection tool for services and applications built on the vlingo/PLATFORM.
+The vlingo/PLATFORM reactive, scalable, and resilient Object, CQRS, and Event Sourcing storage tools for services and applications.
 
 ### Name
 The name "symbio" highlights the symbiotic relationship between domain models and persistence mechanisms.
