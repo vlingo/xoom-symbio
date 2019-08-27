@@ -8,6 +8,7 @@
 package io.vlingo.symbio.store.object;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import io.vlingo.symbio.store.object.ObjectStoreReader.QueryMode;
@@ -72,7 +73,7 @@ public class ListQueryExpression extends QueryExpression {
    */
   public ListQueryExpression(final Class<?> type, final String query, final Object... parameters) {
     super(type, query);
-    this.parameters = Arrays.asList(parameters);
+    this.parameters = Collections.unmodifiableList(Arrays.asList(parameters));
   }
 
   /**
@@ -84,7 +85,7 @@ public class ListQueryExpression extends QueryExpression {
    */
   public ListQueryExpression(final Class<?> type, final String query, final QueryMode mode, final Object... parameters) {
     super(type, query, mode);
-    this.parameters = Arrays.asList(parameters);
+    this.parameters = Collections.unmodifiableList(Arrays.asList(parameters));
   }
 
   /*
