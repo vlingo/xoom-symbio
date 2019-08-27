@@ -7,6 +7,7 @@
 
 package io.vlingo.symbio.store.object;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -61,7 +62,7 @@ public class MapQueryExpression extends QueryExpression {
    */
   public MapQueryExpression(final Class<?> type, final String query, final Map<String,?> parameters) {
     super(type, query);
-    this.parameters = parameters;
+    this.parameters = Collections.unmodifiableMap(parameters);
   }
 
   /**
@@ -73,7 +74,7 @@ public class MapQueryExpression extends QueryExpression {
    */
   public MapQueryExpression(final Class<?> type, final String query, final QueryMode mode, final Map<String,?> parameters) {
     super(type, query, mode);
-    this.parameters = parameters;
+    this.parameters = Collections.unmodifiableMap(parameters);
   }
 
   /*
