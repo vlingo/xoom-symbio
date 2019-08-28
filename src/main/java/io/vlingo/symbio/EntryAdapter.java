@@ -12,7 +12,7 @@ package io.vlingo.symbio;
  * and the raw {@code Entry<?>} to the native {@code Source<?>}.
  *
  * <p>
- * Note that the `id` provided herein is the identity assigned by the storage mechanism.
+ * Note that the {@code id} provided herein is the identity assigned by the storage mechanism.
  * This may be a sequence number or an alphanumeric value. The important thing to note is
  * that this is provided by storage but may subsequently be used to represent time or order.
  *
