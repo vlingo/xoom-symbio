@@ -11,6 +11,11 @@ package io.vlingo.symbio;
  * Adapts the native {@code Source<?>} state to the raw {@code Entry<?>},
  * and the raw {@code Entry<?>} to the native {@code Source<?>}.
  *
+ * <p>
+ * Note that the `id` provided herein is the identity assigned by the storage mechanism.
+ * This may be a sequence number or an alphanumeric value. The important thing to note is
+ * that this is provided by storage but may subsequently be used to represent time or order.
+ *
  * @param <S> the native {@code Source<?>}
  * @param <E> the raw {@code Entry<?>}
  */
