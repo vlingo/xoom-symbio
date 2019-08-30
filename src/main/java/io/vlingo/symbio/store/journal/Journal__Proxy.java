@@ -6,6 +6,7 @@ import io.vlingo.actors.Actor;
 import io.vlingo.actors.DeadLetter;
 import io.vlingo.actors.LocalMessage;
 import io.vlingo.actors.Mailbox;
+import io.vlingo.actors.Returns;
 import io.vlingo.common.BasicCompletes;
 import io.vlingo.symbio.Entry;
 
@@ -120,7 +121,7 @@ public class Journal__Proxy<T> implements io.vlingo.symbio.store.journal.Journal
       if (mailbox.isPreallocated()) {
         mailbox.send(actor, Journal.class, consumer, completes, journalReaderRepresentation5);
       } else {
-        mailbox.send(new LocalMessage<>(actor, Journal.class, consumer, completes, journalReaderRepresentation5));
+        mailbox.send(new LocalMessage<>(actor, Journal.class, consumer, Returns.value(completes), journalReaderRepresentation5));
       }
       return completes;
     } else {
@@ -138,7 +139,7 @@ public class Journal__Proxy<T> implements io.vlingo.symbio.store.journal.Journal
       if (mailbox.isPreallocated()) {
         mailbox.send(actor, Journal.class, consumer, completes, streamReaderRepresentation6);
       } else {
-        mailbox.send(new LocalMessage<>(actor, Journal.class, consumer, completes, streamReaderRepresentation6));
+        mailbox.send(new LocalMessage<>(actor, Journal.class, consumer, Returns.value(completes), streamReaderRepresentation6));
       }
       return completes;
     } else {

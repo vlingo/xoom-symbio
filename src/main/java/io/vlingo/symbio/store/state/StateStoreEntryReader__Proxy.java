@@ -4,6 +4,7 @@ import io.vlingo.actors.Actor;
 import io.vlingo.actors.DeadLetter;
 import io.vlingo.actors.LocalMessage;
 import io.vlingo.actors.Mailbox;
+import io.vlingo.actors.Returns;
 import io.vlingo.common.BasicCompletes;
 
 @SuppressWarnings("rawtypes")
@@ -33,7 +34,7 @@ public class StateStoreEntryReader__Proxy<T extends io.vlingo.symbio.Entry<?>> i
       final java.util.function.Consumer<StateStoreEntryReader> consumer = (actor) -> actor.name();
       final io.vlingo.common.Completes<java.lang.String> completes = new BasicCompletes<>(actor.scheduler());
       if (mailbox.isPreallocated()) { mailbox.send(actor, StateStoreEntryReader.class, consumer, completes, nameRepresentation1); }
-      else { mailbox.send(new LocalMessage<StateStoreEntryReader>(actor, StateStoreEntryReader.class, consumer, completes, nameRepresentation1)); }
+      else { mailbox.send(new LocalMessage<StateStoreEntryReader>(actor, StateStoreEntryReader.class, consumer, Returns.value(completes), nameRepresentation1)); }
       return completes;
     } else {
       actor.deadLetters().failedDelivery(new DeadLetter(actor, nameRepresentation1));
@@ -46,7 +47,7 @@ public class StateStoreEntryReader__Proxy<T extends io.vlingo.symbio.Entry<?>> i
       final java.util.function.Consumer<StateStoreEntryReader> consumer = (actor) -> actor.size();
       final io.vlingo.common.Completes<java.lang.Long> completes = new BasicCompletes<>(actor.scheduler());
       if (mailbox.isPreallocated()) { mailbox.send(actor, StateStoreEntryReader.class, consumer, completes, sizeRepresentation2); }
-      else { mailbox.send(new LocalMessage<StateStoreEntryReader>(actor, StateStoreEntryReader.class, consumer, completes, sizeRepresentation2)); }
+      else { mailbox.send(new LocalMessage<StateStoreEntryReader>(actor, StateStoreEntryReader.class, consumer, Returns.value(completes), sizeRepresentation2)); }
       return completes;
     } else {
       actor.deadLetters().failedDelivery(new DeadLetter(actor, sizeRepresentation2));
@@ -79,7 +80,7 @@ public class StateStoreEntryReader__Proxy<T extends io.vlingo.symbio.Entry<?>> i
       final java.util.function.Consumer<StateStoreEntryReader> consumer = (actor) -> actor.readNext(arg0);
       final io.vlingo.common.Completes<java.util.List<T>> completes = new BasicCompletes<>(actor.scheduler());
       if (mailbox.isPreallocated()) { mailbox.send(actor, StateStoreEntryReader.class, consumer, completes, readNextRepresentation5); }
-      else { mailbox.send(new LocalMessage<StateStoreEntryReader>(actor, StateStoreEntryReader.class, consumer, completes, readNextRepresentation5)); }
+      else { mailbox.send(new LocalMessage<StateStoreEntryReader>(actor, StateStoreEntryReader.class, consumer, Returns.value(completes), readNextRepresentation5)); }
       return completes;
     } else {
       actor.deadLetters().failedDelivery(new DeadLetter(actor, readNextRepresentation5));
@@ -92,7 +93,7 @@ public class StateStoreEntryReader__Proxy<T extends io.vlingo.symbio.Entry<?>> i
       final java.util.function.Consumer<StateStoreEntryReader> consumer = (actor) -> actor.readNext(arg0);
       final io.vlingo.common.Completes<T> completes = new BasicCompletes<>(actor.scheduler());
       if (mailbox.isPreallocated()) { mailbox.send(actor, StateStoreEntryReader.class, consumer, completes, readNextRepresentation6); }
-      else { mailbox.send(new LocalMessage<StateStoreEntryReader>(actor, StateStoreEntryReader.class, consumer, completes, readNextRepresentation6)); }
+      else { mailbox.send(new LocalMessage<StateStoreEntryReader>(actor, StateStoreEntryReader.class, consumer, Returns.value(completes), readNextRepresentation6)); }
       return completes;
     } else {
       actor.deadLetters().failedDelivery(new DeadLetter(actor, readNextRepresentation6));
@@ -105,7 +106,7 @@ public class StateStoreEntryReader__Proxy<T extends io.vlingo.symbio.Entry<?>> i
       final java.util.function.Consumer<StateStoreEntryReader> consumer = (actor) -> actor.readNext(arg0, arg1);
       final io.vlingo.common.Completes<java.util.List<T>> completes = new BasicCompletes<>(actor.scheduler());
       if (mailbox.isPreallocated()) { mailbox.send(actor, StateStoreEntryReader.class, consumer, completes, readNextRepresentation7); }
-      else { mailbox.send(new LocalMessage<StateStoreEntryReader>(actor, StateStoreEntryReader.class, consumer, completes, readNextRepresentation7)); }
+      else { mailbox.send(new LocalMessage<StateStoreEntryReader>(actor, StateStoreEntryReader.class, consumer, Returns.value(completes), readNextRepresentation7)); }
       return completes;
     } else {
       actor.deadLetters().failedDelivery(new DeadLetter(actor, readNextRepresentation7));
@@ -118,7 +119,7 @@ public class StateStoreEntryReader__Proxy<T extends io.vlingo.symbio.Entry<?>> i
       final java.util.function.Consumer<StateStoreEntryReader> consumer = (actor) -> actor.readNext();
       final io.vlingo.common.Completes<T> completes = new BasicCompletes<>(actor.scheduler());
       if (mailbox.isPreallocated()) { mailbox.send(actor, StateStoreEntryReader.class, consumer, completes, readNextRepresentation8); }
-      else { mailbox.send(new LocalMessage<StateStoreEntryReader>(actor, StateStoreEntryReader.class, consumer, completes, readNextRepresentation8)); }
+      else { mailbox.send(new LocalMessage<StateStoreEntryReader>(actor, StateStoreEntryReader.class, consumer, Returns.value(completes), readNextRepresentation8)); }
       return completes;
     } else {
       actor.deadLetters().failedDelivery(new DeadLetter(actor, readNextRepresentation8));
@@ -131,7 +132,7 @@ public class StateStoreEntryReader__Proxy<T extends io.vlingo.symbio.Entry<?>> i
       final java.util.function.Consumer<StateStoreEntryReader> consumer = (actor) -> actor.seekTo(arg0);
       final io.vlingo.common.Completes<java.lang.String> completes = new BasicCompletes<>(actor.scheduler());
       if (mailbox.isPreallocated()) { mailbox.send(actor, StateStoreEntryReader.class, consumer, completes, seekToRepresentation9); }
-      else { mailbox.send(new LocalMessage<StateStoreEntryReader>(actor, StateStoreEntryReader.class, consumer, completes, seekToRepresentation9)); }
+      else { mailbox.send(new LocalMessage<StateStoreEntryReader>(actor, StateStoreEntryReader.class, consumer, Returns.value(completes), seekToRepresentation9)); }
       return completes;
     } else {
       actor.deadLetters().failedDelivery(new DeadLetter(actor, seekToRepresentation9));

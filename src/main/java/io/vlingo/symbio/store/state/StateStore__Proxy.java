@@ -13,6 +13,7 @@ import io.vlingo.actors.Actor;
 import io.vlingo.actors.DeadLetter;
 import io.vlingo.actors.LocalMessage;
 import io.vlingo.actors.Mailbox;
+import io.vlingo.actors.Returns;
 import io.vlingo.common.BasicCompletes;
 import io.vlingo.common.Completes;
 import io.vlingo.symbio.Entry;
@@ -58,7 +59,7 @@ public class StateStore__Proxy implements io.vlingo.symbio.store.state.StateStor
       final java.util.function.Consumer<StateStore> consumer = (actor) -> actor.entryReader(arg0);
       final Completes<StateStoreEntryReader<ET>> completes = new BasicCompletes<>(actor.scheduler());
       if (mailbox.isPreallocated()) { mailbox.send(actor, StateStore.class, consumer, completes, entryReaderRepresentation3); }
-      else { mailbox.send(new LocalMessage<StateStore>(actor, StateStore.class, consumer, completes, entryReaderRepresentation3)); }
+      else { mailbox.send(new LocalMessage<StateStore>(actor, StateStore.class, consumer, Returns.value(completes), entryReaderRepresentation3)); }
       return completes;
     } else {
       actor.deadLetters().failedDelivery(new DeadLetter(actor, entryReaderRepresentation3));
