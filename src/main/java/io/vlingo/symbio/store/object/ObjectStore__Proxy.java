@@ -61,7 +61,7 @@ public class ObjectStore__Proxy implements io.vlingo.symbio.store.object.ObjectS
     if (!actor.isStopped()) {
       final java.util.function.Consumer<ObjectStore> consumer = (actor) -> actor.entryReader(arg0);
       final Completes<EntryReader<? extends Entry<?>>> completes = new BasicCompletes<>(actor.scheduler());
-      if (mailbox.isPreallocated()) { mailbox.send(actor, ObjectStore.class, consumer, completes, entryReaderRepresentation2); }
+      if (mailbox.isPreallocated()) { mailbox.send(actor, ObjectStore.class, consumer, Returns.value(completes), entryReaderRepresentation2); }
       else { mailbox.send(new LocalMessage<ObjectStore>(actor, ObjectStore.class, consumer, Returns.value(completes), entryReaderRepresentation2)); }
       return completes;
     } else {

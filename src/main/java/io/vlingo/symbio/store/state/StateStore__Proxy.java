@@ -58,7 +58,7 @@ public class StateStore__Proxy implements io.vlingo.symbio.store.state.StateStor
     if (!actor.isStopped()) {
       final java.util.function.Consumer<StateStore> consumer = (actor) -> actor.entryReader(arg0);
       final Completes<StateStoreEntryReader<ET>> completes = new BasicCompletes<>(actor.scheduler());
-      if (mailbox.isPreallocated()) { mailbox.send(actor, StateStore.class, consumer, completes, entryReaderRepresentation3); }
+      if (mailbox.isPreallocated()) { mailbox.send(actor, StateStore.class, consumer, Returns.value(completes), entryReaderRepresentation3); }
       else { mailbox.send(new LocalMessage<StateStore>(actor, StateStore.class, consumer, Returns.value(completes), entryReaderRepresentation3)); }
       return completes;
     } else {

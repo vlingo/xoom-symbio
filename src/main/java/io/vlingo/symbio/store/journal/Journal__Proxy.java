@@ -119,7 +119,7 @@ public class Journal__Proxy<T> implements io.vlingo.symbio.store.journal.Journal
       final io.vlingo.common.Completes<io.vlingo.symbio.store.journal.JournalReader<ET>> completes = new BasicCompletes<>(
               actor.scheduler());
       if (mailbox.isPreallocated()) {
-        mailbox.send(actor, Journal.class, consumer, completes, journalReaderRepresentation5);
+        mailbox.send(actor, Journal.class, consumer, Returns.value(completes), journalReaderRepresentation5);
       } else {
         mailbox.send(new LocalMessage<>(actor, Journal.class, consumer, Returns.value(completes), journalReaderRepresentation5));
       }
@@ -137,7 +137,7 @@ public class Journal__Proxy<T> implements io.vlingo.symbio.store.journal.Journal
       final io.vlingo.common.Completes<io.vlingo.symbio.store.journal.StreamReader<T>> completes = new BasicCompletes<>(
               actor.scheduler());
       if (mailbox.isPreallocated()) {
-        mailbox.send(actor, Journal.class, consumer, completes, streamReaderRepresentation6);
+        mailbox.send(actor, Journal.class, consumer, Returns.value(completes), streamReaderRepresentation6);
       } else {
         mailbox.send(new LocalMessage<>(actor, Journal.class, consumer, Returns.value(completes), streamReaderRepresentation6));
       }

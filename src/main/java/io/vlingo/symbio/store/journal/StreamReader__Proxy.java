@@ -26,7 +26,7 @@ public class StreamReader__Proxy<T> implements io.vlingo.symbio.store.journal.St
     if (!actor.isStopped()) {
       final java.util.function.Consumer<StreamReader> consumer = (actor) -> actor.streamFor(arg0);
       final io.vlingo.common.Completes<io.vlingo.symbio.store.journal.Stream<T>> completes = new BasicCompletes<>(actor.scheduler());
-      if (mailbox.isPreallocated()) { mailbox.send(actor, StreamReader.class, consumer, completes, streamForRepresentation1); }
+      if (mailbox.isPreallocated()) { mailbox.send(actor, StreamReader.class, consumer, Returns.value(completes), streamForRepresentation1); }
       else { mailbox.send(new LocalMessage<StreamReader>(actor, StreamReader.class, consumer, Returns.value(completes), streamForRepresentation1)); }
       return completes;
     } else {
@@ -40,7 +40,7 @@ public class StreamReader__Proxy<T> implements io.vlingo.symbio.store.journal.St
     if (!actor.isStopped()) {
       final java.util.function.Consumer<StreamReader> consumer = (actor) -> actor.streamFor(arg0, arg1);
       final io.vlingo.common.Completes<io.vlingo.symbio.store.journal.Stream<T>> completes = new BasicCompletes<>(actor.scheduler());
-      if (mailbox.isPreallocated()) { mailbox.send(actor, StreamReader.class, consumer, completes, streamForRepresentation2); }
+      if (mailbox.isPreallocated()) { mailbox.send(actor, StreamReader.class, consumer, Returns.value(completes), streamForRepresentation2); }
       else { mailbox.send(new LocalMessage<StreamReader>(actor, StreamReader.class, consumer, Returns.value(completes), streamForRepresentation2)); }
       return completes;
     } else {
