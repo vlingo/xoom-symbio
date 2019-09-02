@@ -67,6 +67,10 @@ public class Dispatchable<E extends Entry<?>, RS extends State<?>> {
     return entries;
   }
 
+  public boolean hasEntries() {
+    return entries != null && !entries.isEmpty();
+  }
+
   @Override
   @SuppressWarnings({ "rawtypes" })
   public boolean equals(Object o) {
