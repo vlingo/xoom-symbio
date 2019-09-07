@@ -40,6 +40,15 @@ public class Metadata implements Comparable<Metadata> {
     return new Metadata(object, value, operation);
   }
 
+  public static Metadata with(final Object object, final String value, final Class<?> operationType) {
+    return with(object, value, operationType, true);
+  }
+
+  public static Metadata with(final Object object, final String value, final Class<?> operationType, final boolean compact) {
+    final String operation = compact ? operationType.getSimpleName() : operationType.getName();
+    return new Metadata(object, value, operation);
+  }
+
   public Metadata(final Object object, final String value, final String operation) {
     if (object == null) this.object = EmptyObject; else this.object = object;
 
