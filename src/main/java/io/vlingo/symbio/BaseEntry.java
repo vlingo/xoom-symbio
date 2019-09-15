@@ -227,6 +227,10 @@ public abstract class BaseEntry<T> implements Entry<T> {
             " metadata=" + metadata + "]";
   }
 
+  /**
+   * FOR INTERNAL USE ONLY.
+   * @param id the String to set as my id
+   */
   public void __internal__setId(final String id) {
     this.id = id;
   }
