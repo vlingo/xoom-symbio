@@ -82,6 +82,14 @@ public abstract class StateObject implements Serializable {
   }
 
   /**
+   * FOR INTERNAL USE ONLY.
+   * @param persistenceId the long to set as my persistenceId
+   */
+  public void __internal__setPersistenceId(final long persistenceId) {
+    this.persistenceId = persistenceId;
+  }
+
+  /**
    * Construct my default state with {@code persistenceId} and {@link version}
    * @param persistenceId the long unique identity used for my persistence
    * @param version the persistent version
