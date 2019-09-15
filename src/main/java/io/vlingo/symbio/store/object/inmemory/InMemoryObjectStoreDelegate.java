@@ -28,14 +28,16 @@ import io.vlingo.symbio.store.dispatch.DispatcherControl;
 import io.vlingo.symbio.store.object.ObjectStoreDelegate;
 import io.vlingo.symbio.store.object.ObjectStoreReader.QueryMultiResults;
 import io.vlingo.symbio.store.object.ObjectStoreReader.QuerySingleResult;
+import io.vlingo.symbio.store.object.QueryExpression;
 import io.vlingo.symbio.store.object.StateObject;
 import io.vlingo.symbio.store.object.StateObjectMapper;
-import io.vlingo.symbio.store.object.QueryExpression;
 
 public class InMemoryObjectStoreDelegate
         implements ObjectStoreDelegate<BaseEntry<?>, State<?>>, DispatcherControl.DispatcherControlDelegate<BaseEntry<?>, State<?>> {
 
-  private final Map<Long, State<?>> store;
+  private long nextId;
+
+  private final Map<Class<?>,Map<Long, State<?>>> stores;
   private final List<BaseEntry<?>> entries;
   private final List<Dispatchable<BaseEntry<?>, State<?>>> dispatchables;
   private final StateAdapterProvider stateAdapterProvider;
@@ -43,10 +45,12 @@ public class InMemoryObjectStoreDelegate
 
   public InMemoryObjectStoreDelegate(final StateAdapterProvider stateAdapterProvider) {
     this.stateAdapterProvider = stateAdapterProvider;
-    this.store = new HashMap<>();
+    this.stores = new HashMap<>();
     this.entries = new ArrayList<>();
     this.dispatchables = new CopyOnWriteArrayList<>();
     this.identityGenerator = new IdentityGenerator.RandomIdentityGenerator();
+
+    this.nextId = 1;
   }
 
   private static String idParameterAsString(final Object id) {
@@ -73,7 +77,7 @@ public class InMemoryObjectStoreDelegate
    */
   @Override
   public void close() {
-    this.store.clear();
+    this.stores.clear();
     this.entries.clear();
     this.dispatchables.clear();
   }
@@ -135,7 +139,10 @@ public class InMemoryObjectStoreDelegate
 
   private <T extends StateObject> State<?> persist(final T stateObject, final Metadata metadata) {
     final State<?> raw = this.stateAdapterProvider.asRaw(String.valueOf(stateObject.persistenceId()), stateObject, 1, metadata);
-    store.put(stateObject.persistenceId(), raw);
+    final Map<Long, State<?>> store = stores.computeIfAbsent(stateObject.getClass(), (type) -> new HashMap<>());
+    final long persistenceId = stateObject.persistenceId() == -1L ? nextId++ : stateObject.persistenceId();
+    store.put(persistenceId, raw);
+    stateObject.__internal__setPersistenceId(persistenceId);
     return raw;
   }
 
@@ -174,6 +181,7 @@ public class InMemoryObjectStoreDelegate
     // NOTE: No query constraints accepted; selects all stored objects
 
     final Set<Object> all = new HashSet<>();
+    final Map<Long, State<?>> store = stores.computeIfAbsent(expression.type, (type) -> new HashMap<>());
     for (final State<?> entry : store.values()) {
       final Object stateObject = stateAdapterProvider.fromRaw(entry);
       all.add(stateObject);
@@ -196,7 +204,8 @@ public class InMemoryObjectStoreDelegate
       throw new StorageException(Result.Error, "Unknown query type: " + expression);
     }
 
-    final State<?> found = store.get(Long.parseLong(id));
+    final Map<Long, State<?>> store = stores.computeIfAbsent(expression.type, (type) -> new HashMap<>());
+    final State<?> found = id.equals("-1") ? null : store.get(Long.parseLong(id));
 
     final Object result = Optional
             .ofNullable(found)
