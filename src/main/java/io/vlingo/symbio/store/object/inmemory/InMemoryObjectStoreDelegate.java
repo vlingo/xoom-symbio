@@ -54,7 +54,9 @@ public class InMemoryObjectStoreDelegate
   }
 
   private static String idParameterAsString(final Object id) {
-    if (id instanceof String) {
+    if (id == null) {
+      return null;
+    } else if (id instanceof String) {
       return (String) id;
     } else if (id instanceof Long) {
       return String.valueOf((long) id);
@@ -205,7 +207,7 @@ public class InMemoryObjectStoreDelegate
     }
 
     final Map<Long, State<?>> store = stores.computeIfAbsent(expression.type, (type) -> new HashMap<>());
-    final State<?> found = id.equals("-1") ? null : store.get(Long.parseLong(id));
+    final State<?> found = (id == null || id.equals("-1")) ? null : store.get(Long.parseLong(id));
 
     final Object result = Optional
             .ofNullable(found)
