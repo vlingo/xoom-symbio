@@ -100,6 +100,18 @@ public class MapQueryExpression extends QueryExpression {
     private static final long serialVersionUID = 1L;
 
     /**
+     * Answer a new {@code FluentMap<K,V>} with {@code key} and {@code value} as the first entry.
+     * @param key the K key
+     * @param value the V value
+     * @param <K> the key type
+     * @param <V> the value type
+     * @return {@code FluentMap<K,V>}
+     */
+    public static <K,V> FluentMap<K,V> has(final K key, final V value) {
+      return new FluentMap<K,V>().and(key, value);
+    }
+
+    /**
      * Constructs my default state.
      */
     public FluentMap() {
@@ -116,13 +128,16 @@ public class MapQueryExpression extends QueryExpression {
 
     /**
      * Answer myself after putting {@code value} at {@code key}.
-     * @param key the K typed key
-     * @param value the V typed value
-     * @return {@code FluentMap<K,V>}
+     * @param key the K1 typed key
+     * @param value the V1 typed value
+     * @param <K1> the key type, which is same as K but for specific casting
+     * @param <V1> the value type, which is same as V but for specific casting
+     * @return {@code FluentMap<K1,V1>}
      */
-    public FluentMap<K,V> and(final K key, final V value) {
-      put(key, value);
-      return this;
+    @SuppressWarnings("unchecked")
+    public <K1,V1> FluentMap<K1,V1> and(final K1 key, final V1 value) {
+      put((K) key, (V) value);
+      return (FluentMap<K1,V1>) this;
     }
   }
 }
