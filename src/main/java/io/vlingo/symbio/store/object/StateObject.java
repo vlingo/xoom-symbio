@@ -8,6 +8,9 @@
 package io.vlingo.symbio.store.object;
 
 import java.io.Serializable;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 /**
  * A base type for persistent object states.
  */
@@ -79,6 +82,22 @@ public abstract class StateObject implements Serializable {
    */
   public void incrementVersion() {
     version++;
+  }
+
+  /**
+   * Answer a {@code List<Object>} that may be used as query parameters.
+   * @return {@code List<Object>}
+   */
+  public List<Object> queryList() {
+    return Collections.emptyList();
+  }
+
+  /**
+   * Answer a {@code Map<String,Object>} that may be used as query parameters.
+   * @return {@code Map<String,Object>}
+   */
+  public Map<String,Object> queryMap() {
+    return Collections.emptyMap();
   }
 
   /**
