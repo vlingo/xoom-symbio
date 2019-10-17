@@ -61,7 +61,7 @@ We welcome you to add support for your favorite database!
     <dependency>
       <groupId>io.vlingo</groupId>
       <artifactId>vlingo-symbio</artifactId>
-      <version>0.9.0-RC1</version>
+      <version>0.9.1-RC2</version>
       <scope>compile</scope>
     </dependency>
   </dependencies>
@@ -69,7 +69,7 @@ We welcome you to add support for your favorite database!
 
 ```gradle
 dependencies {
-    compile 'io.vlingo:vlingo-symbio:0.9.0-RC1'
+    compile 'io.vlingo:vlingo-symbio:0.9.1-RC2'
 }
 
 repositories {
