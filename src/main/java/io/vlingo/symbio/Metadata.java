@@ -8,6 +8,7 @@
 package io.vlingo.symbio;
 
 import java.util.Comparator;
+import java.util.Optional;
 
 public class Metadata implements Comparable<Metadata> {
   public final static Object EmptyObject = new Object() { @Override public String toString() { return "(empty)"; } };
@@ -83,6 +84,10 @@ public class Metadata implements Comparable<Metadata> {
 
   public Object object() {
     return object;
+  }
+
+  public Optional<Object> optionalObject() {
+    return hasObject() ? Optional.of(object) : Optional.empty();
   }
 
   public String operation() {
