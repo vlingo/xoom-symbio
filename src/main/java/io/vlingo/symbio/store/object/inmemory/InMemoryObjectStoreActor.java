@@ -8,10 +8,7 @@
 package io.vlingo.symbio.store.object.inmemory;
 
 import java.time.LocalDateTime;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import io.vlingo.actors.Actor;
@@ -33,11 +30,7 @@ import io.vlingo.symbio.store.dispatch.Dispatchable;
 import io.vlingo.symbio.store.dispatch.Dispatcher;
 import io.vlingo.symbio.store.dispatch.DispatcherControl;
 import io.vlingo.symbio.store.dispatch.control.DispatcherControlActor;
-import io.vlingo.symbio.store.object.ObjectStore;
-import io.vlingo.symbio.store.object.ObjectStoreDelegate;
-import io.vlingo.symbio.store.object.ObjectStoreEntryReader;
-import io.vlingo.symbio.store.object.StateObject;
-import io.vlingo.symbio.store.object.QueryExpression;
+import io.vlingo.symbio.store.object.*;
 import io.vlingo.symbio.store.state.StateStoreEntryReader;
 
 /**
@@ -103,12 +96,12 @@ public class InMemoryObjectStoreActor extends Actor implements ObjectStore {
     return completes().with(reader);
   }
 
-  /* @see io.vlingo.symbio.store.object.ObjectStore#persist(java.lang.Object, java.util.List, long, io.vlingo.symbio.store.object.ObjectStore.PersistResultInterest, java.lang.Object) */
   @Override
-  public <T extends StateObject, E> void persist(
-          final T stateObject, final List<Source<E>> sources, final Metadata metadata,
-          final long updateId, final PersistResultInterest interest, final Object object) {
+  public <T extends StateObject, E> void persist(StateSources<T, E> stateSources, Metadata metadata, long updateId, PersistResultInterest interest, Object object) {
     try {
+      final T stateObject = stateSources.stateObject();
+      final List<Source<E>> sources = stateSources.sources();
+
       final State<?> raw = storeDelegate.persist(stateObject, updateId, metadata);
 
       final List<BaseEntry<?>> entries = entryAdapterProvider.asEntries(sources, metadata);
@@ -125,27 +118,25 @@ public class InMemoryObjectStoreActor extends Actor implements ObjectStore {
     }
   }
 
-
-  /* @see io.vlingo.symbio.store.object.ObjectStore#persistAll(java.util.Collection, java.util.List, long, io.vlingo.symbio.store.object.ObjectStore.PersistResultInterest, java.lang.Object) */
   @Override
-  public <T extends StateObject, E> void persistAll(final Collection<T> stateObjects, final List<Source<E>> sources,
-          final Metadata metadata, final long updateId, final PersistResultInterest interest, final Object object) {
-
+  public <T extends StateObject, E> void persistAll(Collection<StateSources<T, E>> allStateSources, Metadata metadata, long updateId, PersistResultInterest interest, Object object) {
+    final Collection<T> allPersistentObjects = new ArrayList<>();
     try {
-      final Collection<State<?>> states = storeDelegate.persistAll(stateObjects, updateId, metadata);
+      for (StateSources<T, E> stateSources : allStateSources) {
+        final T stateObject = stateSources.stateObject();
+        final State<?> state = storeDelegate.persist(stateObject, updateId, metadata);
+        allPersistentObjects.add(stateObject);
 
-      final List<BaseEntry<?>> entries = entryAdapterProvider.asEntries(sources, metadata);
+        final List<BaseEntry<?>> entries = entryAdapterProvider.asEntries(stateSources.sources(), metadata);
+        this.storeDelegate.persistEntries(entries);
 
-      this.storeDelegate.persistEntries(entries);
-
-      states.forEach(state -> {
         final Dispatchable<BaseEntry<?>, State<?>> dispatchable = buildDispatchable(state, entries);
         this.storeDelegate.persistDispatchable(dispatchable);
-        //dispatch each persistent object
-        dispatch(buildDispatchable(state, entries));
-      });
 
-      interest.persistResultedIn(Success.of(Result.Success), stateObjects, stateObjects.size(), stateObjects.size(), object);
+        dispatch(buildDispatchable(state, entries));
+      }
+
+      interest.persistResultedIn(Success.of(Result.Success), allPersistentObjects, allPersistentObjects.size(), allPersistentObjects.size(), object);
     } catch (final StorageException e){
       logger().error("Failed to persist all objects", e);
       interest.persistResultedIn(Failure.of(e), null, 0, 0, object);
