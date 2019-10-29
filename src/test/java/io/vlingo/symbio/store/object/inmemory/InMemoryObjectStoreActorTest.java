@@ -22,11 +22,13 @@ import io.vlingo.symbio.store.dispatch.MockDispatcher;
 import io.vlingo.symbio.store.object.MapQueryExpression;
 import io.vlingo.symbio.store.object.ObjectStore;
 import io.vlingo.symbio.store.object.QueryExpression;
+import io.vlingo.symbio.store.object.StateSources;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -45,7 +47,7 @@ public class InMemoryObjectStoreActorTest {
     final AccessSafely persistAccess = persistInterest.afterCompleting(1);
     final Person person = new Person("Tom Jones", 85);
     final Test1Source source = new Test1Source();
-    objectStore.persist(person, Collections.singletonList(source), persistInterest);
+    objectStore.persist(StateSources.of(person, source), persistInterest);
     final int persistSize = persistAccess.readFrom("size");
     assertEquals(1, persistSize);
     assertEquals(person, persistAccess.readFrom("object", 0));
@@ -79,7 +81,7 @@ public class InMemoryObjectStoreActorTest {
     final Person person1 = new Person("Tom Jones", 78);
     final Person person2 = new Person("Dean Martin", 78);
     final Person person3 = new Person("Sally Struthers", 71);
-    objectStore.persistAll(Arrays.asList(person1, person2, person3), persistInterest);
+    objectStore.persistAll(Arrays.asList(StateSources.of(person1), StateSources.of(person2), StateSources.of(person3)), persistInterest);
     final int persistSize = persistAllAccess.readFrom("size");
     assertEquals(3, persistSize);
 
