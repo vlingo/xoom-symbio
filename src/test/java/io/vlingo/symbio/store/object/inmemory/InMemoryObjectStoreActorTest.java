@@ -7,6 +7,15 @@
 
 package io.vlingo.symbio.store.object.inmemory;
 
+import static org.junit.Assert.assertEquals;
+
+import java.util.Arrays;
+import java.util.List;
+
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+
 import io.vlingo.actors.World;
 import io.vlingo.actors.testkit.AccessSafely;
 import io.vlingo.symbio.BaseEntry.ObjectEntry;
@@ -23,16 +32,6 @@ import io.vlingo.symbio.store.object.MapQueryExpression;
 import io.vlingo.symbio.store.object.ObjectStore;
 import io.vlingo.symbio.store.object.QueryExpression;
 import io.vlingo.symbio.store.object.StateSources;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-
-import static org.junit.Assert.assertEquals;
 
 public class InMemoryObjectStoreActorTest {
   private MockPersistResultInterest persistInterest;
@@ -130,7 +129,7 @@ public class InMemoryObjectStoreActorTest {
     world = World.startWithDefaults("test-object-store");
     final EntryAdapterProvider entryAdapterProvider = new EntryAdapterProvider(world);
     entryAdapterProvider.registerAdapter(Test1Source.class, new Test1SourceAdapter());
-    
+
     this.dispatcher = new MockDispatcher<>(new MockConfirmDispatchedResultInterest());
     objectStore = world.actorFor(ObjectStore.class, InMemoryObjectStoreActor.class, this.dispatcher);
   }

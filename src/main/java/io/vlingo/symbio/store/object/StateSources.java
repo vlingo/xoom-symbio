@@ -6,11 +6,11 @@
 // one at https://mozilla.org/MPL/2.0/.
 package io.vlingo.symbio.store.object;
 
-import io.vlingo.symbio.Source;
-
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+
+import io.vlingo.symbio.Source;
 /**
  * StateSources records the mapping between {@link StateObject} and the
  * {@link io.vlingo.symbio.Source sources}  of its creation or mutation.
@@ -53,6 +53,7 @@ public class StateSources<T extends StateObject, E> {
   }
 
   @Override
+  @SuppressWarnings("rawtypes")
   public boolean equals(Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;

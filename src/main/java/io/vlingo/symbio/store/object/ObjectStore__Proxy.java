@@ -1,7 +1,5 @@
 package io.vlingo.symbio.store.object;
 
-import java.util.Collection;
-import java.util.List;
 import java.util.function.Consumer;
 
 import io.vlingo.actors.Actor;
@@ -13,7 +11,6 @@ import io.vlingo.common.BasicCompletes;
 import io.vlingo.common.Completes;
 import io.vlingo.symbio.Entry;
 import io.vlingo.symbio.Metadata;
-import io.vlingo.symbio.Source;
 import io.vlingo.symbio.store.EntryReader;
 
 public class ObjectStore__Proxy implements io.vlingo.symbio.store.object.ObjectStore {
