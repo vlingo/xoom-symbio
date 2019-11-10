@@ -36,6 +36,11 @@ public abstract class BaseEntry<T> implements Entry<T> {
   private final T entryData;
 
   /**
+   * My version that is the state version with which I am associated.
+   */
+  private final int entryVersion;
+
+  /**
    * My associated {@code Metadata} if any.
    */
   private final Metadata metadata;
@@ -52,7 +57,7 @@ public abstract class BaseEntry<T> implements Entry<T> {
    */
   private final int typeVersion;
 
-  public BaseEntry(final String id, final Class<?> type, final int typeVersion, final T entryData, final Metadata metadata) {
+  public BaseEntry(final String id, final Class<?> type, final int typeVersion, final T entryData, final int entryVersion, final Metadata metadata) {
     if (id == null) throw new IllegalArgumentException("Entry id must not be null.");
     this.id = id;
     if (type == null) throw new IllegalArgumentException("Entry type must not be null.");
@@ -61,16 +66,21 @@ public abstract class BaseEntry<T> implements Entry<T> {
     this.typeVersion = typeVersion;
     if (entryData == null) throw new IllegalArgumentException("Entry entryData must not be null.");
     this.entryData = entryData;
+    this.entryVersion = entryVersion;
     if (metadata == null) throw new IllegalArgumentException("Entry metadata must not be null.");
     this.metadata = metadata;
   }
 
+  public BaseEntry(final String id, final Class<?> type, final int typeVersion, final T entryData, final Metadata metadata) {
+    this(id, type, typeVersion, entryData, DefaultVersion, metadata);
+  }
+
   protected BaseEntry(final String id, final Class<?> type, final int typeVersion, final T entryData) {
-    this(id, type, typeVersion, entryData, Metadata.nullMetadata());
+    this(id, type, typeVersion, entryData, DefaultVersion, Metadata.nullMetadata());
   }
 
   public BaseEntry(final Class<?> type, final int typeVersion, final T entryData, final Metadata metadata) {
-    this(UnknownId, type, typeVersion, entryData, metadata);
+    this(UnknownId, type, typeVersion, entryData, DefaultVersion, metadata);
   }
 
   /* @see io.vlingo.symbio.Entry#id() */
@@ -83,6 +93,12 @@ public abstract class BaseEntry<T> implements Entry<T> {
   @Override
   public T entryData() {
     return entryData;
+  }
+
+  /* @see io.vlingo.symbio.Entry#entryVersion() */
+  @Override
+  public int entryVersion() {
+    return entryVersion;
   }
 
   /* @see io.vlingo.symbio.Entry#metadata() */
