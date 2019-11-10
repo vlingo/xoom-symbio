@@ -18,6 +18,7 @@ import org.junit.Test;
 
 import io.vlingo.actors.World;
 import io.vlingo.actors.testkit.AccessSafely;
+import io.vlingo.common.serialization.JsonSerialization;
 import io.vlingo.symbio.BaseEntry.ObjectEntry;
 import io.vlingo.symbio.Entry;
 import io.vlingo.symbio.EntryAdapter;
@@ -156,6 +157,12 @@ public class InMemoryObjectStoreActorTest {
     @Override
     public ObjectEntry<Test1Source> toEntry(Test1Source source, String id, Metadata metadata) {
       return new ObjectEntry<>(id, Test1Source.class, 1, source, metadata);
+    }
+
+    @Override
+    public ObjectEntry<Test1Source> toEntry(final Test1Source source, final int version, final String id, final Metadata metadata) {
+      final String serialization = JsonSerialization.serialized(source);
+      return new ObjectEntry<>(id, Test1Source.class, 1, serialization, version, metadata);
     }
   }
 }

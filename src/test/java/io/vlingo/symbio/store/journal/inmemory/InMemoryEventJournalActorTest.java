@@ -245,6 +245,12 @@ public class InMemoryEventJournalActorTest {
       final String serialization = JsonSerialization.serialized(source);
       return new TextEntry(id, Test1Source.class, 1, serialization, metadata);
     }
+
+    @Override
+    public TextEntry toEntry(final Test1Source source, final int version, final String id, final Metadata metadata) {
+      final String serialization = JsonSerialization.serialized(source);
+      return new TextEntry(id, Test1Source.class, 1, serialization, version, metadata);
+    }
   }
 
   private static final class Test2SourceAdapter implements EntryAdapter<Test2Source, TextEntry> {
@@ -256,13 +262,19 @@ public class InMemoryEventJournalActorTest {
     @Override
     public TextEntry toEntry(Test2Source source, Metadata metadata) {
       final String serialization = JsonSerialization.serialized(source);
-      return new TextEntry(Test1Source.class, 1, serialization, metadata);
+      return new TextEntry(Test2Source.class, 1, serialization, metadata);
     }
 
     @Override
     public TextEntry toEntry(Test2Source source, String id, Metadata metadata) {
       final String serialization = JsonSerialization.serialized(source);
-      return new TextEntry(id, Test1Source.class, 1, serialization, metadata);
+      return new TextEntry(id, Test2Source.class, 1, serialization, metadata);
+    }
+
+    @Override
+    public TextEntry toEntry(final Test2Source source, final int version, final String id, final Metadata metadata) {
+      final String serialization = JsonSerialization.serialized(source);
+      return new TextEntry(id, Test2Source.class, 1, serialization, version, metadata);
     }
   }
 
