@@ -38,6 +38,7 @@ public final class DefaultTextEntryAdapter implements EntryAdapter {
 
   @Override
   public Entry toEntry(final Source source, final int version, final String id, final Metadata metadata) {
-    return null;
+    final String serialization = JsonSerialization.serialized(source);
+    return new TextEntry(id, source.getClass(), 1, serialization, version, metadata);
   }
 }

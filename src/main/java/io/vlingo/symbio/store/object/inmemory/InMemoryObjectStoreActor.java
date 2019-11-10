@@ -8,7 +8,11 @@
 package io.vlingo.symbio.store.object.inmemory;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import io.vlingo.actors.Actor;
@@ -30,7 +34,12 @@ import io.vlingo.symbio.store.dispatch.Dispatchable;
 import io.vlingo.symbio.store.dispatch.Dispatcher;
 import io.vlingo.symbio.store.dispatch.DispatcherControl;
 import io.vlingo.symbio.store.dispatch.control.DispatcherControlActor;
-import io.vlingo.symbio.store.object.*;
+import io.vlingo.symbio.store.object.ObjectStore;
+import io.vlingo.symbio.store.object.ObjectStoreDelegate;
+import io.vlingo.symbio.store.object.ObjectStoreEntryReader;
+import io.vlingo.symbio.store.object.QueryExpression;
+import io.vlingo.symbio.store.object.StateObject;
+import io.vlingo.symbio.store.object.StateSources;
 import io.vlingo.symbio.store.state.StateStoreEntryReader;
 
 /**
@@ -104,7 +113,8 @@ public class InMemoryObjectStoreActor extends Actor implements ObjectStore {
 
       final State<?> raw = storeDelegate.persist(stateObject, updateId, metadata);
 
-      final List<BaseEntry<?>> entries = entryAdapterProvider.asEntries(sources, metadata);
+      final int entryVersion = (int) stateSources.stateObject().version();
+      final List<BaseEntry<?>> entries = entryAdapterProvider.asEntries(sources, entryVersion, metadata);
       final Dispatchable<BaseEntry<?>, State<?>> dispatchable = buildDispatchable(raw, entries);
 
       this.storeDelegate.persistEntries(entries);
@@ -127,7 +137,8 @@ public class InMemoryObjectStoreActor extends Actor implements ObjectStore {
         final State<?> state = storeDelegate.persist(stateObject, updateId, metadata);
         allPersistentObjects.add(stateObject);
 
-        final List<BaseEntry<?>> entries = entryAdapterProvider.asEntries(stateSources.sources(), metadata);
+        final int entryVersion = (int) stateSources.stateObject().version();
+        final List<BaseEntry<?>> entries = entryAdapterProvider.asEntries(stateSources.sources(), entryVersion, metadata);
         this.storeDelegate.persistEntries(entries);
 
         final Dispatchable<BaseEntry<?>, State<?>> dispatchable = buildDispatchable(state, entries);

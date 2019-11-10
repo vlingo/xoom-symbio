@@ -7,6 +7,12 @@
 
 package io.vlingo.symbio.store.state.inmemory;
 
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
+
 import io.vlingo.actors.Actor;
 import io.vlingo.actors.Definition;
 import io.vlingo.common.Completes;
@@ -29,12 +35,6 @@ import io.vlingo.symbio.store.dispatch.inmemory.InMemoryDispatcherControlDelegat
 import io.vlingo.symbio.store.state.StateStore;
 import io.vlingo.symbio.store.state.StateStoreEntryReader;
 import io.vlingo.symbio.store.state.StateTypeStateStoreMap;
-
-import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 public class InMemoryStateStoreActor<RS extends State<?>> extends Actor
     implements StateStore {
@@ -182,7 +182,7 @@ public class InMemoryStateStoreActor<RS extends State<?>> extends Actor
             }
           }
           typeStore.put(id, raw);
-          final List<Entry<?>> entries = appendEntries(sources, metadata);
+          final List<Entry<?>> entries = appendEntries(sources, stateVersion, metadata);
           dispatch(id, storeName, raw, entries);
 
           interest.writeResultedIn(Success.of(Result.Success), id, state, stateVersion, sources, object);
@@ -199,8 +199,8 @@ public class InMemoryStateStoreActor<RS extends State<?>> extends Actor
     }
   }
 
-  private <C> List<Entry<?>> appendEntries(final List<Source<C>> sources, final Metadata metadata) {
-    final List<Entry<?>> adapted = entryAdapterProvider.asEntries(sources, metadata);
+  private <C> List<Entry<?>> appendEntries(final List<Source<C>> sources, final int stateVersion, final Metadata metadata) {
+    final List<Entry<?>> adapted = entryAdapterProvider.asEntries(sources, stateVersion, metadata);
     for (final Entry<?> each : adapted) {
       ((BaseEntry<?>) each).__internal__setId(String.valueOf(entries.size()));
       entries.add(each);

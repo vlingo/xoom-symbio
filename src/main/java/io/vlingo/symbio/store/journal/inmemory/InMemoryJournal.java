@@ -93,7 +93,7 @@ public class InMemoryJournal<T,RS extends State<?>> implements Journal<T>, Stopp
   @Override
   public <S, ST> void appendWith(final String streamName, final int streamVersion, final Source<S> source, final Metadata metadata, final ST snapshot,
           final AppendResultInterest interest, final Object object) {
-    final Entry<T> entry = entryAdapterProvider.asEntry(source, metadata);
+    final Entry<T> entry = entryAdapterProvider.asEntry(source, streamVersion, metadata);
     insert(streamName, streamVersion, entry);
     final RS raw;
     final Optional<ST> snapshotResult;
@@ -114,7 +114,7 @@ public class InMemoryJournal<T,RS extends State<?>> implements Journal<T>, Stopp
   @Override
   public <S, ST> void appendAll(final String streamName, final int fromStreamVersion, final List<Source<S>> sources, final Metadata metadata,
           final AppendResultInterest interest, final Object object) {
-    final List<Entry<T>> entries = entryAdapterProvider.asEntries(sources, metadata);
+    final List<Entry<T>> entries = entryAdapterProvider.asEntries(sources, fromStreamVersion, metadata);
     insert(streamName, fromStreamVersion, entries);
 
     dispatch(streamName, fromStreamVersion, entries, null);
@@ -125,7 +125,7 @@ public class InMemoryJournal<T,RS extends State<?>> implements Journal<T>, Stopp
   @Override
   public <S, ST> void appendAllWith(final String streamName, final int fromStreamVersion, final List<Source<S>> sources,
           final Metadata metadata, final ST snapshot, final AppendResultInterest interest, final Object object) {
-    final List<Entry<T>> entries = entryAdapterProvider.asEntries(sources, metadata);
+    final List<Entry<T>> entries = entryAdapterProvider.asEntries(sources, fromStreamVersion, metadata);
     insert(streamName, fromStreamVersion, entries);
     final RS raw;
     final Optional<ST> snapshotResult;
