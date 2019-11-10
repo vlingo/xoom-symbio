@@ -240,6 +240,7 @@ public abstract class BaseEntry<T> implements Entry<T> {
     return getClass().getSimpleName() +
             "[id=" + id + " type=" + type + " typeVersion=" + typeVersion +
             " entryData=" + (isText() || isObject() ? entryData.toString() : "(binary)") +
+            " entryVersion=" + entryVersion +
             " metadata=" + metadata + "]";
   }
 
@@ -274,12 +275,20 @@ public abstract class BaseEntry<T> implements Entry<T> {
    * The byte[] form of {@code Entry<T>}.
    */
   public static final class BinaryEntry extends BaseEntry<byte[]> {
+    public BinaryEntry(final String id, final Class<?> type, final int typeVersion, final byte[] entryData, final int entryVersion, final Metadata metadata) {
+      super(id, type, typeVersion, entryData, entryVersion, metadata);
+    }
+
     public BinaryEntry(final String id, final Class<?> type, final int typeVersion, final byte[] entryData, final Metadata metadata) {
       super(id, type, typeVersion, entryData, metadata);
     }
 
     public BinaryEntry(final String id, final Class<?> type, final int typeVersion, final byte[] entryData) {
       super(id, type, typeVersion, entryData);
+    }
+
+    public BinaryEntry(final Class<?> type, final int typeVersion, final byte[] entryData, final int entryVersion, final Metadata metadata) {
+      super(UnknownId, type, typeVersion, entryData, entryVersion, metadata);
     }
 
     public BinaryEntry(final Class<?> type, final int typeVersion, final byte[] entryData, final Metadata metadata) {
@@ -310,12 +319,20 @@ public abstract class BaseEntry<T> implements Entry<T> {
    * The Object form of {@code Entry<T>}.
    */
   public static final class ObjectEntry<T> extends BaseEntry<Object> {
+    public ObjectEntry(final String id, final Class<?> type, final int typeVersion, final String entryData, final int entryVersion, final Metadata metadata) {
+      super(id, type, typeVersion, entryData, entryVersion, metadata);
+    }
+
     public ObjectEntry(final String id, final Class<?> type, final int typeVersion, final T entryData, final Metadata metadata) {
       super(id, type, typeVersion, entryData, metadata);
     }
 
-    public ObjectEntry(String id, Class<?> type, int typeVersion, T entryData, int dataVersion) {
+    public ObjectEntry(final String id, final Class<?> type, final int typeVersion, final T entryData, final int dataVersion) {
       super(id, type, typeVersion, entryData);
+    }
+
+    public ObjectEntry(final Class<?> type, final int typeVersion, final String entryData, final int entryVersion, final Metadata metadata) {
+      super(UnknownId, type, typeVersion, entryData, entryVersion, metadata);
     }
 
     public ObjectEntry(final Class<?> type, final int typeVersion, final T entryData, final Metadata metadata) {
@@ -346,12 +363,20 @@ public abstract class BaseEntry<T> implements Entry<T> {
    * The text String form of {@code Entry<T>}.
    */
   public static final class TextEntry extends BaseEntry<String> {
+    public TextEntry(final String id, final Class<?> type, final int typeVersion, final String entryData, final int entryVersion, final Metadata metadata) {
+      super(id, type, typeVersion, entryData, entryVersion, metadata);
+    }
+
     public TextEntry(final String id, final Class<?> type, final int typeVersion, final String entryData, final Metadata metadata) {
       super(id, type, typeVersion, entryData, metadata);
     }
 
     public TextEntry(final String id, final Class<?> type, final int typeVersion, final String entryData) {
       super(id, type, typeVersion, entryData);
+    }
+
+    public TextEntry(final Class<?> type, final int typeVersion, final String entryData, final int entryVersion, final Metadata metadata) {
+      super(UnknownId, type, typeVersion, entryData, entryVersion, metadata);
     }
 
     public TextEntry(final Class<?> type, final int typeVersion, final String entryData, final Metadata metadata) {
