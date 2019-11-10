@@ -18,6 +18,9 @@ import java.util.List;
  */
 public interface Entry<T> extends Comparable<Entry<T>> {
 
+  /** The default state version number with which I am associated. */
+  static final int DefaultVersion = -1;
+
   /**
    * Answer an empty {@code List<Entry<T>>}.
    * @param <T> the type used in {@code Entry<T>}
@@ -54,6 +57,13 @@ public interface Entry<T> extends Comparable<Entry<T>> {
    * @return T my entry data
    */
   T entryData();
+
+  /**
+   * Answer my entry version that is the state version with which I am associated.
+   * Answers {@code DefaultVersion} if not overridden.
+   * @return int
+   */
+  default int entryVersion() { return DefaultVersion; }
 
   /**
    * Returns my associated (possibly null) Metadata
