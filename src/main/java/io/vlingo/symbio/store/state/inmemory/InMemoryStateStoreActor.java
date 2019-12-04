@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import io.vlingo.actors.Actor;
+import io.vlingo.actors.ActorInstantiator;
 import io.vlingo.actors.Definition;
 import io.vlingo.common.Completes;
 import io.vlingo.common.Failure;
@@ -30,6 +31,7 @@ import io.vlingo.symbio.store.StorageException;
 import io.vlingo.symbio.store.dispatch.Dispatchable;
 import io.vlingo.symbio.store.dispatch.Dispatcher;
 import io.vlingo.symbio.store.dispatch.DispatcherControl;
+import io.vlingo.symbio.store.dispatch.DispatcherControl.DispatcherControlInstantiator;
 import io.vlingo.symbio.store.dispatch.control.DispatcherControlActor;
 import io.vlingo.symbio.store.dispatch.inmemory.InMemoryDispatcherControlDelegate;
 import io.vlingo.symbio.store.state.StateStore;
@@ -52,6 +54,7 @@ public class InMemoryStateStoreActor<RS extends State<?>> extends Actor
     this(dispatcher, 1000L, 1000L);
   }
 
+  @SuppressWarnings("unchecked")
   public InMemoryStateStoreActor(final Dispatcher<Dispatchable<Entry<?>, RS>> dispatcher, final long checkConfirmationExpirationInterval, final long confirmationExpiration) {
     if (dispatcher == null) {
       throw new IllegalArgumentException("Dispatcher must not be null.");
@@ -70,7 +73,7 @@ public class InMemoryStateStoreActor<RS extends State<?>> extends Actor
       DispatcherControl.class,
       Definition.has(
         DispatcherControlActor.class,
-        Definition.parameters(
+        new DispatcherControlInstantiator(
           dispatcher,
           dispatcherControlDelegate,
           checkConfirmationExpirationInterval,
@@ -90,7 +93,7 @@ public class InMemoryStateStoreActor<RS extends State<?>> extends Actor
   public <ET extends Entry<?>> Completes<StateStoreEntryReader<ET>> entryReader(final String name) {
     StateStoreEntryReader<?> reader = entryReaders.get(name);
     if (reader == null) {
-      reader = childActorFor(StateStoreEntryReader.class, Definition.has(InMemoryStateStoreEntryReaderActor.class, Definition.parameters(entries, name)));
+      reader = childActorFor(StateStoreEntryReader.class, Definition.has(InMemoryStateStoreEntryReaderActor.class, new StateStoreEntryReaderInstantiator(entries, name)));
       entryReaders.put(name, reader);
     }
     return completes().with((StateStoreEntryReader<ET>) reader);
@@ -213,5 +216,26 @@ public class InMemoryStateStoreActor<RS extends State<?>> extends Actor
     final Dispatchable<Entry<?>, RS> dispatchable = new Dispatchable<>(dispatchId, LocalDateTime.now(), raw, entries);
     this.dispatchables.add(dispatchable);
     this.dispatcher.dispatch(dispatchable);
+  }
+
+  @SuppressWarnings({"rawtypes", "unchecked"})
+  private static class StateStoreEntryReaderInstantiator implements ActorInstantiator<InMemoryStateStoreEntryReaderActor> {
+    final String name;
+    final List<Entry<?>> entries;
+
+    StateStoreEntryReaderInstantiator(final List<Entry<?>> entries, final String name) {
+      this.entries = entries;
+      this.name = name;
+    }
+
+    @Override
+    public InMemoryStateStoreEntryReaderActor instantiate() {
+      return new InMemoryStateStoreEntryReaderActor(entries, name);
+    }
+
+    @Override
+    public Class<InMemoryStateStoreEntryReaderActor> type() {
+      return InMemoryStateStoreEntryReaderActor.class;
+    }
   }
 }

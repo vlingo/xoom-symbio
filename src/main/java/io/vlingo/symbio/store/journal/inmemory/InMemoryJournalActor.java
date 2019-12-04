@@ -10,6 +10,7 @@ package io.vlingo.symbio.store.journal.inmemory;
 import java.util.List;
 
 import io.vlingo.actors.Actor;
+import io.vlingo.actors.ActorInstantiator;
 import io.vlingo.actors.Definition;
 import io.vlingo.common.Completes;
 import io.vlingo.symbio.Entry;
@@ -77,7 +78,7 @@ public class InMemoryJournalActor<T,RS extends State<?>> extends Actor implement
   @SuppressWarnings("unchecked")
   public <ET extends Entry<?>> Completes<JournalReader<ET>> journalReader(final String name) {
     final JournalReader<ET> inmemory = (JournalReader<ET>) journal.journalReader(name).outcome();
-    final JournalReader<ET> actor = childActorFor(JournalReader.class, Definition.has(InMemoryJournalReaderActor.class, Definition.parameters(inmemory)));
+    final JournalReader<ET> actor = childActorFor(JournalReader.class, Definition.has(InMemoryJournalReaderActor.class, new InMemoryJournalReaderInstantiator<>(inmemory)));
     return completes().with(actor);
   }
 
@@ -85,7 +86,7 @@ public class InMemoryJournalActor<T,RS extends State<?>> extends Actor implement
   public Completes<StreamReader<T>> streamReader(final String name) {
     final StreamReader<T> inmemory = journal.streamReader(name).outcome();
     @SuppressWarnings("unchecked")
-    final StreamReader<T> actor = childActorFor(StreamReader.class, Definition.has(InMemoryStreamReaderActor.class, Definition.parameters(inmemory)));
+    final StreamReader<T> actor = childActorFor(StreamReader.class, Definition.has(InMemoryStreamReaderActor.class, new InMemoryStreamReaderInstantiator<>(inmemory)));
     return completes().with(actor);
   }
 
@@ -93,5 +94,45 @@ public class InMemoryJournalActor<T,RS extends State<?>> extends Actor implement
   public void stop() {
     journal.stop();
     super.stop();
+  }
+
+  @SuppressWarnings("rawtypes")
+  private static class InMemoryJournalReaderInstantiator<T extends Entry<?>> implements ActorInstantiator<InMemoryJournalReaderActor> {
+    private final JournalReader<T> inmemory;
+
+    InMemoryJournalReaderInstantiator(final JournalReader<T> inmemory) {
+      this.inmemory = inmemory;
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public InMemoryJournalReaderActor<T> instantiate() {
+      return new InMemoryJournalReaderActor((InMemoryJournalReader<T>) inmemory);
+    }
+
+    @Override
+    public Class<InMemoryJournalReaderActor> type() {
+      return InMemoryJournalReaderActor.class;
+    }
+  }
+
+  @SuppressWarnings("rawtypes")
+  private static class InMemoryStreamReaderInstantiator<T extends Entry<?>> implements ActorInstantiator<InMemoryStreamReaderActor> {
+    private final StreamReader<?> inmemory;
+
+    InMemoryStreamReaderInstantiator(final StreamReader<?> inmemory) {
+      this.inmemory = inmemory;
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public InMemoryStreamReaderActor<T> instantiate() {
+      return new InMemoryStreamReaderActor((InMemoryStreamReader<T>) inmemory);
+    }
+
+    @Override
+    public Class<InMemoryStreamReaderActor> type() {
+      return InMemoryStreamReaderActor.class;
+    }
   }
 }

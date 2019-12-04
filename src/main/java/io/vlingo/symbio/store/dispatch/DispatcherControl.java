@@ -7,10 +7,12 @@
 
 package io.vlingo.symbio.store.dispatch;
 
+import java.util.Collection;
+
+import io.vlingo.actors.ActorInstantiator;
 import io.vlingo.symbio.Entry;
 import io.vlingo.symbio.State;
-
-import java.util.Collection;
+import io.vlingo.symbio.store.dispatch.control.DispatcherControlActor;
 
 /**
  * Defines the means to confirm previously dispatched results, and to
@@ -47,5 +49,37 @@ public interface DispatcherControl {
     void confirmDispatched(final String dispatchId);
 
     void stop();
+  }
+
+  static class DispatcherControlInstantiator<ET extends Entry<?>, ST extends State<?>> implements ActorInstantiator<DispatcherControlActor> {
+    private final Dispatcher<Dispatchable<? extends Entry<?>, ? extends State<?>>> dispatcher;
+    private final DispatcherControlDelegate<? extends Entry<?>, ? extends State<?>> dispatcherControl;
+    private final long checkConfirmationExpirationInterval;
+    private final long confirmationExpiration;
+
+    public DispatcherControlInstantiator(
+            final Dispatcher<Dispatchable<? extends Entry<?>, ? extends State<?>>> dispatcher,
+            final DispatcherControlDelegate<? extends Entry<?>, ? extends State<?>> dispatcherControl,
+            final long checkConfirmationExpirationInterval,
+            final long confirmationExpiration) {
+      this.dispatcher = dispatcher;
+      this.dispatcherControl = dispatcherControl;
+      this.checkConfirmationExpirationInterval = checkConfirmationExpirationInterval;
+      this.confirmationExpiration = confirmationExpiration;
+    }
+
+    @Override
+    public DispatcherControlActor instantiate() {
+      return new DispatcherControlActor(
+              dispatcher,
+              dispatcherControl,
+              checkConfirmationExpirationInterval,
+              confirmationExpiration);
+    }
+
+    @Override
+    public Class<DispatcherControlActor> type() {
+      return DispatcherControlActor.class;
+    }
   }
 }

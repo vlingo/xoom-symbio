@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import io.vlingo.actors.Actor;
+import io.vlingo.actors.ActorInstantiator;
 import io.vlingo.actors.Definition;
 import io.vlingo.common.Completes;
 import io.vlingo.common.Failure;
@@ -33,6 +34,7 @@ import io.vlingo.symbio.store.StorageException;
 import io.vlingo.symbio.store.dispatch.Dispatchable;
 import io.vlingo.symbio.store.dispatch.Dispatcher;
 import io.vlingo.symbio.store.dispatch.DispatcherControl;
+import io.vlingo.symbio.store.dispatch.DispatcherControl.DispatcherControlInstantiator;
 import io.vlingo.symbio.store.dispatch.control.DispatcherControlActor;
 import io.vlingo.symbio.store.object.ObjectStore;
 import io.vlingo.symbio.store.object.ObjectStoreDelegate;
@@ -63,6 +65,7 @@ public class InMemoryObjectStoreActor extends Actor implements ObjectStore {
     this(dispatcher, 1000L, 1000L);
   }
 
+  @SuppressWarnings({ "unchecked", "rawtypes" })
   public InMemoryObjectStoreActor(final Dispatcher<Dispatchable<BaseEntry<?>,State<?>>> dispatcher,
          final long checkConfirmationExpirationInterval, final long confirmationExpiration ) {
     this.entryAdapterProvider = EntryAdapterProvider.instance(stage().world());
@@ -76,7 +79,7 @@ public class InMemoryObjectStoreActor extends Actor implements ObjectStore {
             DispatcherControl.class,
             Definition.has(
                     DispatcherControlActor.class,
-                    Definition.parameters(
+                    new DispatcherControlInstantiator(
                             dispatcher,
                             this.storeDelegate,
                             checkConfirmationExpirationInterval,
@@ -99,7 +102,7 @@ public class InMemoryObjectStoreActor extends Actor implements ObjectStore {
   public Completes<EntryReader<? extends Entry<?>>> entryReader(final String name) {
     EntryReader<? extends Entry<?>> reader = entryReaders.get(name);
     if (reader == null) {
-      final Definition definition = Definition.has(InMemoryObjectStoreEntryReaderActor.class, Definition.parameters(readOnlyJournal(), name));
+      final Definition definition = Definition.has(InMemoryObjectStoreEntryReaderActor.class, new ObjectStoreEntryReaderInstantiator(readOnlyJournal(), name));
       reader = childActorFor(ObjectStoreEntryReader.class, definition);
     }
     return completes().with(reader);
@@ -199,5 +202,30 @@ public class InMemoryObjectStoreActor extends Actor implements ObjectStore {
 
   private List<BaseEntry<?>> readOnlyJournal() {
     return ((InMemoryObjectStoreDelegate) storeDelegate).readOnlyJournal();
+  }
+
+  private static class ObjectStoreEntryReaderInstantiator implements ActorInstantiator<InMemoryObjectStoreEntryReaderActor> {
+    final String name;
+    final List<BaseEntry<?>> readOnlyJournal;
+
+    ObjectStoreEntryReaderInstantiator(final List<BaseEntry<?>> readOnlyJournal, final String name) {
+      this.readOnlyJournal = readOnlyJournal;
+      this.name = name;
+    }
+
+    @Override
+    public InMemoryObjectStoreEntryReaderActor instantiate() {
+      return new InMemoryObjectStoreEntryReaderActor(readOnlyJournal(), name);
+    }
+
+    @Override
+    public Class<InMemoryObjectStoreEntryReaderActor> type() {
+      return InMemoryObjectStoreEntryReaderActor.class;
+    }
+
+    @SuppressWarnings("unchecked")
+    <E, ET extends Entry<E>> ET readOnlyJournal() {
+      return (ET) readOnlyJournal;
+    }
   }
 }

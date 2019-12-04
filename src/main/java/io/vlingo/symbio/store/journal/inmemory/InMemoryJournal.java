@@ -34,6 +34,7 @@ import io.vlingo.symbio.store.Result;
 import io.vlingo.symbio.store.dispatch.Dispatchable;
 import io.vlingo.symbio.store.dispatch.Dispatcher;
 import io.vlingo.symbio.store.dispatch.DispatcherControl;
+import io.vlingo.symbio.store.dispatch.DispatcherControl.DispatcherControlInstantiator;
 import io.vlingo.symbio.store.dispatch.control.DispatcherControlActor;
 import io.vlingo.symbio.store.dispatch.inmemory.InMemoryDispatcherControlDelegate;
 import io.vlingo.symbio.store.journal.Journal;
@@ -56,6 +57,7 @@ public class InMemoryJournal<T,RS extends State<?>> implements Journal<T>, Stopp
     this(dispatcher, world, 1000L, 1000L);
   }
 
+  @SuppressWarnings({ "rawtypes", "unchecked" })
   public InMemoryJournal(final Dispatcher<Dispatchable<Entry<T>,RS>> dispatcher, final World world,
           final long checkConfirmationExpirationInterval, final long confirmationExpiration) {
     this.entryAdapterProvider = EntryAdapterProvider.instance(world);
@@ -74,7 +76,7 @@ public class InMemoryJournal<T,RS extends State<?>> implements Journal<T>, Stopp
             DispatcherControl.class,
             Definition.has(
                     DispatcherControlActor.class,
-                    Definition.parameters(
+                    new DispatcherControlInstantiator(
                             dispatcher,
                             dispatcherControlDelegate,
                             checkConfirmationExpirationInterval,
