@@ -7,6 +7,10 @@
 
 package io.vlingo.symbio.store.state;
 
+import java.util.List;
+
+import io.vlingo.actors.Actor;
+import io.vlingo.actors.ActorInstantiator;
 import io.vlingo.common.Completes;
 import io.vlingo.common.Outcome;
 import io.vlingo.symbio.Entry;
@@ -15,8 +19,6 @@ import io.vlingo.symbio.Source;
 import io.vlingo.symbio.store.EntryReader;
 import io.vlingo.symbio.store.Result;
 import io.vlingo.symbio.store.StorageException;
-
-import java.util.List;
 
 /**
  * The basic State Store interface, defining standard dispatching and control types.
@@ -76,6 +78,7 @@ public interface StateStore extends StateStoreReader, StateStoreWriter {
     void close();
     boolean isClosed();
     EntryReader.Advice entryReaderAdvice();
+    default <A extends Actor> ActorInstantiator<A> instantiator() { return null; }
     String originatorId();
     <S,R> S stateFrom(final R result, final String id) throws Exception;
   }
