@@ -51,19 +51,19 @@ public interface DispatcherControl {
     void stop();
   }
 
-  static class DispatcherControlInstantiator<ET extends Entry<?>, ST extends State<?>> implements ActorInstantiator<DispatcherControlActor> {
+  public static class DispatcherControlInstantiator<ET extends Entry<?>, ST extends State<?>> implements ActorInstantiator<DispatcherControlActor> {
     private final Dispatcher<Dispatchable<? extends Entry<?>, ? extends State<?>>> dispatcher;
-    private final DispatcherControlDelegate<? extends Entry<?>, ? extends State<?>> dispatcherControl;
+    private final DispatcherControlDelegate<? extends Entry<?>, ? extends State<?>> delegate;
     private final long checkConfirmationExpirationInterval;
     private final long confirmationExpiration;
 
     public DispatcherControlInstantiator(
             final Dispatcher<Dispatchable<? extends Entry<?>, ? extends State<?>>> dispatcher,
-            final DispatcherControlDelegate<? extends Entry<?>, ? extends State<?>> dispatcherControl,
+            final DispatcherControlDelegate<? extends Entry<?>, ? extends State<?>> delegate,
             final long checkConfirmationExpirationInterval,
             final long confirmationExpiration) {
       this.dispatcher = dispatcher;
-      this.dispatcherControl = dispatcherControl;
+      this.delegate = delegate;
       this.checkConfirmationExpirationInterval = checkConfirmationExpirationInterval;
       this.confirmationExpiration = confirmationExpiration;
     }
@@ -72,7 +72,7 @@ public interface DispatcherControl {
     public DispatcherControlActor instantiate() {
       return new DispatcherControlActor(
               dispatcher,
-              dispatcherControl,
+              delegate,
               checkConfirmationExpirationInterval,
               confirmationExpiration);
     }
