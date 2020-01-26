@@ -111,6 +111,11 @@
       <artifactId>vlingo-actors</artifactId>
       <version>1.0.0</version>
     </dependency>
+    <dependency>
+      <groupId>io.vlingo</groupId>
+      <artifactId>vlingo-streams</artifactId>
+      <version>1.0.0</version>
+    </dependency>
   </dependencies>
   <distributionManagement>
     <repository>
