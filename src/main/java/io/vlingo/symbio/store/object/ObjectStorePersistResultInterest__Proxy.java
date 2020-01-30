@@ -12,6 +12,7 @@ import io.vlingo.actors.DeadLetter;
 import io.vlingo.actors.LocalMessage;
 import io.vlingo.actors.Mailbox;
 import io.vlingo.common.Outcome;
+import io.vlingo.common.SerializableConsumer;
 import io.vlingo.symbio.store.Result;
 import io.vlingo.symbio.store.StorageException;
 import io.vlingo.symbio.store.object.ObjectStoreWriter.PersistResultInterest;
@@ -32,7 +33,7 @@ public class ObjectStorePersistResultInterest__Proxy implements io.vlingo.symbio
   @Override
   public void persistResultedIn(Outcome<StorageException, Result> arg0, java.lang.Object arg1, int arg2, int arg3, Object arg4) {
     if (!actor.isStopped()) {
-      final java.util.function.Consumer<PersistResultInterest> consumer = (actor) -> actor.persistResultedIn(arg0, arg1, arg2, arg3, arg4);
+      final SerializableConsumer<PersistResultInterest> consumer = (actor) -> actor.persistResultedIn(arg0, arg1, arg2, arg3, arg4);
       if (mailbox.isPreallocated()) { mailbox.send(actor, PersistResultInterest.class, consumer, null, persistResultedInRepresentation1); }
       else { mailbox.send(new LocalMessage<PersistResultInterest>(actor, PersistResultInterest.class, consumer, persistResultedInRepresentation1)); }
     } else {

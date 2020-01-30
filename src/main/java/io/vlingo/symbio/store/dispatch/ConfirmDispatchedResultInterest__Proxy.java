@@ -11,6 +11,7 @@ import io.vlingo.actors.Actor;
 import io.vlingo.actors.DeadLetter;
 import io.vlingo.actors.LocalMessage;
 import io.vlingo.actors.Mailbox;
+import io.vlingo.common.SerializableConsumer;
 
 public class ConfirmDispatchedResultInterest__Proxy implements ConfirmDispatchedResultInterest {
 
@@ -26,7 +27,7 @@ public class ConfirmDispatchedResultInterest__Proxy implements ConfirmDispatched
 
   public void confirmDispatchedResultedIn(io.vlingo.symbio.store.Result arg0, java.lang.String arg1) {
     if (!actor.isStopped()) {
-      final java.util.function.Consumer<ConfirmDispatchedResultInterest> consumer = (actor) -> actor.confirmDispatchedResultedIn(arg0, arg1);
+      final SerializableConsumer<ConfirmDispatchedResultInterest> consumer = (actor) -> actor.confirmDispatchedResultedIn(arg0, arg1);
       if (mailbox.isPreallocated()) { mailbox.send(actor, ConfirmDispatchedResultInterest.class, consumer, null, confirmDispatchedResultedInRepresentation1); }
       else { mailbox.send(new LocalMessage<ConfirmDispatchedResultInterest>(actor, ConfirmDispatchedResultInterest.class, consumer, confirmDispatchedResultedInRepresentation1)); }
     } else {

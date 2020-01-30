@@ -7,17 +7,14 @@
 
 package io.vlingo.symbio.store.state;
 
-import java.util.List;
-
-import io.vlingo.actors.Actor;
-import io.vlingo.actors.DeadLetter;
-import io.vlingo.actors.LocalMessage;
-import io.vlingo.actors.Mailbox;
-import io.vlingo.actors.Returns;
+import io.vlingo.actors.*;
 import io.vlingo.common.BasicCompletes;
 import io.vlingo.common.Completes;
+import io.vlingo.common.SerializableConsumer;
 import io.vlingo.symbio.Entry;
 import io.vlingo.symbio.Source;
+
+import java.util.List;
 
 public class StateStore__Proxy implements io.vlingo.symbio.store.state.StateStore {
 
@@ -36,7 +33,7 @@ public class StateStore__Proxy implements io.vlingo.symbio.store.state.StateStor
   @Override
   public <S,C> void write(java.lang.String arg0, S arg1, int arg2, final List<Source<C>> arg3, io.vlingo.symbio.Metadata arg4, io.vlingo.symbio.store.state.StateStore.WriteResultInterest arg5, java.lang.Object arg6) {
     if (!actor.isStopped()) {
-      final java.util.function.Consumer<StateStore> consumer = (actor) -> actor.write(arg0, arg1, arg2, arg3, arg4, arg5, arg6);
+      final SerializableConsumer<StateStore> consumer = (actor) -> actor.write(arg0, arg1, arg2, arg3, arg4, arg5, arg6);
       if (mailbox.isPreallocated()) { mailbox.send(actor, StateStore.class, consumer, null, writeRepresentation1); }
       else { mailbox.send(new LocalMessage<StateStore>(actor, StateStore.class, consumer, writeRepresentation1)); }
     } else {
@@ -46,7 +43,7 @@ public class StateStore__Proxy implements io.vlingo.symbio.store.state.StateStor
   @Override
   public void read(java.lang.String arg0, java.lang.Class<?> arg1, io.vlingo.symbio.store.state.StateStore.ReadResultInterest arg2, java.lang.Object arg3) {
     if (!actor.isStopped()) {
-      final java.util.function.Consumer<StateStore> consumer = (actor) -> actor.read(arg0, arg1, arg2, arg3);
+      final SerializableConsumer<StateStore> consumer = (actor) -> actor.read(arg0, arg1, arg2, arg3);
       if (mailbox.isPreallocated()) { mailbox.send(actor, StateStore.class, consumer, null, readRepresentation2); }
       else { mailbox.send(new LocalMessage<StateStore>(actor, StateStore.class, consumer, readRepresentation2)); }
     } else {
@@ -56,7 +53,7 @@ public class StateStore__Proxy implements io.vlingo.symbio.store.state.StateStor
   @Override
   public <ET extends Entry<?>> Completes<StateStoreEntryReader<ET>> entryReader(String arg0) {
     if (!actor.isStopped()) {
-      final java.util.function.Consumer<StateStore> consumer = (actor) -> actor.entryReader(arg0);
+      final SerializableConsumer<StateStore> consumer = (actor) -> actor.entryReader(arg0);
       final Completes<StateStoreEntryReader<ET>> completes = new BasicCompletes<>(actor.scheduler());
       if (mailbox.isPreallocated()) { mailbox.send(actor, StateStore.class, consumer, Returns.value(completes), entryReaderRepresentation3); }
       else { mailbox.send(new LocalMessage<StateStore>(actor, StateStore.class, consumer, Returns.value(completes), entryReaderRepresentation3)); }

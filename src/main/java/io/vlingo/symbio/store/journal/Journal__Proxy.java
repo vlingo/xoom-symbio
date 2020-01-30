@@ -1,13 +1,8 @@
 package io.vlingo.symbio.store.journal;
 
-import java.util.function.Consumer;
-
-import io.vlingo.actors.Actor;
-import io.vlingo.actors.DeadLetter;
-import io.vlingo.actors.LocalMessage;
-import io.vlingo.actors.Mailbox;
-import io.vlingo.actors.Returns;
+import io.vlingo.actors.*;
 import io.vlingo.common.BasicCompletes;
+import io.vlingo.common.SerializableConsumer;
 import io.vlingo.symbio.Entry;
 
 @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -35,7 +30,7 @@ public class Journal__Proxy<T> implements io.vlingo.symbio.store.journal.Journal
   @Override
   public <S, ST> void append(final java.lang.String arg0, final int arg1, final io.vlingo.symbio.Source<S> arg2,
           final io.vlingo.symbio.store.journal.Journal.AppendResultInterest arg3, final java.lang.Object arg4) {
-    final java.util.function.Consumer<Journal> consumer = (actor) -> actor.append(arg0, arg1, arg2, arg3, arg4);
+    final SerializableConsumer<Journal> consumer = (actor) -> actor.append(arg0, arg1, arg2, arg3, arg4);
     send(Journal__Proxy.appendRepresentation1, consumer);
   }
 
@@ -43,7 +38,7 @@ public class Journal__Proxy<T> implements io.vlingo.symbio.store.journal.Journal
   public <S, ST> void append(final java.lang.String arg0, final int arg1, final io.vlingo.symbio.Source<S> arg2,
           final io.vlingo.symbio.Metadata arg3, final io.vlingo.symbio.store.journal.Journal.AppendResultInterest arg4,
           final java.lang.Object arg5) {
-    final java.util.function.Consumer<Journal> consumer = (actor) -> actor.append(arg0, arg1, arg2, arg3, arg4, arg5);
+    final SerializableConsumer<Journal> consumer = (actor) -> actor.append(arg0, arg1, arg2, arg3, arg4, arg5);
     send(Journal__Proxy.appendRepresentation2, consumer);
   }
 
@@ -51,7 +46,7 @@ public class Journal__Proxy<T> implements io.vlingo.symbio.store.journal.Journal
   public <S, ST> void appendAll(final java.lang.String arg0, final int arg1,
           final java.util.List<io.vlingo.symbio.Source<S>> arg2,
           final io.vlingo.symbio.store.journal.Journal.AppendResultInterest arg3, final java.lang.Object arg4) {
-    final java.util.function.Consumer<Journal> consumer = (actor) -> actor.appendAll(arg0, arg1, arg2, arg3, arg4);
+    final SerializableConsumer<Journal> consumer = (actor) -> actor.appendAll(arg0, arg1, arg2, arg3, arg4);
     send(Journal__Proxy.appendAllRepresentation, consumer);
   }
 
@@ -59,7 +54,7 @@ public class Journal__Proxy<T> implements io.vlingo.symbio.store.journal.Journal
   public <S, ST> void appendAll(final java.lang.String arg0, final int arg1,
           final java.util.List<io.vlingo.symbio.Source<S>> arg2, final io.vlingo.symbio.Metadata arg3,
           final io.vlingo.symbio.store.journal.Journal.AppendResultInterest arg4, final java.lang.Object arg5) {
-    final java.util.function.Consumer<Journal> consumer = (actor) -> actor
+    final SerializableConsumer<Journal> consumer = (actor) -> actor
             .appendAll(arg0, arg1, arg2, arg3, arg4, arg5);
     send(Journal__Proxy.appendAllRepresentation2, consumer);
   }
@@ -68,7 +63,7 @@ public class Journal__Proxy<T> implements io.vlingo.symbio.store.journal.Journal
   public <S, ST> void appendAllWith(final java.lang.String arg0, final int arg1,
           final java.util.List<io.vlingo.symbio.Source<S>> arg2, final ST arg3,
           final io.vlingo.symbio.store.journal.Journal.AppendResultInterest arg4, final java.lang.Object arg5) {
-    final java.util.function.Consumer<Journal> consumer = (actor) -> actor
+    final SerializableConsumer<Journal> consumer = (actor) -> actor
             .appendAllWith(arg0, arg1, arg2, arg3, arg4, arg5);
     send(Journal__Proxy.appendAllWithRepresentation1, consumer);
   }
@@ -77,7 +72,7 @@ public class Journal__Proxy<T> implements io.vlingo.symbio.store.journal.Journal
   public <S, ST> void appendAllWith(final java.lang.String arg0, final int arg1,
           final java.util.List<io.vlingo.symbio.Source<S>> arg2, final io.vlingo.symbio.Metadata arg3, final ST arg4,
           final io.vlingo.symbio.store.journal.Journal.AppendResultInterest arg5, final java.lang.Object arg6) {
-    final java.util.function.Consumer<Journal> consumer = (actor) -> actor
+    final SerializableConsumer<Journal> consumer = (actor) -> actor
             .appendAllWith(arg0, arg1, arg2, arg3, arg4, arg5, arg6);
     send(Journal__Proxy.appendAllWithRepresentation2, consumer);
   }
@@ -86,7 +81,7 @@ public class Journal__Proxy<T> implements io.vlingo.symbio.store.journal.Journal
   public <S, ST> void appendWith(final java.lang.String arg0, final int arg1, final io.vlingo.symbio.Source<S> arg2,
           final ST arg3, final io.vlingo.symbio.store.journal.Journal.AppendResultInterest arg4,
           final java.lang.Object arg5) {
-    final java.util.function.Consumer<Journal> consumer = (actor) -> actor
+    final SerializableConsumer<Journal> consumer = (actor) -> actor
             .appendWith(arg0, arg1, arg2, arg3, arg4, arg5);
     send(Journal__Proxy.appendWithRepresentation1, consumer);
   }
@@ -95,12 +90,12 @@ public class Journal__Proxy<T> implements io.vlingo.symbio.store.journal.Journal
   public <S, ST> void appendWith(final java.lang.String arg0, final int arg1, final io.vlingo.symbio.Source<S> arg2,
           final io.vlingo.symbio.Metadata arg3, final ST arg4,
           final io.vlingo.symbio.store.journal.Journal.AppendResultInterest arg5, final java.lang.Object arg6) {
-    final java.util.function.Consumer<Journal> consumer = (actor) -> actor
+    final SerializableConsumer<Journal> consumer = (actor) -> actor
             .appendWith(arg0, arg1, arg2, arg3, arg4, arg5, arg6);
     send(Journal__Proxy.appendWithRepresentation2, consumer);
   }
 
-  private void send(final String representation, final Consumer<Journal> consumer) {
+  private void send(final String representation, final SerializableConsumer<Journal> consumer) {
     if (!actor.isStopped()) {
       if (mailbox.isPreallocated()) {
         mailbox.send(actor, Journal.class, consumer, null, representation);
@@ -115,7 +110,7 @@ public class Journal__Proxy<T> implements io.vlingo.symbio.store.journal.Journal
   @Override
   public <ET extends Entry<?>> io.vlingo.common.Completes<io.vlingo.symbio.store.journal.JournalReader<ET>> journalReader(final java.lang.String arg0) {
     if (!actor.isStopped()) {
-      final java.util.function.Consumer<Journal> consumer = (actor) -> actor.journalReader(arg0);
+      final SerializableConsumer<Journal> consumer = (actor) -> actor.journalReader(arg0);
       final io.vlingo.common.Completes<io.vlingo.symbio.store.journal.JournalReader<ET>> completes = new BasicCompletes<>(
               actor.scheduler());
       if (mailbox.isPreallocated()) {
@@ -133,7 +128,7 @@ public class Journal__Proxy<T> implements io.vlingo.symbio.store.journal.Journal
   @Override
   public io.vlingo.common.Completes<io.vlingo.symbio.store.journal.StreamReader<T>> streamReader(final java.lang.String arg0) {
     if (!actor.isStopped()) {
-      final java.util.function.Consumer<Journal> consumer = (actor) -> actor.streamReader(arg0);
+      final SerializableConsumer<Journal> consumer = (actor) -> actor.streamReader(arg0);
       final io.vlingo.common.Completes<io.vlingo.symbio.store.journal.StreamReader<T>> completes = new BasicCompletes<>(
               actor.scheduler());
       if (mailbox.isPreallocated()) {

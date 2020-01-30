@@ -11,8 +11,7 @@ import io.vlingo.actors.Actor;
 import io.vlingo.actors.DeadLetter;
 import io.vlingo.actors.LocalMessage;
 import io.vlingo.actors.Mailbox;
-
-import java.util.function.Consumer;
+import io.vlingo.common.SerializableConsumer;
 
 public class DispatcherControl__Proxy implements DispatcherControl {
 
@@ -28,21 +27,21 @@ public class DispatcherControl__Proxy implements DispatcherControl {
   }
 
   public void dispatchUnconfirmed() {
-    final java.util.function.Consumer<DispatcherControl> consumer = (actor) -> actor.dispatchUnconfirmed();
+    final SerializableConsumer<DispatcherControl> consumer = (actor) -> actor.dispatchUnconfirmed();
     send(consumer, DispatcherControl__Proxy.dispatchUnconfirmedRepresentation1);
   }
 
   public void confirmDispatched(final java.lang.String arg0, final ConfirmDispatchedResultInterest arg1) {
-    final java.util.function.Consumer<DispatcherControl> consumer = (actor) -> actor.confirmDispatched(arg0, arg1);
+    final SerializableConsumer<DispatcherControl> consumer = (actor) -> actor.confirmDispatched(arg0, arg1);
     send(consumer, DispatcherControl__Proxy.confirmDispatchedRepresentation2);
   }
 
   public void stop() {
-    final java.util.function.Consumer<DispatcherControl> consumer = (actor) -> actor.stop();
+    final SerializableConsumer<DispatcherControl> consumer = (actor) -> actor.stop();
     send(consumer, DispatcherControl__Proxy.dispatchUnconfirmedRepresentation1);
   }
 
-  private void send(final Consumer<DispatcherControl> consumer,final String representation) {
+  private void send(final SerializableConsumer<DispatcherControl> consumer, final String representation) {
     if (!actor.isStopped()) {
       if (mailbox.isPreallocated()) {
         mailbox.send(actor, DispatcherControl.class, consumer, null, representation);

@@ -11,6 +11,7 @@ import io.vlingo.actors.Actor;
 import io.vlingo.actors.DeadLetter;
 import io.vlingo.actors.LocalMessage;
 import io.vlingo.actors.Mailbox;
+import io.vlingo.common.SerializableConsumer;
 import io.vlingo.symbio.store.object.ObjectStoreReader.QueryResultInterest;
 
 public class ObjectStoreQueryResultInterest__Proxy implements io.vlingo.symbio.store.object.ObjectStore.QueryResultInterest {
@@ -29,7 +30,7 @@ public class ObjectStoreQueryResultInterest__Proxy implements io.vlingo.symbio.s
   @Override
   public void queryAllResultedIn(io.vlingo.common.Outcome<io.vlingo.symbio.store.StorageException, io.vlingo.symbio.store.Result> arg0, io.vlingo.symbio.store.object.ObjectStore.QueryMultiResults arg1, java.lang.Object arg2) {
     if (!actor.isStopped()) {
-      final java.util.function.Consumer<QueryResultInterest> consumer = (actor) -> actor.queryAllResultedIn(arg0, arg1, arg2);
+      final SerializableConsumer<QueryResultInterest> consumer = (actor) -> actor.queryAllResultedIn(arg0, arg1, arg2);
       if (mailbox.isPreallocated()) { mailbox.send(actor, QueryResultInterest.class, consumer, null, queryAllResultedInRepresentation1); }
       else { mailbox.send(new LocalMessage<QueryResultInterest>(actor, QueryResultInterest.class, consumer, queryAllResultedInRepresentation1)); }
     } else {
@@ -39,7 +40,7 @@ public class ObjectStoreQueryResultInterest__Proxy implements io.vlingo.symbio.s
   @Override
   public void queryObjectResultedIn(io.vlingo.common.Outcome<io.vlingo.symbio.store.StorageException, io.vlingo.symbio.store.Result> arg0, io.vlingo.symbio.store.object.ObjectStore.QuerySingleResult arg1, java.lang.Object arg2) {
     if (!actor.isStopped()) {
-      final java.util.function.Consumer<QueryResultInterest> consumer = (actor) -> actor.queryObjectResultedIn(arg0, arg1, arg2);
+      final SerializableConsumer<QueryResultInterest> consumer = (actor) -> actor.queryObjectResultedIn(arg0, arg1, arg2);
       if (mailbox.isPreallocated()) { mailbox.send(actor, QueryResultInterest.class, consumer, null, queryObjectResultedInRepresentation2); }
       else { mailbox.send(new LocalMessage<QueryResultInterest>(actor, QueryResultInterest.class, consumer, queryObjectResultedInRepresentation2)); }
     } else {
