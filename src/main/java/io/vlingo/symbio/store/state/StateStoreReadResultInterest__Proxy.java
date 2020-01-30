@@ -11,6 +11,7 @@ import io.vlingo.actors.Actor;
 import io.vlingo.actors.DeadLetter;
 import io.vlingo.actors.LocalMessage;
 import io.vlingo.actors.Mailbox;
+import io.vlingo.common.SerializableConsumer;
 import io.vlingo.symbio.store.state.StateStore.ReadResultInterest;
 
 public class StateStoreReadResultInterest__Proxy implements io.vlingo.symbio.store.state.StateStore.ReadResultInterest {
@@ -27,7 +28,7 @@ public class StateStoreReadResultInterest__Proxy implements io.vlingo.symbio.sto
 
   public <S>void readResultedIn(io.vlingo.common.Outcome<io.vlingo.symbio.store.StorageException, io.vlingo.symbio.store.Result> arg0, java.lang.String arg1, S arg2, int arg3, io.vlingo.symbio.Metadata arg4, java.lang.Object arg5) {
     if (!actor.isStopped()) {
-      final java.util.function.Consumer<ReadResultInterest> consumer = (actor) -> actor.readResultedIn(arg0, arg1, arg2, arg3, arg4, arg5);
+      final SerializableConsumer<ReadResultInterest> consumer = (actor) -> actor.readResultedIn(arg0, arg1, arg2, arg3, arg4, arg5);
       if (mailbox.isPreallocated()) { mailbox.send(actor, ReadResultInterest.class, consumer, null, readResultedInRepresentation1); }
       else { mailbox.send(new LocalMessage<ReadResultInterest>(actor, ReadResultInterest.class, consumer, readResultedInRepresentation1)); }
     } else {

@@ -7,14 +7,15 @@
 
 package io.vlingo.symbio.store.state;
 
-import java.util.List;
-
 import io.vlingo.actors.Actor;
 import io.vlingo.actors.DeadLetter;
 import io.vlingo.actors.LocalMessage;
 import io.vlingo.actors.Mailbox;
+import io.vlingo.common.SerializableConsumer;
 import io.vlingo.symbio.Source;
 import io.vlingo.symbio.store.state.StateStore.WriteResultInterest;
+
+import java.util.List;
 
 public class StateStoreWriteResultInterest__Proxy implements io.vlingo.symbio.store.state.StateStore.WriteResultInterest {
 
@@ -31,7 +32,7 @@ public class StateStoreWriteResultInterest__Proxy implements io.vlingo.symbio.st
   @Override
   public <S,C> void writeResultedIn(io.vlingo.common.Outcome<io.vlingo.symbio.store.StorageException, io.vlingo.symbio.store.Result> arg0, java.lang.String arg1, S arg2, int arg3, final List<Source<C>> arg4, java.lang.Object arg5) {
     if (!actor.isStopped()) {
-      final java.util.function.Consumer<WriteResultInterest> consumer = (actor) -> actor.writeResultedIn(arg0, arg1, arg2, arg3, arg4, arg5);
+      final SerializableConsumer<WriteResultInterest> consumer = (actor) -> actor.writeResultedIn(arg0, arg1, arg2, arg3, arg4, arg5);
       if (mailbox.isPreallocated()) { mailbox.send(actor, WriteResultInterest.class, consumer, null, writeResultedInRepresentation1); }
       else { mailbox.send(new LocalMessage<WriteResultInterest>(actor, WriteResultInterest.class, consumer, writeResultedInRepresentation1)); }
     } else {
