@@ -73,6 +73,16 @@ public interface Entry<T> extends Comparable<Entry<T>> {
   Metadata metadata();
 
   /**
+   * Answer the simple name of my {@code type}.
+   * @return String
+   */
+  default String simpleTypeName() {
+    final String typeName = typeName();
+    final int index = Math.max(typeName.lastIndexOf('.'), typeName.lastIndexOf('$'));
+    return typeName.substring(index + 1);
+  }
+
+  /**
    * Returns my typeName.
    *
    * @return my type
