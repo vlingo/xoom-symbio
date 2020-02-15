@@ -21,6 +21,18 @@ package io.vlingo.symbio;
  */
 public interface EntryAdapter<S extends Source<?>,E extends Entry<?>> {
   /**
+   * Answer the {@code ST} native state from the {@code E Entry<?>} state.
+   * @param entry the {@code E Entry<?>} to adapt from
+   * @param <ST> the {@code Source<?>} specified by the client
+   * @return ST
+   */
+  @SuppressWarnings("unchecked")
+  default <ST extends Source<?>> ST anyTypeFromEntry(final E entry) {
+    final S source = fromEntry(entry);
+    return (ST) source;
+  }
+
+  /**
    * Answer the {@code S Source<?>} native state from the {@code E Entry<?>} state.
    * @param entry the {@code E Entry<?>} to adapt from
    * @return S
