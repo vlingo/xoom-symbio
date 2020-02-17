@@ -14,7 +14,8 @@ import java.util.*;
 
 /**
  * This class models entries which contain gaps.
- * @param <T> Generic type applied to {@link Entry<T>}
+ *
+ * @param <T> Generic type applied to {@code Entry<T>}.
  */
 public class GappedEntries<T> {
     /**
@@ -49,6 +50,11 @@ public class GappedEntries<T> {
         return Long.compare(id1, id2);
     }
 
+    /**
+     * Get loaded entries
+     *
+     * @return Sorted entries.
+     */
     public List<Entry<T>> getSortedLoadedEntries() {
         SortedSet<Entry<T>> sorted = new TreeSet<>(this::compare);
         sorted.addAll(loadedEntries);
@@ -70,7 +76,8 @@ public class GappedEntries<T> {
 
     /**
      * Combined size of loaded and gapped entries.
-     * @return
+     *
+     * @return Sum of loaded and gapped entries.
      */
     public int size() {
         return loadedEntries.size() + gapIds.size();
@@ -78,7 +85,8 @@ public class GappedEntries<T> {
 
     /**
      * Get first successfully loaded entry.
-     * @return
+     *
+     * @return an {@link Optional} describing the first entry.
      */
     public Optional<Entry<T>> getFirst() {
         if (loadedEntries.size() > 0) {
@@ -88,6 +96,12 @@ public class GappedEntries<T> {
         }
     }
 
+    /**
+     * Builds up a new <code>GappedEntries</code> obtained by filling up current instance with fill ups parameter.
+     *
+     * @param fillups Parameter used to fill up current instance.
+     * @return New, filled up <code>GappedEntries</code>.
+     */
     public GappedEntries<T> fillupWith(List<Entry<T>> fillups) {
         List<Entry<T>> newLoadedEntries = new ArrayList<>(loadedEntries);
         List<Long> newGapIds = new ArrayList<>(gapIds);

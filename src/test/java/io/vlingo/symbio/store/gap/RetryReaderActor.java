@@ -46,7 +46,7 @@ public class RetryReaderActor extends Actor implements Reader {
     public Completes<Entry<String>> readOne() {
         // Simulate failed read of one entry
         final Entry<String> entry = null;
-        final List<Long> gapIds = reader().detectGaps(entry, offset, 1);
+        final List<Long> gapIds = reader().detectGaps(entry, offset);
         GappedEntries<String> gappedEntries = new GappedEntries<>(new ArrayList<>(), gapIds, completesEventually());
 
         reader().readGaps(gappedEntries, 3, 10L, this::readIds);

@@ -20,8 +20,9 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
- * Detection and fill up (gap prevention) functionality related to {@link EntryReader}
- * @param <T> <T> Generic type applied to {@link Entry<T>}
+ * Detection and fill up (gap prevention) functionality related to {@link EntryReader}.
+ *
+ * @param <T> Generic type applied to {@code Entry<T>}
  */
 public class GapRetryReader<T> {
     private final Scheduled<RetryGappedEntries<T>> actor;
@@ -44,22 +45,24 @@ public class GapRetryReader<T> {
 
     /**
      * Single entry variant method of {@link #detectGaps(List, long, long)}.
-     * @param entry
+     * If the entry is loaded successfully, no gap is detected. Otherwise a gap with one id is detected.
+     *
+     * @param entry The entry to detect gap for
      * @param startIndex This index refers to {@link Entry#id()}
-     * @param count
-     * @return
+     * @return One element list if entry is not loaded.
      */
-    public List<Long> detectGaps(Entry<T> entry, long startIndex, long count) {
+    public List<Long> detectGaps(Entry<T> entry, long startIndex) {
         List<Entry<T>> entries = entry == null ? new ArrayList<>() : Collections.singletonList(entry);
-        return detectGaps(entries, startIndex, count);
+        return detectGaps(entries, startIndex, 1);
     }
 
     /**
-     * Detect gaps in entries list.
-     * @param entries
-     * @param startIndex This index refers to {@link Entry#id()}
-     * @param count
-     * @return Empty list if no gaps have been detected.
+     * Detect gaps in entries.
+     *
+     * @param entries Entries to detect gaps for
+     * @param startIndex Start index to check for. This index refers to {@link Entry#id()}
+     * @param count How many elements the list has to contain if no gaps would be present
+     * @return Empty list if no gaps have been detected
      */
     public List<Long> detectGaps(List<Entry<T>> entries, long startIndex, long count) {
         Set<Long> allIds = collectIds(entries);
@@ -74,6 +77,14 @@ public class GapRetryReader<T> {
         return gapIds;
     }
 
+    /**
+     * Retry reading missing gaps.
+     *
+     * @param gappedEntries Successfully already loaded entries
+     * @param retries How many times to retry filling up gaps
+     * @param retryInterval Interval between retries
+     * @param gappedReader Function which reads the the specified gaps based on ids.
+     */
     public void readGaps(GappedEntries<T> gappedEntries, int retries, long retryInterval, Function<List<Long>, List<Entry<T>>> gappedReader) {
         RetryGappedEntries<T> entries = new RetryGappedEntries<>(gappedEntries, 1, retries, retryInterval, gappedReader);
         scheduler.scheduleOnce(actor, entries, 0L, retryInterval);
