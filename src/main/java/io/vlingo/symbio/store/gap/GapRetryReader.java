@@ -13,13 +13,15 @@ import io.vlingo.actors.Stage;
 import io.vlingo.common.Scheduled;
 import io.vlingo.common.Scheduler;
 import io.vlingo.symbio.Entry;
+import io.vlingo.symbio.store.EntryReader;
 
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
- * Detection and fill up (gap prevention) functionality related to {@link io.vlingo.symbio.store.EntryReader}
+ * Detection and fill up (gap prevention) functionality related to {@link EntryReader}
+ * @param <T> <T> Generic type applied to {@link Entry<T>}
  */
 public class GapRetryReader<T> {
     private final Scheduled<RetryGappedEntries<T>> actor;

@@ -12,6 +12,10 @@ import io.vlingo.symbio.Entry;
 
 import java.util.*;
 
+/**
+ * This class models entries which contain gaps.
+ * @param <T> Generic type applied to {@link Entry<T>}
+ */
 public class GappedEntries<T> {
     /**
      * Successfully loaded entries up to now.
