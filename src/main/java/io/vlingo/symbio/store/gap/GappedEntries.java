@@ -10,9 +10,7 @@ package io.vlingo.symbio.store.gap;
 import io.vlingo.actors.CompletesEventually;
 import io.vlingo.symbio.Entry;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 public class GappedEntries<T> {
     /**
@@ -38,6 +36,20 @@ public class GappedEntries<T> {
 
     public List<Entry<T>> getLoadedEntries() {
         return loadedEntries;
+    }
+
+    private int compare(Entry<T> e1, Entry<T> e2) {
+        long id1 = Long.parseLong(e1.id());
+        long id2 = Long.parseLong(e2.id());
+
+        return Long.compare(id1, id2);
+    }
+
+    public List<Entry<T>> getSortedLoadedEntries() {
+        SortedSet<Entry<T>> sorted = new TreeSet<>(this::compare);
+        sorted.addAll(loadedEntries);
+
+        return new ArrayList<>(sorted);
     }
 
     public List<Long> getGapIds() {

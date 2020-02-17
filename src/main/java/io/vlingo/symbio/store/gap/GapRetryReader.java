@@ -116,7 +116,7 @@ public class GapRetryReader<T> {
                     eventually.with(nextGappedEntries.getFirst().orElse(null));
                 } else {
                     // {@link EntryReader<T>} - read a list of Entry<T>
-                    eventually.with(nextGappedEntries.getLoadedEntries());
+                    eventually.with(nextGappedEntries.getSortedLoadedEntries());
                 }
             } else {
                 RetryGappedEntries<T> nextData = data.nextRetry(nextGappedEntries);

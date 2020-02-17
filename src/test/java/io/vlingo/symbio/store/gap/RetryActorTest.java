@@ -43,6 +43,13 @@ public class RetryActorTest {
         List<Entry<String>> entries2 = readerActor.readNext(50).await();
         // 4 entries out of 50 didn't get loaded at all
         Assert.assertEquals(46, entries2.size());
+
+        long previousId = -1;
+        for (Entry<String> currentEntry : entries2) {
+            long currentId = Long.parseLong(currentEntry.id());
+            Assert.assertTrue(previousId < currentId);
+            previousId = currentId;
+        }
     }
 
     public interface Reader {
