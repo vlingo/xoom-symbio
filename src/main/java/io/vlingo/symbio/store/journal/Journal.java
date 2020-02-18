@@ -35,6 +35,9 @@ import io.vlingo.symbio.store.dispatch.Dispatcher;
  * @param <T> the concrete type of {@code Entry<T>} and {@code State<?>} stored, which maybe be String, byte[], or Object
  */
 public interface Journal<T> {
+  static final long DefaultCheckConfirmationExpirationInterval = 1000;
+  static final long DefaultConfirmationExpiration = 1000;
+
   /**
    * Answer a new {@code Journal<T>}
    * @param stage the Stage within which the {@code Journal<T>} is created

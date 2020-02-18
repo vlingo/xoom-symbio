@@ -12,6 +12,8 @@ package io.vlingo.symbio.store.object;
  * mapping, which certainly can be and is supported, but is not limited to such.
  */
 public interface ObjectStore extends ObjectStoreReader, ObjectStoreWriter {
+  static final long DefaultCheckConfirmationExpirationInterval = 1000;
+  static final long DefaultConfirmationExpiration = 1000;
 
   /**
    * Close me.
