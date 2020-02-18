@@ -9,6 +9,7 @@ package io.vlingo.symbio.store.journal.inmemory;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -50,15 +51,11 @@ public class InMemoryJournal<T,RS extends State<?>> implements Journal<T>, Stopp
   private final Map<String, Map<Integer,Integer>> streamIndexes;
   private final Map<String,RS> snapshots;
   private final List<Dispatchable<Entry<T>, RS>> dispatchables;
-  private final Dispatcher<Dispatchable<Entry<T>,RS>> dispatcher;
+  private final List<Dispatcher<Dispatchable<Entry<T>,RS>>> dispatchers;
   private final DispatcherControl dispatcherControl;
 
-  public InMemoryJournal(final Dispatcher<Dispatchable<Entry<T>, RS>> dispatcher, final World world ) {
-    this(dispatcher, world, 1000L, 1000L);
-  }
-
   @SuppressWarnings({ "rawtypes", "unchecked" })
-  public InMemoryJournal(final Dispatcher<Dispatchable<Entry<T>,RS>> dispatcher, final World world,
+  public InMemoryJournal(final List<Dispatcher<Dispatchable<Entry<T>,RS>>> dispatchers, final World world,
           final long checkConfirmationExpirationInterval, final long confirmationExpiration) {
     this.entryAdapterProvider = EntryAdapterProvider.instance(world);
     this.stateAdapterProvider = StateAdapterProvider.instance(world);
@@ -68,7 +65,7 @@ public class InMemoryJournal<T,RS extends State<?>> implements Journal<T>, Stopp
     this.streamIndexes = new HashMap<>();
     this.snapshots = new HashMap<>();
 
-    this.dispatcher = dispatcher;
+    this.dispatchers = dispatchers;
     this.dispatchables = new CopyOnWriteArrayList<>();
     final InMemoryDispatcherControlDelegate<Entry<T>, RS> dispatcherControlDelegate = new InMemoryDispatcherControlDelegate<>(dispatchables);
 
@@ -77,10 +74,14 @@ public class InMemoryJournal<T,RS extends State<?>> implements Journal<T>, Stopp
             Definition.has(
                     DispatcherControlActor.class,
                     new DispatcherControlInstantiator(
-                            dispatcher,
+                            dispatchers,
                             dispatcherControlDelegate,
                             checkConfirmationExpirationInterval,
                             confirmationExpiration)));
+  }
+
+  public InMemoryJournal(final Dispatcher<Dispatchable<Entry<T>, RS>> dispatcher, final World world ) {
+    this(Arrays.asList(dispatcher), world, 1000L, 1000L);
   }
 
   @Override
@@ -203,7 +204,7 @@ public class InMemoryJournal<T,RS extends State<?>> implements Journal<T>, Stopp
     final String id = getDispatchId(streamName, streamVersion, entries);
     final Dispatchable<Entry<T>, RS> dispatchable = new Dispatchable<>(id,  LocalDateTime.now(), snapshot, entries);
     this.dispatchables.add(dispatchable);
-    this.dispatcher.dispatch(dispatchable);
+    this.dispatchers.forEach(d -> d.dispatch(dispatchable));
   }
 
   private static <T> String getDispatchId(final String streamName, final int streamVersion, final Collection<Entry<T>> entries) {

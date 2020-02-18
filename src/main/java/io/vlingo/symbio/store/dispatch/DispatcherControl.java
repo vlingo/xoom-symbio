@@ -7,7 +7,9 @@
 
 package io.vlingo.symbio.store.dispatch;
 
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 import io.vlingo.actors.ActorInstantiator;
 import io.vlingo.symbio.Entry;
@@ -52,26 +54,36 @@ public interface DispatcherControl {
   }
 
   public static class DispatcherControlInstantiator<ET extends Entry<?>, ST extends State<?>> implements ActorInstantiator<DispatcherControlActor> {
-    private final Dispatcher<Dispatchable<? extends Entry<?>, ? extends State<?>>> dispatcher;
+    private static final long serialVersionUID = 1739556269104244158L;
+
+    private final List<Dispatcher<Dispatchable<? extends Entry<?>, ? extends State<?>>>> dispatchers;
     private final DispatcherControlDelegate<? extends Entry<?>, ? extends State<?>> delegate;
     private final long checkConfirmationExpirationInterval;
     private final long confirmationExpiration;
+
+    public DispatcherControlInstantiator(
+            final List<Dispatcher<Dispatchable<? extends Entry<?>, ? extends State<?>>>> dispatchers,
+            final DispatcherControlDelegate<? extends Entry<?>, ? extends State<?>> delegate,
+            final long checkConfirmationExpirationInterval,
+            final long confirmationExpiration) {
+      this.dispatchers = dispatchers;
+      this.delegate = delegate;
+      this.checkConfirmationExpirationInterval = checkConfirmationExpirationInterval;
+      this.confirmationExpiration = confirmationExpiration;
+    }
 
     public DispatcherControlInstantiator(
             final Dispatcher<Dispatchable<? extends Entry<?>, ? extends State<?>>> dispatcher,
             final DispatcherControlDelegate<? extends Entry<?>, ? extends State<?>> delegate,
             final long checkConfirmationExpirationInterval,
             final long confirmationExpiration) {
-      this.dispatcher = dispatcher;
-      this.delegate = delegate;
-      this.checkConfirmationExpirationInterval = checkConfirmationExpirationInterval;
-      this.confirmationExpiration = confirmationExpiration;
+      this(Arrays.asList(dispatcher), delegate, checkConfirmationExpirationInterval, confirmationExpiration);
     }
 
     @Override
     public DispatcherControlActor instantiate() {
       return new DispatcherControlActor(
-              dispatcher,
+              dispatchers,
               delegate,
               checkConfirmationExpirationInterval,
               confirmationExpiration);

@@ -98,6 +98,8 @@ public class InMemoryJournalActor<T,RS extends State<?>> extends Actor implement
 
   @SuppressWarnings("rawtypes")
   private static class InMemoryJournalReaderInstantiator<T extends Entry<?>> implements ActorInstantiator<InMemoryJournalReaderActor> {
+    private static final long serialVersionUID = -4704305821903232245L;
+
     private final JournalReader<T> inmemory;
 
     InMemoryJournalReaderInstantiator(final JournalReader<T> inmemory) {
@@ -118,6 +120,8 @@ public class InMemoryJournalActor<T,RS extends State<?>> extends Actor implement
 
   @SuppressWarnings("rawtypes")
   private static class InMemoryStreamReaderInstantiator<T extends Entry<?>> implements ActorInstantiator<InMemoryStreamReaderActor> {
+    private static final long serialVersionUID = 5878161332125082127L;
+
     private final StreamReader<?> inmemory;
 
     InMemoryStreamReaderInstantiator(final StreamReader<?> inmemory) {

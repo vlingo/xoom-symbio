@@ -9,6 +9,7 @@ package io.vlingo.symbio.store.object.inmemory;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -51,7 +52,7 @@ import io.vlingo.symbio.store.state.StateStoreEntryReader;
 public class InMemoryObjectStoreActor extends Actor implements ObjectStore {
   private final EntryAdapterProvider entryAdapterProvider;
 
-  private final Dispatcher<Dispatchable<BaseEntry<?>,State<?>>> dispatcher;
+  private final List<Dispatcher<Dispatchable<BaseEntry<?>,State<?>>>> dispatchers;
   private final DispatcherControl dispatcherControl;
   private final Map<String,StateStoreEntryReader<?>> entryReaders;
 
@@ -66,10 +67,10 @@ public class InMemoryObjectStoreActor extends Actor implements ObjectStore {
   }
 
   @SuppressWarnings({ "unchecked", "rawtypes" })
-  public InMemoryObjectStoreActor(final Dispatcher<Dispatchable<BaseEntry<?>,State<?>>> dispatcher,
+  public InMemoryObjectStoreActor(final List<Dispatcher<Dispatchable<BaseEntry<?>,State<?>>>> dispatchers,
          final long checkConfirmationExpirationInterval, final long confirmationExpiration ) {
     this.entryAdapterProvider = EntryAdapterProvider.instance(stage().world());
-    this.dispatcher = dispatcher;
+    this.dispatchers = dispatchers;
 
     this.entryReaders = new HashMap<>();
 
@@ -80,10 +81,15 @@ public class InMemoryObjectStoreActor extends Actor implements ObjectStore {
             Definition.has(
                     DispatcherControlActor.class,
                     new DispatcherControlInstantiator(
-                            dispatcher,
+                            dispatchers,
                             this.storeDelegate,
                             checkConfirmationExpirationInterval,
                             confirmationExpiration)));
+  }
+
+  public InMemoryObjectStoreActor(final Dispatcher<Dispatchable<BaseEntry<?>,State<?>>> dispatcher,
+         final long checkConfirmationExpirationInterval, final long confirmationExpiration ) {
+    this(Arrays.asList(dispatcher), checkConfirmationExpirationInterval, confirmationExpiration);
   }
 
   /*
@@ -188,7 +194,7 @@ public class InMemoryObjectStoreActor extends Actor implements ObjectStore {
 
 
   private void dispatch(final Dispatchable<BaseEntry<?>, State<?>> dispatchable){
-    this.dispatcher.dispatch(dispatchable);
+    this.dispatchers.forEach(d -> d.dispatch(dispatchable));
   }
 
   private static Dispatchable<BaseEntry<?>, State<?>> buildDispatchable(final State<?> state, final List<BaseEntry<?>> entries) {
@@ -205,6 +211,8 @@ public class InMemoryObjectStoreActor extends Actor implements ObjectStore {
   }
 
   private static class ObjectStoreEntryReaderInstantiator implements ActorInstantiator<InMemoryObjectStoreEntryReaderActor> {
+    private static final long serialVersionUID = -2022300658559205459L;
+
     final String name;
     final List<BaseEntry<?>> readOnlyJournal;
 

@@ -8,6 +8,7 @@
 package io.vlingo.symbio.store.state.inmemory;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,7 +43,7 @@ public class InMemoryStateStoreActor<RS extends State<?>> extends Actor
     implements StateStore {
 
   private final List<Dispatchable<Entry<?>,RS>> dispatchables;
-  private final Dispatcher<Dispatchable<Entry<?>,RS>> dispatcher;
+  private final List<Dispatcher<Dispatchable<Entry<?>,RS>>> dispatchers;
   private final DispatcherControl dispatcherControl;
   private final List<Entry<?>> entries;
   private final Map<String,StateStoreEntryReader<?>> entryReaders;
@@ -50,16 +51,12 @@ public class InMemoryStateStoreActor<RS extends State<?>> extends Actor
   private final StateAdapterProvider stateAdapterProvider;
   private final Map<String, Map<String, RS>> store;
 
-  public InMemoryStateStoreActor(final Dispatcher<Dispatchable<Entry<?>, RS>> dispatcher) {
-    this(dispatcher, 1000L, 1000L);
-  }
-
   @SuppressWarnings({ "unchecked", "rawtypes" })
-  public InMemoryStateStoreActor(final Dispatcher<Dispatchable<Entry<?>, RS>> dispatcher, final long checkConfirmationExpirationInterval, final long confirmationExpiration) {
-    if (dispatcher == null) {
+  public InMemoryStateStoreActor(final List<Dispatcher<Dispatchable<Entry<?>, RS>>> dispatchers, final long checkConfirmationExpirationInterval, final long confirmationExpiration) {
+    if (dispatchers == null) {
       throw new IllegalArgumentException("Dispatcher must not be null.");
     }
-    this.dispatcher = dispatcher;
+    this.dispatchers = dispatchers;
     this.entryAdapterProvider = EntryAdapterProvider.instance(stage().world());
     this.stateAdapterProvider = StateAdapterProvider.instance(stage().world());
     this.entries = new CopyOnWriteArrayList<>();
@@ -74,10 +71,22 @@ public class InMemoryStateStoreActor<RS extends State<?>> extends Actor
       Definition.has(
         DispatcherControlActor.class,
         new DispatcherControlInstantiator(
-          dispatcher,
+          dispatchers,
           dispatcherControlDelegate,
           checkConfirmationExpirationInterval,
           confirmationExpiration)));
+  }
+
+  public InMemoryStateStoreActor(final Dispatcher<Dispatchable<Entry<?>, RS>> dispatcher, final long checkConfirmationExpirationInterval, final long confirmationExpiration) {
+    this(Arrays.asList(dispatcher), checkConfirmationExpirationInterval, confirmationExpiration);
+  }
+
+  public InMemoryStateStoreActor(final List<Dispatcher<Dispatchable<Entry<?>, RS>>> dispatchers) {
+    this(dispatchers, 1000L, 1000L);
+  }
+
+  public InMemoryStateStoreActor(final Dispatcher<Dispatchable<Entry<?>, RS>> dispatcher) {
+    this(dispatcher, 1000L, 1000L);
   }
 
   @Override
@@ -215,11 +224,13 @@ public class InMemoryStateStoreActor<RS extends State<?>> extends Actor
     final String dispatchId = storeName + ":" + id;
     final Dispatchable<Entry<?>, RS> dispatchable = new Dispatchable<>(dispatchId, LocalDateTime.now(), raw, entries);
     this.dispatchables.add(dispatchable);
-    this.dispatcher.dispatch(dispatchable);
+    this.dispatchers.forEach(p -> p.dispatch(dispatchable));
   }
 
   @SuppressWarnings({"rawtypes", "unchecked"})
   private static class StateStoreEntryReaderInstantiator implements ActorInstantiator<InMemoryStateStoreEntryReaderActor> {
+    private static final long serialVersionUID = 8463366612347915854L;
+
     final String name;
     final List<Entry<?>> entries;
 

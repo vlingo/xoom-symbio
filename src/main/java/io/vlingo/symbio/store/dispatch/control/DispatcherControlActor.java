@@ -6,6 +6,12 @@
 // one at https://mozilla.org/MPL/2.0/.
 package io.vlingo.symbio.store.dispatch.control;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+
 import io.vlingo.actors.Actor;
 import io.vlingo.common.Cancellable;
 import io.vlingo.common.Scheduled;
@@ -17,26 +23,28 @@ import io.vlingo.symbio.store.dispatch.Dispatchable;
 import io.vlingo.symbio.store.dispatch.Dispatcher;
 import io.vlingo.symbio.store.dispatch.DispatcherControl;
 
-import java.time.Duration;
-import java.time.LocalDateTime;
-import java.util.Collection;
-
 public class DispatcherControlActor extends Actor implements DispatcherControl, Scheduled<Object> {
   private final static long DEFAULT_REDISPATCH_DELAY = 2000L;
-  
-  private final Dispatcher<Dispatchable<? extends Entry<?>, ? extends State<?>>> dispatcher;
+
+  private final List<Dispatcher<Dispatchable<? extends Entry<?>, ? extends State<?>>>> dispatchers;
   private final DispatcherControlDelegate<? extends Entry<?>, ? extends State<?>> delegate;
   private final Cancellable cancellable;
   private final long confirmationExpiration;
 
-  public DispatcherControlActor(final Dispatcher<Dispatchable<? extends Entry<?>, ? extends State<?>>> dispatcher,
+  public DispatcherControlActor(final List<Dispatcher<Dispatchable<? extends Entry<?>, ? extends State<?>>>> dispatchers,
           final DispatcherControlDelegate<? extends Entry<?>, ? extends State<?>> delegate,
           final long checkConfirmationExpirationInterval, final long confirmationExpiration) {
-    this.dispatcher = dispatcher;
+    this.dispatchers = dispatchers;
     this.delegate = delegate;
     this.confirmationExpiration = confirmationExpiration;
     this.cancellable = scheduler().schedule(this, null, DEFAULT_REDISPATCH_DELAY, checkConfirmationExpirationInterval);
-    this.dispatcher.controlWith(this);
+    this.dispatchers.forEach(d -> d.controlWith(this));
+  }
+
+  public DispatcherControlActor(final Dispatcher<Dispatchable<? extends Entry<?>, ? extends State<?>>> dispatcher,
+          final DispatcherControlDelegate<? extends Entry<?>, ? extends State<?>> delegate,
+          final long checkConfirmationExpirationInterval, final long confirmationExpiration) {
+    this(Arrays.asList(dispatcher), delegate, checkConfirmationExpirationInterval, confirmationExpiration);
   }
 
   @Override
@@ -64,7 +72,7 @@ public class DispatcherControlActor extends Actor implements DispatcherControl, 
         final LocalDateTime then = dispatchable.createdOn();
         final Duration duration = Duration.between(then, now);
         if (Math.abs(duration.toMillis()) > confirmationExpiration) {
-          dispatcher.dispatch(dispatchable);
+          dispatchers.forEach(d -> d.dispatch(dispatchable));
         }
       }
     } catch (final Exception e) {

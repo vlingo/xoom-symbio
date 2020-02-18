@@ -7,6 +7,9 @@
 
 package io.vlingo.symbio.store.journal;
 
+import java.util.List;
+import java.util.Optional;
+
 import io.vlingo.actors.Actor;
 import io.vlingo.actors.Stage;
 import io.vlingo.common.Completes;
@@ -20,9 +23,6 @@ import io.vlingo.symbio.store.StorageException;
 import io.vlingo.symbio.store.dispatch.Dispatchable;
 import io.vlingo.symbio.store.dispatch.Dispatcher;
 
-import java.util.List;
-import java.util.Optional;
-
 /**
  * The top-level journal used within a Bounded Context (microservice) to store all of
  * its {@code Entry<T>} instances for {@code EventSourced} and {@code CommandSourced} components. Each use of
@@ -35,6 +35,25 @@ import java.util.Optional;
  * @param <T> the concrete type of {@code Entry<T>} and {@code State<?>} stored, which maybe be String, byte[], or Object
  */
 public interface Journal<T> {
+  /**
+   * Answer a new {@code Journal<T>}
+   * @param stage the Stage within which the {@code Journal<T>} is created
+   * @param implementor the {@code Class<A>} of the implementor
+   * @param dispatchers the {@code List<Dispatcher<T>>}
+   * @param additional the Object[] of additional parameters
+   * @param <A> the concrete type of the Actor implementing the {@code Journal<T>} protocol
+   * @param <T> the concrete type of {@code Entry<T>} stored and read, which maybe be String, byte[], or Object
+   * @param <RS> the raw snapshot state type
+   * @return {@code Journal<T>}
+   */
+  @SuppressWarnings("unchecked")
+  static <A extends Actor, T, RS extends State<?>> Journal<T> using(final Stage stage, final Class<A> implementor,
+          final List<Dispatcher<Dispatchable<Entry<T>,RS>>> dispatchers, final Object...additional) {
+    return additional.length == 0 ?
+             stage.actorFor(Journal.class, implementor, dispatchers) :
+             stage.actorFor(Journal.class, implementor, dispatchers, additional);
+  }
+
   /**
    * Answer a new {@code Journal<T>}
    * @param stage the Stage within which the {@code Journal<T>} is created
