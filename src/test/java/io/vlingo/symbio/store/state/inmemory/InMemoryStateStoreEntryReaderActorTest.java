@@ -7,6 +7,13 @@
 
 package io.vlingo.symbio.store.state.inmemory;
 
+import static org.junit.Assert.assertEquals;
+
+import java.util.Arrays;
+
+import org.junit.Before;
+import org.junit.Test;
+
 import io.vlingo.actors.World;
 import io.vlingo.actors.testkit.AccessSafely;
 import io.vlingo.actors.testkit.TestWorld;
@@ -24,12 +31,6 @@ import io.vlingo.symbio.store.state.MockStateStoreResultInterest;
 import io.vlingo.symbio.store.state.StateStore;
 import io.vlingo.symbio.store.state.StateStoreEntryReader;
 import io.vlingo.symbio.store.state.StateTypeStateStoreMap;
-import org.junit.Before;
-import org.junit.Test;
-
-import java.util.Arrays;
-
-import static org.junit.Assert.assertEquals;
 
 public class InMemoryStateStoreEntryReaderActorTest {
   private static final String Id1 = "123-A";
@@ -58,11 +59,11 @@ public class InMemoryStateStoreEntryReaderActorTest {
     assertEquals(new Event3(), access.readFrom("sources"));
 
     final TextEntry entry1 = reader.readNext().await();
-    assertEquals(entryAdapterProvider.asEntry(new Event1(), Metadata.nullMetadata()).withId("0"), entry1);
+    assertEquals(entryAdapterProvider.asEntry(new Event1(), 1, Metadata.nullMetadata()).withId("0"), entry1);
     final TextEntry entry2 = reader.readNext().await();
-    assertEquals(entryAdapterProvider.asEntry(new Event2(), Metadata.nullMetadata()).withId("1"), entry2);
+    assertEquals(entryAdapterProvider.asEntry(new Event2(), 1, Metadata.nullMetadata()).withId("1"), entry2);
     final TextEntry entry3 = reader.readNext().await();
-    assertEquals(entryAdapterProvider.asEntry(new Event3(), Metadata.nullMetadata()).withId("2"), entry3);
+    assertEquals(entryAdapterProvider.asEntry(new Event3(), 1, Metadata.nullMetadata()).withId("2"), entry3);
 
     reader.rewind();
     assertEquals(Arrays.asList(entry1, entry2, entry3), reader.readNext(3).await());
