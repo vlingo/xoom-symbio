@@ -87,7 +87,7 @@ public class InMemoryJournal<T,RS extends State<?>> implements Journal<T>, Stopp
   @Override
   public <S, ST> void append(final String streamName, final int streamVersion, final Source<S> source, final Metadata metadata,
           final AppendResultInterest interest, final Object object) {
-    final Entry<T> entry = entryAdapterProvider.asEntry(source, metadata);
+    final Entry<T> entry = entryAdapterProvider.asEntry(source, streamVersion, metadata);
     insert(streamName, streamVersion, entry);
     dispatch(streamName, streamVersion, Collections.singletonList(entry), null);
     interest.appendResultedIn(Success.of(Result.Success), streamName, streamVersion, source, Optional.empty(), object);
