@@ -8,7 +8,6 @@ package io.vlingo.symbio.store.dispatch.control;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -31,9 +30,11 @@ public class DispatcherControlActor extends Actor implements DispatcherControl, 
   private final Cancellable cancellable;
   private final long confirmationExpiration;
 
-  public DispatcherControlActor(final List<Dispatcher<Dispatchable<? extends Entry<?>, ? extends State<?>>>> dispatchers,
+  public DispatcherControlActor(
+          final List<Dispatcher<Dispatchable<? extends Entry<?>, ? extends State<?>>>> dispatchers,
           final DispatcherControlDelegate<? extends Entry<?>, ? extends State<?>> delegate,
-          final long checkConfirmationExpirationInterval, final long confirmationExpiration) {
+          final long checkConfirmationExpirationInterval,
+          final long confirmationExpiration) {
     this.dispatchers = dispatchers;
     this.delegate = delegate;
     this.confirmationExpiration = confirmationExpiration;
@@ -41,11 +42,13 @@ public class DispatcherControlActor extends Actor implements DispatcherControl, 
     this.dispatchers.forEach(d -> d.controlWith(this));
   }
 
-  public DispatcherControlActor(final Dispatcher<Dispatchable<? extends Entry<?>, ? extends State<?>>> dispatcher,
-          final DispatcherControlDelegate<? extends Entry<?>, ? extends State<?>> delegate,
-          final long checkConfirmationExpirationInterval, final long confirmationExpiration) {
-    this(Arrays.asList(dispatcher), delegate, checkConfirmationExpirationInterval, confirmationExpiration);
-  }
+//  public DispatcherControlActor(
+//          final Dispatcher<Dispatchable<? extends Entry<?>, ? extends State<?>>> dispatcher,
+//          final DispatcherControlDelegate<? extends Entry<?>, ? extends State<?>> delegate,
+//          final long checkConfirmationExpirationInterval,
+//          final long confirmationExpiration) {
+//    this(Arrays.asList(dispatcher), delegate, checkConfirmationExpirationInterval, confirmationExpiration);
+//  }
 
   @Override
   public void intervalSignal(final Scheduled<Object> scheduled, final Object data) {
