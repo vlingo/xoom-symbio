@@ -7,6 +7,14 @@
 
 package io.vlingo.symbio.store.gap;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 import io.vlingo.actors.Actor;
 import io.vlingo.actors.CompletesEventually;
 import io.vlingo.actors.Stage;
@@ -14,10 +22,6 @@ import io.vlingo.common.Scheduled;
 import io.vlingo.common.Scheduler;
 import io.vlingo.symbio.Entry;
 import io.vlingo.symbio.store.EntryReader;
-
-import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * Detection and fill up (gap prevention) functionality related to {@link EntryReader}.
@@ -28,6 +32,7 @@ public class GapRetryReader<T> {
     private final Scheduled<RetryGappedEntries<T>> actor;
     private final Scheduler scheduler;
 
+    @SuppressWarnings("unchecked")
     public GapRetryReader(Stage stage, Scheduler scheduler) {
         this.actor = stage.actorFor(Scheduled.class, GapsFillUpActor.class);
         this.scheduler = scheduler;
