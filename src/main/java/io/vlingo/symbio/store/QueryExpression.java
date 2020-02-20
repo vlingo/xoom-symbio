@@ -5,9 +5,7 @@
 // was not distributed with this file, You can obtain
 // one at https://mozilla.org/MPL/2.0/.
 
-package io.vlingo.symbio.store.object;
-
-import io.vlingo.symbio.store.object.ObjectStoreReader.QueryMode;
+package io.vlingo.symbio.store;
 
 /**
  * The base query expression.

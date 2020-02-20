@@ -5,13 +5,11 @@
 // was not distributed with this file, You can obtain
 // one at https://mozilla.org/MPL/2.0/.
 
-package io.vlingo.symbio.store.object;
+package io.vlingo.symbio.store;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-
-import io.vlingo.symbio.store.object.ObjectStoreReader.QueryMode;
 
 /**
  * A query expression whose parameters are provided in a {@code List}.
