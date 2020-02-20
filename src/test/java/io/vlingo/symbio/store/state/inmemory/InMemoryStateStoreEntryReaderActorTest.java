@@ -83,7 +83,7 @@ public class InMemoryStateStoreEntryReaderActorTest {
     stateAdapterProvider.registerAdapter(Entity1.class, new Entity1StateAdapter());
     // NOTE: No adapter registered for Entity2.class because it will use the default
 
-    store = world.actorFor(StateStore.class, InMemoryStateStoreActor.class, dispatcher);
+    store = world.actorFor(StateStore.class, InMemoryStateStoreActor.class, Arrays.asList(dispatcher));
 
     final Completes<StateStoreEntryReader<TextEntry>> completes = store.entryReader("test");
     reader = completes.await();

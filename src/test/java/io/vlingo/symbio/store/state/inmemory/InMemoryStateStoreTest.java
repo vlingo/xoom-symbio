@@ -12,6 +12,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.After;
@@ -362,7 +363,7 @@ public class InMemoryStateStoreTest {
     stateAdapterProvider.registerAdapter(Entity1.class, new Entity1StateAdapter());
     // NOTE: No adapter registered for Entity2.class because it will use the default
 
-    store = world.actorFor(StateStore.class, InMemoryStateStoreActor.class, dispatcher);
+    store = world.actorFor(StateStore.class, InMemoryStateStoreActor.class, Arrays.asList(dispatcher));
 
     StateTypeStateStoreMap.stateTypeToStoreName(Entity1.class, StoreName1);
     StateTypeStateStoreMap.stateTypeToStoreName(Entity2.class, StoreName2);

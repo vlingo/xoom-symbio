@@ -87,9 +87,9 @@ public class InMemoryStateStoreActor<RS extends State<?>> extends Actor
     this(dispatchers, 1000L, 1000L);
   }
 
-  public InMemoryStateStoreActor(final Dispatcher<Dispatchable<Entry<?>, RS>> dispatcher) {
-    this(dispatcher, 1000L, 1000L);
-  }
+//  public InMemoryStateStoreActor(final Dispatcher<Dispatchable<Entry<?>, RS>> dispatcher) {
+//    this(dispatcher, 1000L, 1000L);
+//  }
 
   @Override
   public void stop() {

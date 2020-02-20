@@ -6,6 +6,14 @@
 // one at https://mozilla.org/MPL/2.0/.
 package io.vlingo.symbio.store.state.inmemory;
 
+import static org.junit.Assert.assertTrue;
+
+import java.util.Arrays;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
 import io.vlingo.actors.World;
 import io.vlingo.actors.testkit.AccessSafely;
 import io.vlingo.symbio.EntryAdapterProvider;
@@ -16,11 +24,6 @@ import io.vlingo.symbio.store.state.MockStateStoreDispatcher;
 import io.vlingo.symbio.store.state.MockStateStoreResultInterest;
 import io.vlingo.symbio.store.state.StateStore;
 import io.vlingo.symbio.store.state.StateTypeStateStoreMap;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-
-import static org.junit.Assert.assertTrue;
 
 /**
  * RedispatchControlTest
@@ -74,7 +77,7 @@ public class InMemoryStateStoreRedispatchControlTest {
 
     StateTypeStateStoreMap.stateTypeToStoreName(Entity1.class, StoreName);
 
-    store = world.actorFor(StateStore.class, InMemoryStateStoreActor.class, dispatcher);
+    store = world.actorFor(StateStore.class, InMemoryStateStoreActor.class, Arrays.asList(dispatcher));
   }
 
   @After
