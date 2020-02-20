@@ -84,5 +84,6 @@ public interface StateStore extends StateStoreReader, StateStoreWriter {
     default <A extends Actor> ActorInstantiator<A> instantiator() { return null; }
     String originatorId();
     <S,R> S stateFrom(final R result, final String id) throws Exception;
+    <S,R> S stateFrom(final R result, final String id, final int columnOffset) throws Exception;
   }
 }
