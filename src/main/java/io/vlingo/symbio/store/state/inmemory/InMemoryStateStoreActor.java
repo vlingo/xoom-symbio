@@ -20,6 +20,7 @@ import io.vlingo.actors.Definition;
 import io.vlingo.common.Completes;
 import io.vlingo.common.Failure;
 import io.vlingo.common.Success;
+import io.vlingo.reactivestreams.Stream;
 import io.vlingo.symbio.BaseEntry;
 import io.vlingo.symbio.Entry;
 import io.vlingo.symbio.EntryAdapterProvider;
@@ -27,6 +28,7 @@ import io.vlingo.symbio.Metadata;
 import io.vlingo.symbio.Source;
 import io.vlingo.symbio.State;
 import io.vlingo.symbio.StateAdapterProvider;
+import io.vlingo.symbio.store.QueryExpression;
 import io.vlingo.symbio.store.Result;
 import io.vlingo.symbio.store.StorageException;
 import io.vlingo.symbio.store.dispatch.Dispatchable;
@@ -111,6 +113,19 @@ public class InMemoryStateStoreActor<RS extends State<?>> extends Actor
   @Override
   public void read(final String id, final Class<?> type, final ReadResultInterest interest, final Object object) {
     readFor(id, type, interest, object);
+  }
+
+  @Override
+  public Completes<Stream> streamAllOf(final Class<?> stateType) {
+    final String storeName = StateTypeStateStoreMap.storeNameFrom(stateType);
+
+    return completes().with(new InMemoryStateStream<>(stage(), store.get(storeName), stateAdapterProvider));
+  }
+
+  @Override
+  public Completes<Stream> streamSomeUsing(final QueryExpression query) {
+    // TODO Auto-generated method stub
+    return null;
   }
 
   @Override

@@ -12,6 +12,7 @@ import io.vlingo.common.Completes;
 import io.vlingo.common.Outcome;
 import io.vlingo.symbio.Entry;
 import io.vlingo.symbio.store.EntryReader;
+import io.vlingo.symbio.store.QueryExpression;
 import io.vlingo.symbio.store.Result;
 import io.vlingo.symbio.store.StorageException;
 /**
@@ -101,26 +102,6 @@ public interface ObjectStoreReader {
      * @param object the Object passed to query() that is sent back to the receiver
      */
     void queryObjectResultedIn(final Outcome<StorageException,Result> outcome, final QuerySingleResult result, final Object object);
-  }
-
-  /**
-   * The purpose of the query.
-   */
-  public static enum QueryMode {
-    ReadOnly {
-      @Override public boolean isReadOnly() { return true; }
-    },
-    ReadUpdate {
-      @Override public boolean isReadUpdate() { return true; }
-    };
-
-    public boolean isReadOnly() {
-      return false;
-    }
-
-    public boolean isReadUpdate() {
-      return false;
-    }
   }
 
   /**

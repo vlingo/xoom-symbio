@@ -7,29 +7,35 @@
 
 package io.vlingo.symbio.store.state.inmemory;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
+import java.util.concurrent.atomic.AtomicInteger;
+
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+
 import io.vlingo.actors.World;
 import io.vlingo.actors.testkit.AccessSafely;
 import io.vlingo.actors.testkit.TestWorld;
+import io.vlingo.reactivestreams.Stream;
+import io.vlingo.reactivestreams.sink.ConsumerSink;
 import io.vlingo.symbio.EntryAdapterProvider;
 import io.vlingo.symbio.Metadata;
 import io.vlingo.symbio.State;
 import io.vlingo.symbio.StateAdapterProvider;
 import io.vlingo.symbio.store.Result;
-import io.vlingo.symbio.store.state.MockStateStoreResultInterest;
 import io.vlingo.symbio.store.state.Entity1;
 import io.vlingo.symbio.store.state.Entity1.Entity1StateAdapter;
 import io.vlingo.symbio.store.state.Entity2;
 import io.vlingo.symbio.store.state.MockStateStoreDispatcher;
+import io.vlingo.symbio.store.state.MockStateStoreResultInterest;
 import io.vlingo.symbio.store.state.StateStore;
 import io.vlingo.symbio.store.state.StateTypeStateStoreMap;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 
 public class InMemoryStateStoreTest {
   private final static String StoreName1 = Entity1.class.getSimpleName();
@@ -258,6 +264,88 @@ public class InMemoryStateStoreTest {
     assertEquals(entity, access1.readFrom("objectState"));
   }
 
+  private AtomicInteger totalStates = new AtomicInteger(0);
+
+  @Test
+  public void testThatAllOfTypeStreams() {
+    for (int count = 1; count <= 200; ++count) {
+      final Entity1 entity1 = new Entity1("" + count, count);
+      store.write(entity1.id, entity1, 1, interest);
+    }
+
+    final Stream all = store.streamAllOf(Entity1.class).await();
+
+    final AccessSafely access = AccessSafely.afterCompleting(200);
+
+    access.writingWith("stateCounter", (state) -> { totalStates.incrementAndGet(); });
+    access.readingWith("stateCount", () -> totalStates.get());
+
+    all.flowInto(new ConsumerSink<>((state) -> access.writeUsing("stateCounter", 1)), 10);
+
+    final int stateCount = access.readFromExpecting("stateCount", 200);
+
+    Assert.assertEquals(totalStates.get(), 200);
+    Assert.assertEquals(totalStates.get(), stateCount);
+  }
+
+  @Test
+  public void testThatAllOfTypeStreamsUntilStop() {
+    for (int count = 1; count <= 10000; ++count) {
+      final Entity1 entity1 = new Entity1("" + count, count);
+      store.write(entity1.id, entity1, 1, interest);
+    }
+
+    final Stream all = store.streamAllOf(Entity1.class).await();
+
+    final AccessSafely access = AccessSafely.afterCompleting(200);
+
+    access.writingWith("stateCounter", (state) -> { totalStates.incrementAndGet(); });
+    access.readingWith("stateCount", () -> totalStates.get());
+
+    all.flowInto(new ConsumerSink<>((state) -> {
+          access.writeUsing("stateCounter", 1);
+            final int count = totalStates.get();
+            if (count == 100) {
+              all.request(1);
+            }
+          }),
+          50);
+
+    final int stateCount = access.readFromExpecting("stateCount", 200);
+
+    Assert.assertNotEquals(10000, stateCount);
+    Assert.assertNotEquals(10000, totalStates.get());
+  }
+
+  @Test
+  public void testThatAllOfTypeStreamsAdjusting() {
+    for (int count = 1; count <= 10000; ++count) {
+      final Entity1 entity1 = new Entity1("" + count, count);
+      store.write(entity1.id, entity1, 1, interest);
+    }
+
+    final Stream all = store.streamAllOf(Entity1.class).await();
+
+    final AccessSafely access = AccessSafely.afterCompleting(200);
+
+    access.writingWith("stateCounter", (state) -> { totalStates.incrementAndGet(); });
+    access.readingWith("stateCount", () -> totalStates.get());
+
+    all.flowInto(new ConsumerSink<>((state) -> {
+          access.writeUsing("stateCounter", 1);
+            final int count = totalStates.get();
+            if (count == 100) {
+              all.request(10);
+            }
+          }),
+          50);
+
+    final int stateCount = access.readFromExpecting("stateCount", 10000);
+
+    Assert.assertEquals(10000, stateCount);
+    Assert.assertEquals(10000, totalStates.get());
+  }
+
   @Before
   public void setUp() {
     testWorld = TestWorld.startWithDefaults("test-store");
@@ -265,6 +353,8 @@ public class InMemoryStateStoreTest {
 
     interest = new MockStateStoreResultInterest();
     dispatcher = new MockStateStoreDispatcher(interest);
+
+    dispatcher.afterCompleting(0); // avoid NPE
 
     final StateAdapterProvider stateAdapterProvider = new StateAdapterProvider(world);
     new EntryAdapterProvider(world);

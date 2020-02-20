@@ -7,20 +7,28 @@
 
 package io.vlingo.symbio.store.state;
 
-import io.vlingo.actors.*;
+import java.util.List;
+
+import io.vlingo.actors.Actor;
+import io.vlingo.actors.DeadLetter;
+import io.vlingo.actors.LocalMessage;
+import io.vlingo.actors.Mailbox;
+import io.vlingo.actors.Returns;
 import io.vlingo.common.BasicCompletes;
 import io.vlingo.common.Completes;
 import io.vlingo.common.SerializableConsumer;
+import io.vlingo.reactivestreams.Stream;
 import io.vlingo.symbio.Entry;
 import io.vlingo.symbio.Source;
-
-import java.util.List;
+import io.vlingo.symbio.store.QueryExpression;
 
 public class StateStore__Proxy implements io.vlingo.symbio.store.state.StateStore {
 
   private static final String writeRepresentation1 = "write(java.lang.String, S, int, java.util.List<Source<?>>, io.vlingo.symbio.Metadata, io.vlingo.symbio.store.state.StateStore.WriteResultInterest, java.lang.Object)";
   private static final String readRepresentation2 = "read(java.lang.String, java.lang.Class<?>, io.vlingo.symbio.store.state.StateStore.ReadResultInterest, java.lang.Object)";
   private static final String entryReaderRepresentation3 = "entryReader(java.lang.String)";
+  private static final String streamAllOfRepresentation4 = "streamAllOf(java.lang.Class<?>)";
+  private static final String streamSomeUsingRepresentation5 = "streamSomeUsing(io.vlingo.symbio.store.QueryExpression.QueryExpression)";
 
   private final Actor actor;
   private final Mailbox mailbox;
@@ -60,6 +68,32 @@ public class StateStore__Proxy implements io.vlingo.symbio.store.state.StateStor
       return completes;
     } else {
       actor.deadLetters().failedDelivery(new DeadLetter(actor, entryReaderRepresentation3));
+    }
+    return null;
+  }
+  @Override
+  public Completes<Stream> streamAllOf(final Class<?> stateType) {
+    if (!actor.isStopped()) {
+      final SerializableConsumer<StateStore> consumer = (actor) -> actor.streamAllOf(stateType);
+      final Completes<Stream> completes = new BasicCompletes<>(actor.scheduler());
+      if (mailbox.isPreallocated()) { mailbox.send(actor, StateStore.class, consumer, Returns.value(completes), streamAllOfRepresentation4); }
+      else { mailbox.send(new LocalMessage<StateStore>(actor, StateStore.class, consumer, Returns.value(completes), streamAllOfRepresentation4)); }
+      return completes;
+    } else {
+      actor.deadLetters().failedDelivery(new DeadLetter(actor, streamAllOfRepresentation4));
+    }
+    return null;
+  }
+  @Override
+  public Completes<Stream> streamSomeUsing(final QueryExpression query) {
+    if (!actor.isStopped()) {
+      final SerializableConsumer<StateStore> consumer = (actor) -> actor.streamSomeUsing(query);
+      final Completes<Stream> completes = new BasicCompletes<>(actor.scheduler());
+      if (mailbox.isPreallocated()) { mailbox.send(actor, StateStore.class, consumer, Returns.value(completes), streamSomeUsingRepresentation5); }
+      else { mailbox.send(new LocalMessage<StateStore>(actor, StateStore.class, consumer, Returns.value(completes), streamSomeUsingRepresentation5)); }
+      return completes;
+    } else {
+      actor.deadLetters().failedDelivery(new DeadLetter(actor, streamSomeUsingRepresentation5));
     }
     return null;
   }

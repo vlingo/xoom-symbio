@@ -1,6 +1,10 @@
 package io.vlingo.symbio.store.object;
 
-import io.vlingo.actors.*;
+import io.vlingo.actors.Actor;
+import io.vlingo.actors.DeadLetter;
+import io.vlingo.actors.LocalMessage;
+import io.vlingo.actors.Mailbox;
+import io.vlingo.actors.Returns;
 import io.vlingo.common.BasicCompletes;
 import io.vlingo.common.Completes;
 import io.vlingo.common.SerializableConsumer;
@@ -55,28 +59,28 @@ public class ObjectStore__Proxy implements io.vlingo.symbio.store.object.ObjectS
   }
 
   @Override
-  public void queryObject(final io.vlingo.symbio.store.object.QueryExpression arg0,
+  public void queryObject(final io.vlingo.symbio.store.QueryExpression arg0,
           final io.vlingo.symbio.store.object.ObjectStoreReader.QueryResultInterest arg1, final java.lang.Object arg2) {
     final SerializableConsumer<ObjectStore> consumer = (actor) -> actor.queryObject(arg0, arg1, arg2);
     send(ObjectStore__Proxy.queryObjectRepresentation3, consumer);
   }
 
   @Override
-  public void queryObject(final io.vlingo.symbio.store.object.QueryExpression arg0,
+  public void queryObject(final io.vlingo.symbio.store.QueryExpression arg0,
           final io.vlingo.symbio.store.object.ObjectStoreReader.QueryResultInterest arg1) {
     final SerializableConsumer<ObjectStore> consumer = (actor) -> actor.queryObject(arg0, arg1);
     send(ObjectStore__Proxy.queryObjectRepresentation4, consumer);
   }
 
   @Override
-  public void queryAll(final io.vlingo.symbio.store.object.QueryExpression arg0,
+  public void queryAll(final io.vlingo.symbio.store.QueryExpression arg0,
           final io.vlingo.symbio.store.object.ObjectStoreReader.QueryResultInterest arg1, final java.lang.Object arg2) {
     final SerializableConsumer<ObjectStore> consumer = (actor) -> actor.queryAll(arg0, arg1, arg2);
     send(ObjectStore__Proxy.queryAllRepresentation5, consumer);
   }
 
   @Override
-  public void queryAll(final io.vlingo.symbio.store.object.QueryExpression arg0,
+  public void queryAll(final io.vlingo.symbio.store.QueryExpression arg0,
           final io.vlingo.symbio.store.object.ObjectStoreReader.QueryResultInterest arg1) {
     final SerializableConsumer<ObjectStore> consumer = (actor) -> actor.queryAll(arg0, arg1);
     send(ObjectStore__Proxy.queryAllRepresentation6, consumer);

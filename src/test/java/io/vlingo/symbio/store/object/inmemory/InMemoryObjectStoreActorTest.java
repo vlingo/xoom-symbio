@@ -26,12 +26,12 @@ import io.vlingo.symbio.EntryAdapterProvider;
 import io.vlingo.symbio.Metadata;
 import io.vlingo.symbio.Source;
 import io.vlingo.symbio.State;
+import io.vlingo.symbio.store.MapQueryExpression;
+import io.vlingo.symbio.store.QueryExpression;
 import io.vlingo.symbio.store.dispatch.Dispatchable;
 import io.vlingo.symbio.store.dispatch.MockConfirmDispatchedResultInterest;
 import io.vlingo.symbio.store.dispatch.MockDispatcher;
-import io.vlingo.symbio.store.object.MapQueryExpression;
 import io.vlingo.symbio.store.object.ObjectStore;
-import io.vlingo.symbio.store.object.QueryExpression;
 import io.vlingo.symbio.store.object.StateSources;
 
 public class InMemoryObjectStoreActorTest {
