@@ -37,4 +37,9 @@ public class NoOpStorageDelegate implements StorageDelegate {
   public <S, R> S stateFrom(final R result, final String id) {
     return null;
   }
+
+  @Override
+  public <S, R> S stateFrom(final R result, final String id, final int columnOffset) throws Exception {
+    return null;
+  }
 }
