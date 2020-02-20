@@ -37,15 +37,18 @@ public interface StateStoreReader {
 
   /**
    * Answer a new {@code Stream} for flowing all of the instances of the {@code stateType}.
-   * Elements are streamed as type {@code Sink<StateBundle>}.
+   * Elements are streamed as type {@code StateBundle} to the {@code Sink<StateBundle>}.
    * @param stateType the {@code Class<?>} of the state to read
    * @return {@code Completes<Stream>}
    */
   Completes<Stream> streamAllOf(final Class<?> stateType);
 
   /**
-   * Answer a new {@code Stream} for flowing all instances per {@code query}.
-   * Elements are streamed as type {@code Sink<StateBundle>}.
+   * Answer a new {@code Stream} for flowing all instances per {@code query}. Currently
+   * the only supported query types are {@code QueryExpression} (no query parameters), and
+   * {@code ListQueryExpression} (a {@code List<?>} of {@code Object} parameters).
+   * In the future {@code ListQueryExpression} will be supported. Elements are streamed as
+   * type {@code StateBundle} to the {@code Sink<StateBundle>}.
    * @param query the QueryExpression used to constrain the Stream
    * @return {@code Completes<Stream>}
    */
