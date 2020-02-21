@@ -15,13 +15,14 @@ import java.util.*;
 /**
  * This class models entries which contain gaps.
  *
- * @param <T> Generic type applied to {@code Entry<T>}.
+ * @param <T> Generic type applied to {@code Entry}
+ * @param <E> Subtype of {@code Entry}
  */
-public class GappedEntries<T> {
+public class GappedEntries<T, E extends Entry<T>> {
     /**
      * Successfully loaded entries up to now.
      */
-    private final List<Entry<T>> loadedEntries;
+    private final List<E> loadedEntries;
 
     /**
      * List of ids failed to be loaded (gaps).
@@ -33,17 +34,17 @@ public class GappedEntries<T> {
      */
     private final CompletesEventually eventually;
 
-    public GappedEntries(List<Entry<T>> loadedEntries, List<Long> gapIds, CompletesEventually eventually) {
+    public GappedEntries(List<E> loadedEntries, List<Long> gapIds, CompletesEventually eventually) {
         this.loadedEntries = loadedEntries;
         this.gapIds = gapIds;
         this.eventually = eventually;
     }
 
-    public List<Entry<T>> getLoadedEntries() {
+    public List<E> getLoadedEntries() {
         return loadedEntries;
     }
 
-    private int compare(Entry<T> e1, Entry<T> e2) {
+    private int compare(E e1, E e2) {
         long id1 = Long.parseLong(e1.id());
         long id2 = Long.parseLong(e2.id());
 
@@ -55,8 +56,8 @@ public class GappedEntries<T> {
      *
      * @return Sorted entries.
      */
-    public List<Entry<T>> getSortedLoadedEntries() {
-        SortedSet<Entry<T>> sorted = new TreeSet<>(this::compare);
+    public List<E> getSortedLoadedEntries() {
+        SortedSet<E> sorted = new TreeSet<>(this::compare);
         sorted.addAll(loadedEntries);
 
         return new ArrayList<>(sorted);
@@ -88,7 +89,7 @@ public class GappedEntries<T> {
      *
      * @return an {@link Optional} describing the first entry.
      */
-    public Optional<Entry<T>> getFirst() {
+    public Optional<E> getFirst() {
         if (loadedEntries.size() > 0) {
             return Optional.of(loadedEntries.get(0));
         } else {
@@ -102,10 +103,10 @@ public class GappedEntries<T> {
      * @param fillups Parameter used to fill up current instance.
      * @return New, filled up <code>GappedEntries</code>.
      */
-    public GappedEntries<T> fillupWith(List<Entry<T>> fillups) {
-        List<Entry<T>> newLoadedEntries = new ArrayList<>(loadedEntries);
+    public GappedEntries<T, E> fillupWith(List<E> fillups) {
+        List<E> newLoadedEntries = new ArrayList<>(loadedEntries);
         List<Long> newGapIds = new ArrayList<>(gapIds);
-        for (Entry<T> fillup : fillups) {
+        for (E fillup : fillups) {
             Long fillupId = Long.parseLong(fillup.id());
             newGapIds.remove(fillupId);
             newLoadedEntries.add(fillup);
