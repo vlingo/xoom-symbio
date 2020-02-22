@@ -14,10 +14,10 @@ import io.vlingo.symbio.State;
 
 /**
  * The entries and possible snapshot of a full or partial stream of a given named stream.
- * 
+ *
  * @param <T> the concrete type of the stream of {@code Entry<T>}, which maybe be {@code String}, {@code byte[]}, or {@code Object}
  */
-public class Stream<T> {
+public class EntityStream<T> {
 
   /**
    * The most recent {@code State<T>} snapshot, if any.
@@ -44,14 +44,14 @@ public class Stream<T> {
 
   /**
    * Construct a new Stream.
-   * 
+   *
    * @param streamName the {@code String} name of this stream, which is generally a global unique identity
    * of an associated entity/aggregate
    * @param streamVersion the {@code int} version of the stream
    * @param entries the {@code List<Entry<T>>} of all entries in the named stream or some sub-stream
    * @param snapshot the {@code State<T>} of a persisted state, or an empty {@code State<T>} if none
    */
-  public Stream(final String streamName, final int streamVersion, final List<BaseEntry<T>> entries, final State<T> snapshot) {
+  public EntityStream(final String streamName, final int streamVersion, final List<BaseEntry<T>> entries, final State<T> snapshot) {
     this.streamName = streamName;
     this.streamVersion = streamVersion;
     this.entries = entries;
@@ -60,7 +60,7 @@ public class Stream<T> {
 
   /**
    * Answers whether or not I hold a non-empty snapshot.
-   * 
+   *
    * @return boolean
    */
   public boolean hasSnapshot() {
@@ -77,7 +77,8 @@ public class Stream<T> {
 
   @Override
   public String toString() {
-    return "Stream[streamName=" + streamName
+    return "EntityStream["
+            + "streamName=" + streamName
             + " streamVersion=" + streamVersion
             + " entries=" + entries
             + " snapshot=" + snapshot
