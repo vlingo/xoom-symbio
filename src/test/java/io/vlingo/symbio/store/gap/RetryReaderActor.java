@@ -9,10 +9,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class RetryReaderActor extends Actor implements Reader {
-    private GapRetryReader<String, Entry<String>> reader = null;
+    private GapRetryReader<Entry<String>> reader = null;
     private int offset = 0;
 
-    GapRetryReader<String, Entry<String>> reader() {
+    GapRetryReader<Entry<String>> reader() {
         if (reader == null) {
             reader = new GapRetryReader<>(stage(), scheduler());
         }
@@ -47,7 +47,7 @@ public class RetryReaderActor extends Actor implements Reader {
         // Simulate failed read of one entry
         final Entry<String> entry = null;
         final List<Long> gapIds = reader().detectGaps(entry, offset);
-        GappedEntries<String, Entry<String>> gappedEntries = new GappedEntries<>(new ArrayList<>(), gapIds, completesEventually());
+        GappedEntries<Entry<String>> gappedEntries = new GappedEntries<>(new ArrayList<>(), gapIds, completesEventually());
 
         reader().readGaps(gappedEntries, 3, 10L, this::readIds);
         offset++;
@@ -67,7 +67,7 @@ public class RetryReaderActor extends Actor implements Reader {
         }
 
         final List<Long> gapIds = reader().detectGaps(entries, offset, count);
-        GappedEntries<String, Entry<String>> gappedEntries = new GappedEntries<>(entries, gapIds, completesEventually());
+        GappedEntries<Entry<String>> gappedEntries = new GappedEntries<>(entries, gapIds, completesEventually());
         offset += count;
         reader().readGaps(gappedEntries, 3, 10L, this::readIds);
 

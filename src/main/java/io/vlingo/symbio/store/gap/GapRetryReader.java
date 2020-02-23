@@ -7,14 +7,6 @@
 
 package io.vlingo.symbio.store.gap;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
 import io.vlingo.actors.Actor;
 import io.vlingo.actors.CompletesEventually;
 import io.vlingo.actors.Stage;
@@ -23,14 +15,17 @@ import io.vlingo.common.Scheduler;
 import io.vlingo.symbio.Entry;
 import io.vlingo.symbio.store.EntryReader;
 
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 /**
  * Detection and fill up (gap prevention) functionality related to {@link EntryReader}.
  *
- * @param <T> Generic type applied to {@link Entry}
- * @param <E> Subtype of {@link Entry}
+ * @param <T> Subtype of {@link Entry}
  */
-public class GapRetryReader<T, E extends Entry<T>> {
-    private final Scheduled<RetryGappedEntries<T, E>> actor;
+public class GapRetryReader<T extends Entry<?>> {
+    private final Scheduled<RetryGappedEntries<T>> actor;
     private final Scheduler scheduler;
 
     @SuppressWarnings("unchecked")
@@ -39,7 +34,7 @@ public class GapRetryReader<T, E extends Entry<T>> {
         this.scheduler = scheduler;
     }
 
-    private Set<Long> collectIds(List<E> entries) {
+    private Set<Long> collectIds(List<T> entries) {
         if (entries == null) {
             return new HashSet<>();
         } else {
@@ -57,8 +52,8 @@ public class GapRetryReader<T, E extends Entry<T>> {
      * @param startIndex This index refers to {@link Entry#id()}
      * @return One element list if entry is not loaded.
      */
-    public List<Long> detectGaps(E entry, long startIndex) {
-        List<E> entries = entry == null ? new ArrayList<>() : Collections.singletonList(entry);
+    public List<Long> detectGaps(T entry, long startIndex) {
+        List<T> entries = entry == null ? new ArrayList<>() : Collections.singletonList(entry);
         return detectGaps(entries, startIndex, 1);
     }
 
@@ -70,7 +65,7 @@ public class GapRetryReader<T, E extends Entry<T>> {
      * @param count How many elements the list has to contain if no gaps would be present
      * @return Empty list if no gaps have been detected
      */
-    public List<Long> detectGaps(List<E> entries, long startIndex, long count) {
+    public List<Long> detectGaps(List<T> entries, long startIndex, long count) {
         Set<Long> allIds = collectIds(entries);
         List<Long> gapIds = new ArrayList<>();
 
@@ -91,19 +86,19 @@ public class GapRetryReader<T, E extends Entry<T>> {
      * @param retryInterval Interval between retries
      * @param gappedReader Function which reads the the specified gaps based on ids.
      */
-    public void readGaps(GappedEntries<T, E> gappedEntries, int retries, long retryInterval, Function<List<Long>, List<E>> gappedReader) {
-        RetryGappedEntries<T, E> entries = new RetryGappedEntries<>(gappedEntries, 1, retries, retryInterval, gappedReader);
+    public void readGaps(GappedEntries<T> gappedEntries, int retries, long retryInterval, Function<List<Long>, List<T>> gappedReader) {
+        RetryGappedEntries<T> entries = new RetryGappedEntries<>(gappedEntries, 1, retries, retryInterval, gappedReader);
         scheduler.scheduleOnce(actor, entries, 0L, retryInterval);
     }
 
-    static class RetryGappedEntries<T, E extends Entry<T>> {
-        private final GappedEntries<T, E> gappedEntries;
+    static class RetryGappedEntries<T extends Entry<?>> {
+        private final GappedEntries<T> gappedEntries;
         private final int currentRetry;
         private final int retries;
         private final long retryInterval;
-        private final Function<List<Long>, List<E>> gappedReader;
+        private final Function<List<Long>, List<T>> gappedReader;
 
-        RetryGappedEntries(GappedEntries<T, E> gappedEntries, int currentRetry, int retries, long retryInterval, Function<List<Long>, List<E>> gappedReader) {
+        RetryGappedEntries(GappedEntries<T> gappedEntries, int currentRetry, int retries, long retryInterval, Function<List<Long>, List<T>> gappedReader) {
             this.gappedEntries = gappedEntries;
             this.currentRetry = currentRetry;
             this.retries = retries;
@@ -115,17 +110,17 @@ public class GapRetryReader<T, E extends Entry<T>> {
             return currentRetry < retries;
         }
 
-        RetryGappedEntries<T, E> nextRetry(GappedEntries<T, E> nextGappedEntries) {
+        RetryGappedEntries<T> nextRetry(GappedEntries<T> nextGappedEntries) {
             return new RetryGappedEntries<>(nextGappedEntries, currentRetry + 1, retries, retryInterval, gappedReader);
         }
     }
 
-    public static class GapsFillUpActor<T, E extends Entry<T>> extends Actor implements Scheduled<RetryGappedEntries<T, E>> {
+    public static class GapsFillUpActor<T extends Entry<?>> extends Actor implements Scheduled<RetryGappedEntries<T>> {
         @Override
-        public void intervalSignal(Scheduled<RetryGappedEntries<T, E>> scheduled, RetryGappedEntries<T, E> data) {
-            Function<List<Long>, List<E>> gappedReader = data.gappedReader;
-            List<E> fillups = gappedReader.apply(data.gappedEntries.getGapIds());
-            GappedEntries<T, E> nextGappedEntries = data.gappedEntries.fillupWith(fillups);
+        public void intervalSignal(Scheduled<RetryGappedEntries<T>> scheduled, RetryGappedEntries<T> data) {
+            Function<List<Long>, List<T>> gappedReader = data.gappedReader;
+            List<T> fillups = gappedReader.apply(data.gappedEntries.getGapIds());
+            GappedEntries<T> nextGappedEntries = data.gappedEntries.fillupWith(fillups);
 
             if (!nextGappedEntries.containGaps() || !data.moreRetries()) {
                 CompletesEventually eventually = data.gappedEntries.getEventually();
@@ -138,7 +133,7 @@ public class GapRetryReader<T, E extends Entry<T>> {
                     eventually.with(nextGappedEntries.getSortedLoadedEntries());
                 }
             } else {
-                RetryGappedEntries<T, E> nextData = data.nextRetry(nextGappedEntries);
+                RetryGappedEntries<T> nextData = data.nextRetry(nextGappedEntries);
                 scheduler().scheduleOnce(scheduled, nextData, 0L, data.retryInterval);
             }
         }
