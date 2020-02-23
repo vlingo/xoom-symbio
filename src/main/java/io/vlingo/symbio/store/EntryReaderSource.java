@@ -19,8 +19,10 @@ import io.vlingo.common.Scheduled;
 import io.vlingo.reactivestreams.Elements;
 import io.vlingo.reactivestreams.Source;
 import io.vlingo.reactivestreams.Stream;
+import io.vlingo.symbio.BaseEntry;
 import io.vlingo.symbio.Entry;
 import io.vlingo.symbio.EntryAdapterProvider;
+import io.vlingo.symbio.EntryBundle;
 
 /**
  * Reads {@code Entry} instances from a {@code Journal}, {@code ObjectStore},
@@ -40,9 +42,9 @@ public class EntryReaderSource<T extends Entry<?>> extends Actor implements Sour
 
   /**
    * Constructs my default state.
-   * @param reader the {@code EntryReader<T>} from which to read entry elements
-   * @param name the String name of the reader
-   * @param entryAdapterProvider the EntryAdapterProvider used to turn Entry instances into Source<?> instances
+   * @param entryReader the {@code EntryReader<T>} from which to read entry elements
+   * @param entryAdapterProvider the EntryAdapterProvider used to turn Entry instances into {@code Source<?>} instances
+   * @param flowElementsRate the long maximum elements to read at once
    */
   @SuppressWarnings("unchecked")
   public EntryReaderSource(
@@ -65,16 +67,19 @@ public class EntryReaderSource<T extends Entry<?>> extends Actor implements Sour
   @SuppressWarnings({ "rawtypes", "unchecked" })
   public Completes<Elements<T>> next() {
     if (!cache.isEmpty()) {
-      final List<io.vlingo.symbio.Source> next = new ArrayList<>();
+      final List<EntryBundle> next = new ArrayList<>();
 
-      for (int index = 0; index < flowElementsRate; ++index) {
-        final io.vlingo.symbio.Source source = entryAdapterProvider.asEntry(null, index, null);
-        next.add(source);
+      for (int index = 0; index < flowElementsRate && !cache.isEmpty(); ++index) {
+        final T entry = cache.poll();
+        // This little trick gets a PersistentEntry to a BaseEntry: entry.withId(entry.id())
+        final T normalized = (entry instanceof BaseEntry) ? entry : (T) entry.withId(entry.id());
+        final io.vlingo.symbio.Source source = entryAdapterProvider.asSource(normalized);
+        next.add(new EntryBundle(entry, source));
       }
       final Elements elements = Elements.of(arrayFrom(next));
-      return Completes.withSuccess(elements);
+      return completes().with(elements);
     }
-    return Completes.withFailure(Elements.empty());
+    return completes().with(Elements.empty());
   }
 
   /**
@@ -106,7 +111,7 @@ public class EntryReaderSource<T extends Entry<?>> extends Actor implements Sour
    */
   @Override
   public Completes<Boolean> isSlow() {
-    return Completes.withSuccess(false);
+    return completes().with(false);
   }
 
   //====================================
@@ -117,7 +122,8 @@ public class EntryReaderSource<T extends Entry<?>> extends Actor implements Sour
   public void intervalSignal(final Scheduled<Object> scheduled, final Object data) {
     if (cache.isEmpty() && !reading) {
       reading = true;
-      entryReader.readNext(100).andThenConsume(entries -> { cache.addAll(entries); reading = false; });
+      final int max = flowElementsRate > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) flowElementsRate;
+      entryReader.readNext(max).andThenConsume(entries -> { cache.addAll(entries); reading = false; });
     }
   }
 
@@ -135,11 +141,7 @@ public class EntryReaderSource<T extends Entry<?>> extends Actor implements Sour
     super.stop();
   }
 
-  @SuppressWarnings("rawtypes")
-  private io.vlingo.symbio.Source[] arrayFrom(final List<?> sources) {
-    return sources.toArray(new OpaqueSource[sources.size()]);
+  private EntryBundle[] arrayFrom(final List<EntryBundle> sources) {
+    return sources.toArray(new EntryBundle[sources.size()]);
   }
-
-  @SuppressWarnings("rawtypes")
-  private static class OpaqueSource extends io.vlingo.symbio.Source { }
 }

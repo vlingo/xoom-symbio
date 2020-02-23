@@ -11,14 +11,19 @@ import java.util.List;
 
 import io.vlingo.actors.Actor;
 import io.vlingo.common.Completes;
+import io.vlingo.reactivestreams.Stream;
 import io.vlingo.symbio.Entry;
+import io.vlingo.symbio.EntryAdapterProvider;
+import io.vlingo.symbio.store.EntryReaderStream;
 import io.vlingo.symbio.store.journal.JournalReader;
 
 public class InMemoryJournalReaderActor<T extends Entry<?>> extends Actor implements JournalReader<T> {
+  private final EntryAdapterProvider entryAdapterProvider;
   private final InMemoryJournalReader<T> reader;
 
-  public InMemoryJournalReaderActor(final InMemoryJournalReader<T> reader) {
+  public InMemoryJournalReaderActor(final InMemoryJournalReader<T> reader, final EntryAdapterProvider entryAdapterProvider) {
     this.reader = reader;
+    this.entryAdapterProvider = entryAdapterProvider;
   }
 
   @Override
@@ -64,5 +69,11 @@ public class InMemoryJournalReaderActor<T extends Entry<?>> extends Actor implem
   @Override
   public Completes<Long> size() {
     return completes().with(reader.size().outcome());
+  }
+
+  @Override
+  @SuppressWarnings("unchecked")
+  public Completes<Stream> streamAll() {
+    return completes().with(new EntryReaderStream<>(stage(), selfAs(JournalReader.class), entryAdapterProvider));
   }
 }

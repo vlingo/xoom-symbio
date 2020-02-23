@@ -14,6 +14,7 @@ import io.vlingo.actors.ActorInstantiator;
 import io.vlingo.actors.Definition;
 import io.vlingo.common.Completes;
 import io.vlingo.symbio.Entry;
+import io.vlingo.symbio.EntryAdapterProvider;
 import io.vlingo.symbio.Metadata;
 import io.vlingo.symbio.Source;
 import io.vlingo.symbio.State;
@@ -24,10 +25,12 @@ import io.vlingo.symbio.store.journal.JournalReader;
 import io.vlingo.symbio.store.journal.StreamReader;
 
 public class InMemoryJournalActor<T,RS extends State<?>> extends Actor implements Journal<T> {
+  private final EntryAdapterProvider entryAdapterProvider;
   private final InMemoryJournal<T,RS> journal;
 
   public InMemoryJournalActor(final Dispatcher<Dispatchable<Entry<T>,RS>> dispatcher) {
     this.journal = new InMemoryJournal<>(dispatcher, stage().world());
+    this.entryAdapterProvider = EntryAdapterProvider.instance(stage().world());
   }
 
   @Override
@@ -78,7 +81,7 @@ public class InMemoryJournalActor<T,RS extends State<?>> extends Actor implement
   @SuppressWarnings("unchecked")
   public <ET extends Entry<?>> Completes<JournalReader<ET>> journalReader(final String name) {
     final JournalReader<ET> inmemory = (JournalReader<ET>) journal.journalReader(name).outcome();
-    final JournalReader<ET> actor = childActorFor(JournalReader.class, Definition.has(InMemoryJournalReaderActor.class, new InMemoryJournalReaderInstantiator<>(inmemory)));
+    final JournalReader<ET> actor = childActorFor(JournalReader.class, Definition.has(InMemoryJournalReaderActor.class, new InMemoryJournalReaderInstantiator<>(inmemory, entryAdapterProvider)));
     return completes().with(actor);
   }
 
@@ -100,16 +103,18 @@ public class InMemoryJournalActor<T,RS extends State<?>> extends Actor implement
   private static class InMemoryJournalReaderInstantiator<T extends Entry<?>> implements ActorInstantiator<InMemoryJournalReaderActor> {
     private static final long serialVersionUID = -4704305821903232245L;
 
+    private final EntryAdapterProvider entryAdapterProvider;
     private final JournalReader<T> inmemory;
 
-    InMemoryJournalReaderInstantiator(final JournalReader<T> inmemory) {
+    InMemoryJournalReaderInstantiator(final JournalReader<T> inmemory, final EntryAdapterProvider entryAdapterProvider) {
       this.inmemory = inmemory;
+      this.entryAdapterProvider = entryAdapterProvider;
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public InMemoryJournalReaderActor<T> instantiate() {
-      return new InMemoryJournalReaderActor((InMemoryJournalReader<T>) inmemory);
+      return new InMemoryJournalReaderActor((InMemoryJournalReader<T>) inmemory, entryAdapterProvider);
     }
 
     @Override

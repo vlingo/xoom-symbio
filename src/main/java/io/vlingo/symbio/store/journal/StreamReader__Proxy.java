@@ -19,10 +19,10 @@ public class StreamReader__Proxy<T> implements io.vlingo.symbio.store.journal.St
 
   @Override
   @SuppressWarnings("rawtypes")
-  public io.vlingo.common.Completes<io.vlingo.symbio.store.journal.Stream<T>> streamFor(java.lang.String arg0) {
+  public io.vlingo.common.Completes<io.vlingo.symbio.store.journal.EntityStream<T>> streamFor(java.lang.String arg0) {
     if (!actor.isStopped()) {
       final SerializableConsumer<StreamReader> consumer = (actor) -> actor.streamFor(arg0);
-      final io.vlingo.common.Completes<io.vlingo.symbio.store.journal.Stream<T>> completes = new BasicCompletes<>(actor.scheduler());
+      final io.vlingo.common.Completes<io.vlingo.symbio.store.journal.EntityStream<T>> completes = new BasicCompletes<>(actor.scheduler());
       if (mailbox.isPreallocated()) { mailbox.send(actor, StreamReader.class, consumer, Returns.value(completes), streamForRepresentation1); }
       else { mailbox.send(new LocalMessage<StreamReader>(actor, StreamReader.class, consumer, Returns.value(completes), streamForRepresentation1)); }
       return completes;
@@ -33,10 +33,10 @@ public class StreamReader__Proxy<T> implements io.vlingo.symbio.store.journal.St
   }
   @Override
   @SuppressWarnings("rawtypes")
-  public io.vlingo.common.Completes<io.vlingo.symbio.store.journal.Stream<T>> streamFor(java.lang.String arg0, int arg1) {
+  public io.vlingo.common.Completes<io.vlingo.symbio.store.journal.EntityStream<T>> streamFor(java.lang.String arg0, int arg1) {
     if (!actor.isStopped()) {
       final SerializableConsumer<StreamReader> consumer = (actor) -> actor.streamFor(arg0, arg1);
-      final io.vlingo.common.Completes<io.vlingo.symbio.store.journal.Stream<T>> completes = new BasicCompletes<>(actor.scheduler());
+      final io.vlingo.common.Completes<io.vlingo.symbio.store.journal.EntityStream<T>> completes = new BasicCompletes<>(actor.scheduler());
       if (mailbox.isPreallocated()) { mailbox.send(actor, StreamReader.class, consumer, Returns.value(completes), streamForRepresentation2); }
       else { mailbox.send(new LocalMessage<StreamReader>(actor, StreamReader.class, consumer, Returns.value(completes), streamForRepresentation2)); }
       return completes;

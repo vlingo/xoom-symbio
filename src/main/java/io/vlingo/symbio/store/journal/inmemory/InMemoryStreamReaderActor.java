@@ -9,7 +9,7 @@ package io.vlingo.symbio.store.journal.inmemory;
 
 import io.vlingo.actors.Actor;
 import io.vlingo.common.Completes;
-import io.vlingo.symbio.store.journal.Stream;
+import io.vlingo.symbio.store.journal.EntityStream;
 import io.vlingo.symbio.store.journal.StreamReader;
 
 public class InMemoryStreamReaderActor<T> extends Actor implements StreamReader<T> {
@@ -26,12 +26,12 @@ public class InMemoryStreamReaderActor<T> extends Actor implements StreamReader<
   }
 
   @Override
-  public Completes<Stream<T>> streamFor(final String streamName) {
+  public Completes<EntityStream<T>> streamFor(final String streamName) {
     return completes().with(reader.streamFor(streamName).outcome());
   }
 
   @Override
-  public Completes<Stream<T>> streamFor(final String streamName, final int fromStreamVersion) {
+  public Completes<EntityStream<T>> streamFor(final String streamName, final int fromStreamVersion) {
     return completes().with(reader.streamFor(streamName, fromStreamVersion).outcome());
   }
 }

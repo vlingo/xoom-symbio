@@ -63,13 +63,17 @@ public class InMemoryObjectStoreActor extends Actor implements ObjectStore {
    * @param dispatcher The dispatcher to be used
    */
   public InMemoryObjectStoreActor(final Dispatcher<Dispatchable<BaseEntry<?>,State<?>>> dispatcher){
-    this(dispatcher, 1000L, 1000L);
+    this(Arrays.asList(dispatcher), 1000L, 1000L);
   }
 
   @SuppressWarnings({ "unchecked", "rawtypes" })
-  public InMemoryObjectStoreActor(final List<Dispatcher<Dispatchable<BaseEntry<?>,State<?>>>> dispatchers,
-         final long checkConfirmationExpirationInterval, final long confirmationExpiration ) {
+  public InMemoryObjectStoreActor(
+          final List<Dispatcher<Dispatchable<BaseEntry<?>,State<?>>>> dispatchers,
+          final long checkConfirmationExpirationInterval,
+          final long confirmationExpiration ) {
+
     this.entryAdapterProvider = EntryAdapterProvider.instance(stage().world());
+
     this.dispatchers = dispatchers;
 
     this.entryReaders = new HashMap<>();
@@ -85,11 +89,6 @@ public class InMemoryObjectStoreActor extends Actor implements ObjectStore {
                             this.storeDelegate,
                             checkConfirmationExpirationInterval,
                             confirmationExpiration)));
-  }
-
-  public InMemoryObjectStoreActor(final Dispatcher<Dispatchable<BaseEntry<?>,State<?>>> dispatcher,
-         final long checkConfirmationExpirationInterval, final long confirmationExpiration ) {
-    this(Arrays.asList(dispatcher), checkConfirmationExpirationInterval, confirmationExpiration);
   }
 
   /*

@@ -14,7 +14,7 @@ import java.util.Map;
 import io.vlingo.common.Completes;
 import io.vlingo.symbio.BaseEntry;
 import io.vlingo.symbio.State;
-import io.vlingo.symbio.store.journal.Stream;
+import io.vlingo.symbio.store.journal.EntityStream;
 import io.vlingo.symbio.store.journal.StreamReader;
 
 public class InMemoryStreamReader<T> implements StreamReader<T> {
@@ -36,12 +36,12 @@ public class InMemoryStreamReader<T> implements StreamReader<T> {
   }
 
   @Override
-  public Completes<Stream<T>> streamFor(final String streamName) {
+  public Completes<EntityStream<T>> streamFor(final String streamName) {
     return streamFor(streamName, 1);
   }
 
   @Override
-  public Completes<Stream<T>> streamFor(final String streamName, final int fromStreamVersion) {
+  public Completes<EntityStream<T>> streamFor(final String streamName, final int fromStreamVersion) {
     int version = fromStreamVersion;
     State<T> snapshot = snapshotsView.get(streamName);
     if (snapshot != null) {
@@ -62,7 +62,7 @@ public class InMemoryStreamReader<T> implements StreamReader<T> {
         journalIndex = versionIndexes.get(++version);
       }
     }
-    return Completes.withSuccess(new Stream<>(streamName, version - 1, entries, snapshot));
+    return Completes.withSuccess(new EntityStream<>(streamName, version - 1, entries, snapshot));
   }
 
   String name() {

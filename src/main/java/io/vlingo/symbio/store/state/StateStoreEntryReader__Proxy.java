@@ -1,8 +1,14 @@
 package io.vlingo.symbio.store.state;
 
-import io.vlingo.actors.*;
+import io.vlingo.actors.Actor;
+import io.vlingo.actors.DeadLetter;
+import io.vlingo.actors.LocalMessage;
+import io.vlingo.actors.Mailbox;
+import io.vlingo.actors.Returns;
 import io.vlingo.common.BasicCompletes;
+import io.vlingo.common.Completes;
 import io.vlingo.common.SerializableConsumer;
+import io.vlingo.reactivestreams.Stream;
 
 @SuppressWarnings("rawtypes")
 public class StateStoreEntryReader__Proxy<T extends io.vlingo.symbio.Entry<?>> implements io.vlingo.symbio.store.state.StateStoreEntryReader<T> {
@@ -16,6 +22,7 @@ public class StateStoreEntryReader__Proxy<T extends io.vlingo.symbio.Entry<?>> i
   private static final String readNextRepresentation7 = "readNext(java.lang.String, int)";
   private static final String readNextRepresentation8 = "readNext()";
   private static final String seekToRepresentation9 = "seekTo(java.lang.String)";
+  private static final String streamAllRepresentation10 = "streamAll()";
 
   private final Actor actor;
   private final Mailbox mailbox;
@@ -133,6 +140,20 @@ public class StateStoreEntryReader__Proxy<T extends io.vlingo.symbio.Entry<?>> i
       return completes;
     } else {
       actor.deadLetters().failedDelivery(new DeadLetter(actor, seekToRepresentation9));
+    }
+    return null;
+  }
+
+  @Override
+  public Completes<Stream> streamAll() {
+    if (!actor.isStopped()) {
+      final SerializableConsumer<StateStoreEntryReader> consumer = (actor) -> actor.streamAll();
+      final io.vlingo.common.Completes<Stream> completes = new BasicCompletes<>(actor.scheduler());
+      if (mailbox.isPreallocated()) { mailbox.send(actor, StateStoreEntryReader.class, consumer, Returns.value(completes), streamAllRepresentation10); }
+      else { mailbox.send(new LocalMessage<StateStoreEntryReader>(actor, StateStoreEntryReader.class, consumer, Returns.value(completes), streamAllRepresentation10)); }
+      return completes;
+    } else {
+      actor.deadLetters().failedDelivery(new DeadLetter(actor, streamAllRepresentation10));
     }
     return null;
   }

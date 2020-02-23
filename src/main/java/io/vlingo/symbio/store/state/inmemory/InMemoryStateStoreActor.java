@@ -8,7 +8,6 @@
 package io.vlingo.symbio.store.state.inmemory;
 
 import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,6 +38,7 @@ import io.vlingo.symbio.store.dispatch.control.DispatcherControlActor;
 import io.vlingo.symbio.store.dispatch.inmemory.InMemoryDispatcherControlDelegate;
 import io.vlingo.symbio.store.state.StateStore;
 import io.vlingo.symbio.store.state.StateStoreEntryReader;
+import io.vlingo.symbio.store.state.StateStream;
 import io.vlingo.symbio.store.state.StateTypeStateStoreMap;
 
 public class InMemoryStateStoreActor<RS extends State<?>> extends Actor
@@ -54,7 +54,11 @@ public class InMemoryStateStoreActor<RS extends State<?>> extends Actor
   private final Map<String, Map<String, RS>> store;
 
   @SuppressWarnings({ "unchecked", "rawtypes" })
-  public InMemoryStateStoreActor(final List<Dispatcher<Dispatchable<Entry<?>, RS>>> dispatchers, final long checkConfirmationExpirationInterval, final long confirmationExpiration) {
+  public InMemoryStateStoreActor(
+          final List<Dispatcher<Dispatchable<Entry<?>, RS>>> dispatchers,
+          final long checkConfirmationExpirationInterval,
+          final long confirmationExpiration) {
+
     if (dispatchers == null) {
       throw new IllegalArgumentException("Dispatcher must not be null.");
     }
@@ -79,9 +83,12 @@ public class InMemoryStateStoreActor<RS extends State<?>> extends Actor
           confirmationExpiration)));
   }
 
-  public InMemoryStateStoreActor(final Dispatcher<Dispatchable<Entry<?>, RS>> dispatcher, final long checkConfirmationExpirationInterval, final long confirmationExpiration) {
-    this(Arrays.asList(dispatcher), checkConfirmationExpirationInterval, confirmationExpiration);
-  }
+//  public InMemoryStateStoreActor(
+//          final Dispatcher<Dispatchable<Entry<?>, RS>> dispatcher,
+//          final long checkConfirmationExpirationInterval,
+//          final long confirmationExpiration) {
+//    this(Arrays.asList(dispatcher), checkConfirmationExpirationInterval, confirmationExpiration);
+//  }
 
   public InMemoryStateStoreActor(final List<Dispatcher<Dispatchable<Entry<?>, RS>>> dispatchers) {
     this(dispatchers, 1000L, 1000L);
@@ -119,7 +126,7 @@ public class InMemoryStateStoreActor<RS extends State<?>> extends Actor
   public Completes<Stream> streamAllOf(final Class<?> stateType) {
     final String storeName = StateTypeStateStoreMap.storeNameFrom(stateType);
 
-    return completes().with(new InMemoryStateStream<>(stage(), store.get(storeName), stateAdapterProvider));
+    return completes().with(new StateStream<>(stage(), store.get(storeName), stateAdapterProvider));
   }
 
   @Override

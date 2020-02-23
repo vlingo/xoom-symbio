@@ -34,7 +34,7 @@ public interface StreamReader<T> {
    * 
    * @return the {@code Completes<Stream<T>>} of the full stream, or a snapshot with remaining stream
    */
-  Completes<Stream<T>> streamFor(final String streamName);
+  Completes<EntityStream<T>> streamFor(final String streamName);
 
   /**
    * Eventually answers the {@code Stream<T>} of the stream with {@code streamName}, starting with
@@ -47,5 +47,5 @@ public interface StreamReader<T> {
    * 
    * @return the {@code Completes<Stream<T>>} of the full stream
    */
-  Completes<Stream<T>> streamFor(final String streamName, final int fromStreamVersion);
+  Completes<EntityStream<T>> streamFor(final String streamName, final int fromStreamVersion);
 }

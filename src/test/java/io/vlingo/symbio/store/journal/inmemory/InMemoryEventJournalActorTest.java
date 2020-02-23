@@ -16,6 +16,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -25,11 +27,14 @@ import org.junit.Test;
 import io.vlingo.actors.World;
 import io.vlingo.actors.testkit.AccessSafely;
 import io.vlingo.common.serialization.JsonSerialization;
+import io.vlingo.reactivestreams.Stream;
+import io.vlingo.reactivestreams.sink.ConsumerSink;
 import io.vlingo.symbio.BaseEntry;
 import io.vlingo.symbio.BaseEntry.TextEntry;
 import io.vlingo.symbio.Entry;
 import io.vlingo.symbio.EntryAdapter;
 import io.vlingo.symbio.EntryAdapterProvider;
+import io.vlingo.symbio.EntryBundle;
 import io.vlingo.symbio.Metadata;
 import io.vlingo.symbio.Source;
 import io.vlingo.symbio.StateAdapterProvider;
@@ -196,6 +201,40 @@ public class InMemoryEventJournalActorTest {
     assertEquals("5", accessResults.readFrom("entryId", 1));
   }
 
+  private ConsumerSink<EntryBundle> sink;
+
+  private AtomicInteger totalSources = new AtomicInteger(0);
+
+  @Test
+  public void testThatJournalReaderStreams() {
+    final int limit = 1000;
+
+    dispatcher.afterCompleting(0);
+    interest.afterCompleting(0);
+
+    for (int count = 0; count < limit; ++count) {
+      journal.append("123-" + count, 1, new Test1Source(count), interest, object);
+    }
+
+    final AccessSafely access = AccessSafely.afterCompleting(limit);
+
+    access.writingWith("sourcesCounter", (state) -> { totalSources.incrementAndGet(); });
+    access.readingWith("sourcesCount", () -> totalSources.get());
+
+    final Stream all = journal.journalReader("test").andThenTo(reader -> reader.streamAll()).await();
+
+    final Consumer<EntryBundle> bundles = (bundle) -> access.writeUsing("sourcesCounter", 1);
+
+    sink = new ConsumerSink<>(bundles);
+
+    all.flowInto(sink, 100);
+
+    final int sourcesCount = access.readFromExpecting("sourcesCount", limit);
+
+    Assert.assertEquals(limit, totalSources.get());
+    Assert.assertEquals(totalSources.get(), sourcesCount);
+  }
+
   @Before
   public void setUp() {
     world = World.startWithDefaults("test-journal");
@@ -213,10 +252,18 @@ public class InMemoryEventJournalActorTest {
   }
 
   public static final class Test1Source extends Source<String> {
-    private final int one = 1;
+    private final int value;
+
+    public Test1Source() {
+      this(1);
+    }
+
+    public Test1Source(final int value) {
+      this.value = value;
+    }
 
     public int one() {
-      return one;
+      return value;
     }
   }
 

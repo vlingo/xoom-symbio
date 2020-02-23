@@ -1,4 +1,4 @@
-package io.vlingo.symbio.store.state.inmemory;
+package io.vlingo.symbio.store.state;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -23,7 +23,7 @@ import io.vlingo.symbio.State;
 import io.vlingo.symbio.StateAdapterProvider;
 import io.vlingo.symbio.StateBundle;
 
-public class InMemoryStateStream<RS extends State<?>> implements Stream {
+public class StateStream<RS extends State<?>> implements Stream {
   private long flowElementsRate;
   private Publisher<RS> publisher;
   private final Stage stage;
@@ -31,7 +31,7 @@ public class InMemoryStateStream<RS extends State<?>> implements Stream {
   private final StateAdapterProvider stateAdapterProvider;
   private StateStreamSubscriber<RS> subscriber;
 
-  public InMemoryStateStream(final Stage stage, final Map<String, RS> states, final StateAdapterProvider stateAdapterProvider) {
+  public StateStream(final Stage stage, final Map<String, RS> states, final StateAdapterProvider stateAdapterProvider) {
     this.stage = stage;
     this.stateAdapterProvider = stateAdapterProvider;
     this.states = states;
@@ -146,7 +146,7 @@ public class InMemoryStateStream<RS extends State<?>> implements Stream {
     public StateStreamSubscriber(
             final Sink<RS> sink,
             final long requestThreshold,
-            final InMemoryStateStream<RS> stateStream) {
+            final StateStream<RS> stateStream) {
 
       super(sink, requestThreshold);
 
@@ -159,7 +159,7 @@ public class InMemoryStateStream<RS extends State<?>> implements Stream {
     }
 
     @Override
-    public void onSubscribe(Subscription subscription) {
+    public void onSubscribe(final Subscription subscription) {
       this.subscriptionHook = subscription;
 
       super.onSubscribe(subscription);

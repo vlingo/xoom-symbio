@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.vlingo.common.Completes;
+import io.vlingo.reactivestreams.Stream;
 import io.vlingo.symbio.Entry;
 import io.vlingo.symbio.store.journal.JournalReader;
 
@@ -54,7 +55,6 @@ public class InMemoryJournalReader<T extends Entry<?>> implements JournalReader<
   @SuppressWarnings("unchecked")
   public Completes<List<T>> readNext(final int maximumEntries) {
     final List<Entry<T>> entries = new ArrayList<>(maximumEntries);
-
     for (int count = 0; count < maximumEntries; ++count) {
       if (currentIndex < journalView.size()) {
         entries.add(journalView.get(currentIndex++));
@@ -104,6 +104,11 @@ public class InMemoryJournalReader<T extends Entry<?>> implements JournalReader<
   @Override
   public Completes<Long> size() {
     return Completes.withSuccess((long) journalView.size());
+  }
+
+  @Override
+  public Completes<Stream> streamAll() {
+    return null; // provided by InMemoryJournalReaderActor
   }
 
   private void end() {

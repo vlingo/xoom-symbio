@@ -11,6 +11,7 @@ import java.util.List;
 
 import io.vlingo.actors.Actor;
 import io.vlingo.common.Completes;
+import io.vlingo.reactivestreams.Stream;
 import io.vlingo.symbio.Entry;
 
 /**
@@ -160,6 +161,12 @@ public interface EntryReader<T extends Entry<?>> {
    * @return {@code Completes<Long>}
    */
   Completes<Long> size();
+
+  /**
+   * Answer a new {@code Stream} for flowing all {@code Entry} instances in total time order.
+   * @return {@code <Completes<Stream>>}
+   */
+  Completes<Stream> streamAll();
 
   /**
    * Provides advice for the specific implementation.

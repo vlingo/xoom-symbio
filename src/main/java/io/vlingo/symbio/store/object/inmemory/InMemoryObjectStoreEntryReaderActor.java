@@ -5,17 +5,23 @@ import java.util.List;
 
 import io.vlingo.actors.Actor;
 import io.vlingo.common.Completes;
+import io.vlingo.reactivestreams.Stream;
 import io.vlingo.symbio.Entry;
+import io.vlingo.symbio.EntryAdapterProvider;
+import io.vlingo.symbio.store.EntryReaderStream;
+import io.vlingo.symbio.store.journal.JournalReader;
 import io.vlingo.symbio.store.object.ObjectStoreEntryReader;
 
 public class InMemoryObjectStoreEntryReaderActor extends Actor implements ObjectStoreEntryReader<Entry<String>> {
   private int currentIndex;
+  private final EntryAdapterProvider entryAdapterProvider;
   private final List<Entry<String>> entriesView;
   private final String name;
 
   public InMemoryObjectStoreEntryReaderActor(final List<Entry<String>> entriesView, final String name) {
     this.entriesView = entriesView;
     this.name = name;
+    this.entryAdapterProvider = EntryAdapterProvider.instance(stage().world());
     this.currentIndex = 0;
  }
 
@@ -96,6 +102,12 @@ public class InMemoryObjectStoreEntryReaderActor extends Actor implements Object
   @Override
   public Completes<Long> size() {
     return completes().with((long) entriesView.size());
+  }
+
+  @Override
+  @SuppressWarnings("unchecked")
+  public Completes<Stream> streamAll() {
+    return completes().with(new EntryReaderStream<>(stage(), selfAs(JournalReader.class), entryAdapterProvider));
   }
 
   private void end() {

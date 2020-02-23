@@ -55,8 +55,12 @@ public class InMemoryJournal<T,RS extends State<?>> implements Journal<T>, Stopp
   private final DispatcherControl dispatcherControl;
 
   @SuppressWarnings({ "rawtypes", "unchecked" })
-  public InMemoryJournal(final List<Dispatcher<Dispatchable<Entry<T>,RS>>> dispatchers, final World world,
-          final long checkConfirmationExpirationInterval, final long confirmationExpiration) {
+  public InMemoryJournal(
+          final List<Dispatcher<Dispatchable<Entry<T>,RS>>> dispatchers,
+          final World world,
+          final long checkConfirmationExpirationInterval,
+          final long confirmationExpiration) {
+
     this.entryAdapterProvider = EntryAdapterProvider.instance(world);
     this.stateAdapterProvider = StateAdapterProvider.instance(world);
     this.journal = new ArrayList<>();
