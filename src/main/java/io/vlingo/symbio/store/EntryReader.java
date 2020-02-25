@@ -177,6 +177,7 @@ public interface EntryReader<T extends Entry<?>> {
     public final String queryCount;
     public final String queryLatestOffset;
     public final String queryEntryBatchExpression;
+    public final String queryEntryIdsExpression;
     public final String queryEntryExpression;
     public final String queryUpdateCurrentOffset;
 
@@ -184,6 +185,7 @@ public interface EntryReader<T extends Entry<?>> {
             final Object configuration,
             final Class<? extends Actor> entryReaderClass,
             final String queryEntryBatchExpression,
+            final String queryEntryIdsExpression,
             final String queryEntryExpression,
             final String queryCount,
             final String queryLatestOffset,
@@ -192,6 +194,7 @@ public interface EntryReader<T extends Entry<?>> {
       this.configuration = configuration;
       this.entryReaderClass = entryReaderClass;
       this.queryEntryBatchExpression = queryEntryBatchExpression;
+      this.queryEntryIdsExpression = queryEntryIdsExpression;
       this.queryEntryExpression = queryEntryExpression;
       this.queryCount = queryCount;
       this.queryLatestOffset = queryLatestOffset;
