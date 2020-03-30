@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.vlingo</groupId>
   <artifactId>vlingo-symbio</artifactId>
-  <version>1.2.9</version>
+  <version>1.2.10-SNAPSHOT</version>
   <name>vlingo-symbio</name>
   <description>The reactive, scalable, and resilient CQRS storage and projection tool for services and applications built on the vlingo/platform.</description>
   <url>https://github.com/vlingo/vlingo-actors</url>
@@ -99,13 +99,28 @@
       <id>jcenter</id>
       <url>https://jcenter.bintray.com/</url>
     </repository>
+
+    <repository>
+      <id>oss-jfrog-snapshot</id>
+      <url>https://oss.jfrog.org/artifactory/oss-snapshot-local</url>
+      <releases>
+        <enabled>false</enabled>
+      </releases>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
   </repositories>
  
   <distributionManagement>
     <repository>
-      <id>bintray-vlingo-vlingo-platform-java</id>
-      <name>vlingo-vlingo-platform-java</name>
+      <id>bintray-deploy</id>
       <url>https://api.bintray.com/maven/vlingo/vlingo-platform-java/vlingo-symbio/;publish=1</url>
     </repository>
+
+    <snapshotRepository>
+      <id>oss-jfrog-snapshot-deploy</id>
+      <url>https://oss.jfrog.org/artifactory/oss-snapshot-local</url>
+    </snapshotRepository>
   </distributionManagement>
 </project>

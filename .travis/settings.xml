@@ -5,7 +5,19 @@
     <profiles>
         <profile>
             <id>vlingo-platform-profile</id>
+            <servers>
+                <server>
+                    <id>bintray-deploy</id>
+                    <username>${env.BINTRAY_USERNAME}</username>
+                    <password>${env.BINTRAY_PASSWORD}</password>
+                </server>
 
+                <server>
+                    <id>oss-jfrog-snapshot-deploy</id>
+                    <username>${env.BINTRAY_USERNAME}</username>
+                    <password>${env.BINTRAY_PASSWORD}</password>
+                </server>
+            </servers>
         </profile>
     </profiles>
 
