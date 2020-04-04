@@ -13,8 +13,6 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
-import io.vlingo.symbio.Metadata;
-
 public class MetadataTest {
 
   @Test
