@@ -41,7 +41,7 @@ MINOR=$(echo $VERSION | cut -f 2 -d '.')
 PATCH=$(echo $VERSION | cut -f 3 -d '.')
 NEW_VERSION=$MAJOR.$MINOR.$(($PATCH + 1))-SNAPSHOT
 
-for dependency in "vlingo-symbio-jdbc" "vlingo-symbio-dynamodb" "vlingo-symbio-geode" "vlingo-lattice" "vlingo-xoom-server";
+for dependency in "vlingo-symbio-jdbc" "vlingo-symbio-dynamodb" "vlingo-symbio-geode" "vlingo-lattice";
 do
     trigger_dependency $dependency $VERSION $NEW_VERSION
 done
