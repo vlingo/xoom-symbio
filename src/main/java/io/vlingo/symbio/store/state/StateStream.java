@@ -112,7 +112,7 @@ public class StateStream<RS extends State<?>> implements Stream {
         final Elements elements = Elements.of(arrayFrom(next));
         return Completes.withSuccess(elements);
       }
-      return Completes.withFailure(Elements.terminated());
+      return Completes.withSuccess(Elements.terminated());
     }
 
     @Override
