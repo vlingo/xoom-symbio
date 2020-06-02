@@ -2,7 +2,9 @@
 
 [![Javadocs](http://javadoc.io/badge/io.vlingo/vlingo-symbio.svg?color=brightgreen)](http://javadoc.io/doc/io.vlingo/vlingo-symbio) [![Build Status](https://travis-ci.org/vlingo/vlingo-symbio.svg?branch=master)](https://travis-ci.org/vlingo/vlingo-symbio) [ ![Download](https://api.bintray.com/packages/vlingo/vlingo-platform-java/vlingo-symbio/images/download.svg) ](https://bintray.com/vlingo/vlingo-platform-java/vlingo-symbio/_latestVersion) [![Gitter chat](https://badges.gitter.im/gitterHQ/gitter.png)](https://gitter.im/vlingo-platform-java/symbio)
 
-The vlingo/PLATFORM reactive, scalable, and resilient Object, CQRS, and Event Sourcing storage tools for services and applications.
+Docs: https://docs.vlingo.io/vlingo-symbio
+
+The VLINGO/PLATFORM reactive, scalable, and resilient Object, K-V, CQRS, and Event Sourcing storage tools for services and applications.
 
 ### Name
 The name "symbio" highlights the symbiotic relationship between domain models and persistence mechanisms.
@@ -29,7 +31,7 @@ persistence engines. These are the available implementations:
    - JPA standard: `JPAObjectStoreDelegate` for JPA implementations, including EclipseLink, OpenJPA, and Hibernate
 
 ### State Storage
-The `StateStore` is a simple CQRS Key-CLOB/BLOB storage mechanism that can be run against a number of persistence engines.
+The `StateStore` is a simple CQRS Key-Value (Key-CLOB/BLOB) storage mechanism that can be run against a number of persistence engines.
 Use it for both Command/Write Models and Query/Read Models. These are the available storage implementations:
 
    - In-memory binary: `InMemoryBinaryStateStoreActor`
@@ -61,7 +63,7 @@ We welcome you to add support for your favorite database!
     <dependency>
       <groupId>io.vlingo</groupId>
       <artifactId>vlingo-symbio</artifactId>
-      <version>1.2.9</version>
+      <version>1.3.0</version>
       <scope>compile</scope>
     </dependency>
   </dependencies>
@@ -69,7 +71,7 @@ We welcome you to add support for your favorite database!
 
 ```gradle
 dependencies {
-    compile 'io.vlingo:vlingo-symbio:1.2.9'
+    compile 'io.vlingo:vlingo-symbio:1.3.0'
 }
 
 repositories {
