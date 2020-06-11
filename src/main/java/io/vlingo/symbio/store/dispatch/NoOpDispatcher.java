@@ -7,12 +7,30 @@
 
 package io.vlingo.symbio.store.dispatch;
 
+import io.vlingo.symbio.store.Result;
+
 @SuppressWarnings("rawtypes")
-public class NoOpDispatcher implements Dispatcher {
+public class NoOpDispatcher implements Dispatcher, ConfirmDispatchedResultInterest {
+  private DispatcherControl control;
+
+  //=====================================
+  // Dispatcher
+  //=====================================
 
   @Override
-  public void controlWith(final DispatcherControl control) { }
+  public void controlWith(final DispatcherControl control) {
+    this.control = control;
+  }
 
   @Override
-  public void dispatch(final Dispatchable dispatchable) { }
+  public void dispatch(final Dispatchable dispatchable) {
+    control.confirmDispatched(dispatchable.id(), this);
+  }
+
+  //=====================================
+  // ConfirmDispatchedResultInterest
+  //=====================================
+
+  @Override
+  public void confirmDispatchedResultedIn(final Result result, final String dispatchId) { }
 }
