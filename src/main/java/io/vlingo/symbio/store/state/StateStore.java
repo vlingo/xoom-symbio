@@ -7,6 +7,7 @@
 
 package io.vlingo.symbio.store.state;
 
+import java.util.Collection;
 import java.util.List;
 
 import io.vlingo.actors.Actor;
@@ -36,6 +37,38 @@ public interface StateStore extends StateStoreReader, StateStoreWriter {
   public <ET extends Entry<?>> Completes<StateStoreEntryReader<ET>> entryReader(final String name);
 
   /**
+   * Used for writing and reading multiple states in one batch.
+   */
+  public static class TypedStateBundle {
+    public final String id;
+    public final Class<?> type;
+    public final Object state;
+    public final int stateVersion;
+    public final Metadata metadata;
+
+    public TypedStateBundle(final String id, final Class<?> type, final Object state, final int stateVersion, final Metadata metadata) {
+      this.id = id;
+      this.type = type;
+      this.state = state;
+      this.stateVersion = stateVersion;
+      this.metadata = metadata;
+    }
+
+    public TypedStateBundle(final String id, final Object state, final int stateVersion, final Metadata metadata) {
+      this(id, null, state, stateVersion, metadata);
+    }
+
+    public TypedStateBundle(final String id, final Class<?> type) {
+      this(id, type, null, 0, null);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> T typedState() {
+      return (T) state;
+    }
+  }
+
+  /**
    * Defines the result of reading the state with the specific id to the store.
    */
   public static interface ReadResultInterest {
@@ -50,6 +83,20 @@ public interface StateStore extends StateStoreReader, StateStoreWriter {
      * @param <S> the native state type
      */
     <S> void readResultedIn(final Outcome<StorageException,Result> outcome, final String id, final S state, final int stateVersion, final Metadata metadata, final Object object);
+
+    /**
+     * Implemented by the interest of a given State Store for multi-read operation results.
+     * <p>NOTE: In the cause of a partial multi-read failure, the results will contain the
+     * {@code TypedStateBundle} instances that were read. In such cases the {@code outcome}
+     * will have the {@code StorageException#Result.NotAllFound} set.
+     * @param outcome the {@code Outcome<StorageException,Result>} of the read
+     * @param bundles the {@code Collection<TypedStateBundle>} holding multi-read results
+     * @param object the Object passed to read() that is sent back to the receiver
+     * @param <S> the native state type
+     */
+    default <S> void readResultedIn(final Outcome<StorageException,Result> outcome, final Collection<TypedStateBundle> bundles, final Object object) {
+      // defaulted to prevent required override by all consumers
+    }
   }
 
   /**

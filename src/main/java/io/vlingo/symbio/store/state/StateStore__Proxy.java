@@ -7,6 +7,7 @@
 
 package io.vlingo.symbio.store.state;
 
+import java.util.Collection;
 import java.util.List;
 
 import io.vlingo.actors.Actor;
@@ -26,6 +27,7 @@ public class StateStore__Proxy implements io.vlingo.symbio.store.state.StateStor
 
   private static final String writeRepresentation1 = "write(java.lang.String, S, int, java.util.List<Source<?>>, io.vlingo.symbio.Metadata, io.vlingo.symbio.store.state.StateStore.WriteResultInterest, java.lang.Object)";
   private static final String readRepresentation2 = "read(java.lang.String, java.lang.Class<?>, io.vlingo.symbio.store.state.StateStore.ReadResultInterest, java.lang.Object)";
+  private static final String readRepresentation2a = "readAll(java.util.Collection<io.vlingo.symbio.store.state.StateStore.TypedStateBundle>, io.vlingo.symbio.store.state.StateStore.ReadResultInterest, java.lang.Object)";
   private static final String entryReaderRepresentation3 = "entryReader(java.lang.String)";
   private static final String streamAllOfRepresentation4 = "streamAllOf(java.lang.Class<?>)";
   private static final String streamSomeUsingRepresentation5 = "streamSomeUsing(io.vlingo.symbio.store.QueryExpression.QueryExpression)";
@@ -58,6 +60,17 @@ public class StateStore__Proxy implements io.vlingo.symbio.store.state.StateStor
       actor.deadLetters().failedDelivery(new DeadLetter(actor, readRepresentation2));
     }
   }
+  @Override
+  public void readAll(final Collection<TypedStateBundle> arg0, final ReadResultInterest arg1, final Object arg2) {
+    if (!actor.isStopped()) {
+      final SerializableConsumer<StateStore> consumer = (actor) -> actor.readAll(arg0, arg1, arg2);
+      if (mailbox.isPreallocated()) { mailbox.send(actor, StateStore.class, consumer, null, readRepresentation2a); }
+      else { mailbox.send(new LocalMessage<StateStore>(actor, StateStore.class, consumer, readRepresentation2a)); }
+    } else {
+      actor.deadLetters().failedDelivery(new DeadLetter(actor, readRepresentation2a));
+    }
+  }
+
   @Override
   public <ET extends Entry<?>> Completes<StateStoreEntryReader<ET>> entryReader(String arg0) {
     if (!actor.isStopped()) {

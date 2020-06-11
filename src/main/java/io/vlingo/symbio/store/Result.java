@@ -17,6 +17,9 @@ public enum Result {
   Failure {
     @Override public boolean isFailure() { return true; }
   },
+  NotAllFound {
+    @Override public boolean isNotAllFound() { return true; }
+  },
   NotFound {
     @Override public boolean isNotFound() { return true; }
   },
@@ -30,6 +33,7 @@ public enum Result {
   public boolean isConcurrencyViolation() { return false; }
   public boolean isError() { return false; }
   public boolean isFailure() { return false; }
+  public boolean isNotAllFound() { return false; }
   public boolean isNotFound() { return false; }
   public boolean isNoTypeStore() { return false; }
   public boolean isSuccess() { return false; }

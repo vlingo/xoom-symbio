@@ -7,10 +7,23 @@
 
 package io.vlingo.symbio.store.state;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
+
 import io.vlingo.common.Completes;
+import io.vlingo.common.Failure;
+import io.vlingo.common.Outcome;
+import io.vlingo.common.Success;
 import io.vlingo.reactivestreams.Stream;
+import io.vlingo.symbio.Metadata;
 import io.vlingo.symbio.store.QueryExpression;
+import io.vlingo.symbio.store.Result;
+import io.vlingo.symbio.store.StorageException;
 import io.vlingo.symbio.store.state.StateStore.ReadResultInterest;
+import io.vlingo.symbio.store.state.StateStore.TypedStateBundle;
 
 /**
  * Defines the reader of the {@code StateStore}.
@@ -36,6 +49,14 @@ public interface StateStoreReader {
   void read(final String id, final Class<?> type, final ReadResultInterest interest, final Object object);
 
   /**
+   * Read the states identified by {@code id} within {@code bundles} and dispatch the result to the {@code interest}.
+   * @param bundles the {@code Collection<TypedStateBundle>} defining the states to read
+   * @param interest the ReadResultInterest to which the result is dispatched
+   * @param object an Object that will be sent to the ReadResultInterest when the read has succeeded or failed
+   */
+  void readAll(final Collection<TypedStateBundle> bundles, final ReadResultInterest interest, final Object object);
+
+  /**
    * Answer a new {@code Stream} for flowing all of the instances of the {@code stateType}.
    * Elements are streamed as type {@code StateBundle} to the {@code Sink<StateBundle>}.
    * @param stateType the {@code Class<?>} of the state to read
@@ -53,4 +74,88 @@ public interface StateStoreReader {
    * @return {@code Completes<Stream>}
    */
   Completes<Stream> streamSomeUsing(final QueryExpression query);
+
+  /**
+   * Collects results of multiple reads using {@code StateStoreReader#readAll()}.
+   */
+  static class ReadAllResultCollector implements ReadResultInterest {
+    private final List<TypedStateBundle> readBundles;
+    private final AtomicBoolean success;
+    private final AtomicReference<Outcome<StorageException, Result>> readOutcome;
+
+    public ReadAllResultCollector() {
+      this.readBundles = new ArrayList<>();
+      this.success = new AtomicBoolean(true);
+      this.readOutcome = new AtomicReference<>(Success.of(Result.Success));
+    }
+
+    /**
+     * Prepares results collectors.
+     */
+    public void prepare() {
+      readBundles.clear();
+      success.set(true);
+      readOutcome.set(Success.of(Result.Success));
+    }
+
+    /**
+     * Single result collector.
+     */
+    @Override
+    public <S> void readResultedIn(
+            final Outcome<StorageException, Result> outcome,
+            final String id,
+            final S state,
+            final int stateVersion,
+            final Metadata metadata,
+            final Object object) {
+      outcome.andThen(result -> {
+        readBundles.add(new TypedStateBundle(id, state, stateVersion, metadata));
+        return result;
+      })
+      .otherwise(cause -> {
+        readOutcome.set(outcome);
+        success.set(false);
+        return cause.result;
+      });
+    }
+
+    /**
+     * Answer my {@code List<TypedStateBundle>}.
+     * @return {@code List<TypedStateBundle>}
+     */
+    public List<TypedStateBundle> readResultBundles() {
+      return readBundles;
+    }
+
+    /**
+     * Answer my {@code Outcome<StorageException, Result>}.
+     * @return {@code Outcome<StorageException, Result>}
+     */
+    public Outcome<StorageException, Result> readResultOutcome(final int expectedReads) {
+      if (isFailure()) {
+        if (!readBundles.isEmpty() && readBundles.size() < expectedReads) {
+          return Failure.of(new StorageException(Result.NotAllFound, "Not all states were found."));
+        }
+      }
+
+      return readOutcome.get();
+    }
+
+    /**
+     * Answer whether or not my reads were a complete success.
+     * @return boolean
+     */
+    public boolean isSuccess() {
+      return success.get();
+    }
+
+    /**
+     * Answer whether or not my reads were a complete or partial failure.
+     * @return boolean
+     */
+    public boolean isFailure() {
+      return !isSuccess();
+    }
+  }
 }

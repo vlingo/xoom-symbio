@@ -7,6 +7,14 @@
 
 package io.vlingo.symbio.store.state;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
+
 import io.vlingo.actors.testkit.AccessSafely;
 import io.vlingo.common.Outcome;
 import io.vlingo.symbio.Metadata;
@@ -15,13 +23,8 @@ import io.vlingo.symbio.store.Result;
 import io.vlingo.symbio.store.StorageException;
 import io.vlingo.symbio.store.dispatch.ConfirmDispatchedResultInterest;
 import io.vlingo.symbio.store.state.StateStore.ReadResultInterest;
+import io.vlingo.symbio.store.state.StateStore.TypedStateBundle;
 import io.vlingo.symbio.store.state.StateStore.WriteResultInterest;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class MockStateStoreResultInterest
     implements ReadResultInterest,
@@ -41,6 +44,7 @@ public class MockStateStoreResultInterest
   public AtomicReference<Object> objectState = new AtomicReference<>();
   public ConcurrentLinkedQueue<Exception> errorCauses = new ConcurrentLinkedQueue<>();
   public ConcurrentLinkedQueue<Source<?>> sources = new ConcurrentLinkedQueue<>();
+  public CopyOnWriteArrayList<StoreData<?>> readAllState = new CopyOnWriteArrayList<>();
 
   public MockStateStoreResultInterest() { }
 
@@ -60,6 +64,23 @@ public class MockStateStoreResultInterest
         access.writeUsing("readStoreData", new StoreData<>(1, cause.result, state, Arrays.asList(), metadata, cause));
         return cause.result;
       });
+  }
+
+  @Override
+  public <S> void readResultedIn(final Outcome<StorageException, Result> outcome, final Collection<TypedStateBundle> bundles, final Object object) {
+    outcome
+    .andThen(result -> {
+      for (final TypedStateBundle bundle : bundles) {
+        access.writeUsing("readAllStates", new StoreData<>(1, result, bundle.state, Arrays.asList(), bundle.metadata, null));
+      }
+      return result;
+    })
+    .otherwise(cause -> {
+      for (final TypedStateBundle bundle : bundles) {
+        access.writeUsing("readAllStates", new StoreData<>(1, cause.result, bundle.state, Arrays.asList(), bundle.metadata, cause));
+      }
+      return cause.result;
+    });
   }
 
   @Override
@@ -104,6 +125,18 @@ public class MockStateStoreResultInterest
           errorCauses.add(data.errorCauses);
         }
       })
+      .writingWith("readAllStates", (StoreData<?> data) -> {
+        readAllState.add(data);
+        readObjectResultedIn.addAndGet(data.resultedIn);
+        objectReadResult.set(data.result);
+        objectWriteAccumulatedResults.add(data.result);
+        objectState.set(data.state);
+        sources.addAll(data.sources);
+        metadataHolder.set(data.metadata);
+        if (data.errorCauses != null) {
+          errorCauses.add(data.errorCauses);
+        }
+      })
 
       .readingWith("readObjectResultedIn", () -> readObjectResultedIn.get())
       .readingWith("objectReadResult", () -> objectReadResult.get())
@@ -115,7 +148,8 @@ public class MockStateStoreResultInterest
       .readingWith("sources", () -> sources.poll())
       .readingWith("errorCauses", () -> errorCauses.poll())
       .readingWith("errorCausesCount", () -> errorCauses.size())
-      .readingWith("writeObjectResultedIn", () -> writeObjectResultedIn.get());
+      .readingWith("writeObjectResultedIn", () -> writeObjectResultedIn.get())
+      .readingWith("readAllStates", () -> readAllState);
 
     return access;
   }
@@ -135,6 +169,11 @@ public class MockStateStoreResultInterest
       this.sources = sources;
       this.metadata = metadata;
       this.errorCauses = errorCauses;
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> T typedState() {
+      return (T) state;
     }
   }
 }

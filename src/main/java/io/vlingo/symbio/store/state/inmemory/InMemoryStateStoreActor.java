@@ -8,6 +8,7 @@
 package io.vlingo.symbio.store.state.inmemory;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +19,7 @@ import io.vlingo.actors.ActorInstantiator;
 import io.vlingo.actors.Definition;
 import io.vlingo.common.Completes;
 import io.vlingo.common.Failure;
+import io.vlingo.common.Outcome;
 import io.vlingo.common.Success;
 import io.vlingo.reactivestreams.Stream;
 import io.vlingo.symbio.BaseEntry;
@@ -51,6 +53,7 @@ public class InMemoryStateStoreActor<RS extends State<?>> extends Actor
   private final Map<String,StateStoreEntryReader<?>> entryReaders;
   private final EntryAdapterProvider entryAdapterProvider;
   private final StateAdapterProvider stateAdapterProvider;
+  private final ReadAllResultCollector readAllResultCollector;
   private final Map<String, Map<String, RS>> store;
 
   @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -69,6 +72,7 @@ public class InMemoryStateStoreActor<RS extends State<?>> extends Actor
     this.entryReaders = new HashMap<>();
     this.store = new HashMap<>();
     this.dispatchables = new CopyOnWriteArrayList<>();
+    this.readAllResultCollector = new ReadAllResultCollector();
 
     final InMemoryDispatcherControlDelegate<Entry<?>, RS> dispatcherControlDelegate = new InMemoryDispatcherControlDelegate<>(dispatchables);
 
@@ -120,6 +124,19 @@ public class InMemoryStateStoreActor<RS extends State<?>> extends Actor
   @Override
   public void read(final String id, final Class<?> type, final ReadResultInterest interest, final Object object) {
     readFor(id, type, interest, object);
+  }
+
+  @Override
+  public void readAll(final Collection<TypedStateBundle> bundles, final ReadResultInterest interest, final Object object) {
+    readAllResultCollector.prepare();
+
+    for (final TypedStateBundle bundle : bundles) {
+      readFor(bundle.id, bundle.type, readAllResultCollector, null);
+    }
+
+    final Outcome<StorageException, Result> outcome = readAllResultCollector.readResultOutcome(bundles.size());
+
+    interest.readResultedIn(outcome, readAllResultCollector.readResultBundles(), object);
   }
 
   @Override
@@ -176,7 +193,7 @@ public class InMemoryStateStoreActor<RS extends State<?>> extends Actor
     } else {
       logger().warn(
               getClass().getSimpleName() +
-              " readText() missing ReadResultInterest for: " +
+              " readFor() missing ReadResultInterest for: " +
               (id == null ? "unknown id" : id));
     }
   }
