@@ -15,7 +15,6 @@ import io.vlingo.actors.DeadLetter;
 import io.vlingo.actors.LocalMessage;
 import io.vlingo.actors.Mailbox;
 import io.vlingo.actors.Returns;
-import io.vlingo.common.BasicCompletes;
 import io.vlingo.common.Completes;
 import io.vlingo.common.SerializableConsumer;
 import io.vlingo.reactivestreams.Stream;
@@ -75,7 +74,7 @@ public class StateStore__Proxy implements io.vlingo.symbio.store.state.StateStor
   public <ET extends Entry<?>> Completes<StateStoreEntryReader<ET>> entryReader(String arg0) {
     if (!actor.isStopped()) {
       final SerializableConsumer<StateStore> consumer = (actor) -> actor.entryReader(arg0);
-      final Completes<StateStoreEntryReader<ET>> completes = new BasicCompletes<>(actor.scheduler());
+      final Completes<StateStoreEntryReader<ET>> completes = Completes.using(actor.scheduler());
       if (mailbox.isPreallocated()) { mailbox.send(actor, StateStore.class, consumer, Returns.value(completes), entryReaderRepresentation3); }
       else { mailbox.send(new LocalMessage<StateStore>(actor, StateStore.class, consumer, Returns.value(completes), entryReaderRepresentation3)); }
       return completes;
@@ -88,7 +87,7 @@ public class StateStore__Proxy implements io.vlingo.symbio.store.state.StateStor
   public Completes<Stream> streamAllOf(final Class<?> stateType) {
     if (!actor.isStopped()) {
       final SerializableConsumer<StateStore> consumer = (actor) -> actor.streamAllOf(stateType);
-      final Completes<Stream> completes = new BasicCompletes<>(actor.scheduler());
+      final Completes<Stream> completes = Completes.using(actor.scheduler());
       if (mailbox.isPreallocated()) { mailbox.send(actor, StateStore.class, consumer, Returns.value(completes), streamAllOfRepresentation4); }
       else { mailbox.send(new LocalMessage<StateStore>(actor, StateStore.class, consumer, Returns.value(completes), streamAllOfRepresentation4)); }
       return completes;
@@ -101,7 +100,7 @@ public class StateStore__Proxy implements io.vlingo.symbio.store.state.StateStor
   public Completes<Stream> streamSomeUsing(final QueryExpression query) {
     if (!actor.isStopped()) {
       final SerializableConsumer<StateStore> consumer = (actor) -> actor.streamSomeUsing(query);
-      final Completes<Stream> completes = new BasicCompletes<>(actor.scheduler());
+      final Completes<Stream> completes = Completes.using(actor.scheduler());
       if (mailbox.isPreallocated()) { mailbox.send(actor, StateStore.class, consumer, Returns.value(completes), streamSomeUsingRepresentation5); }
       else { mailbox.send(new LocalMessage<StateStore>(actor, StateStore.class, consumer, Returns.value(completes), streamSomeUsingRepresentation5)); }
       return completes;

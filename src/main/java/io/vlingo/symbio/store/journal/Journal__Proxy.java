@@ -1,7 +1,11 @@
 package io.vlingo.symbio.store.journal;
 
-import io.vlingo.actors.*;
-import io.vlingo.common.BasicCompletes;
+import io.vlingo.actors.Actor;
+import io.vlingo.actors.DeadLetter;
+import io.vlingo.actors.LocalMessage;
+import io.vlingo.actors.Mailbox;
+import io.vlingo.actors.Returns;
+import io.vlingo.common.Completes;
 import io.vlingo.common.SerializableConsumer;
 import io.vlingo.symbio.Entry;
 
@@ -111,7 +115,7 @@ public class Journal__Proxy<T> implements io.vlingo.symbio.store.journal.Journal
   public <ET extends Entry<?>> io.vlingo.common.Completes<io.vlingo.symbio.store.journal.JournalReader<ET>> journalReader(final java.lang.String arg0) {
     if (!actor.isStopped()) {
       final SerializableConsumer<Journal> consumer = (actor) -> actor.journalReader(arg0);
-      final io.vlingo.common.Completes<io.vlingo.symbio.store.journal.JournalReader<ET>> completes = new BasicCompletes<>(
+      final io.vlingo.common.Completes<io.vlingo.symbio.store.journal.JournalReader<ET>> completes = Completes.using(
               actor.scheduler());
       if (mailbox.isPreallocated()) {
         mailbox.send(actor, Journal.class, consumer, Returns.value(completes), journalReaderRepresentation5);
@@ -129,7 +133,7 @@ public class Journal__Proxy<T> implements io.vlingo.symbio.store.journal.Journal
   public io.vlingo.common.Completes<io.vlingo.symbio.store.journal.StreamReader<T>> streamReader(final java.lang.String arg0) {
     if (!actor.isStopped()) {
       final SerializableConsumer<Journal> consumer = (actor) -> actor.streamReader(arg0);
-      final io.vlingo.common.Completes<io.vlingo.symbio.store.journal.StreamReader<T>> completes = new BasicCompletes<>(
+      final io.vlingo.common.Completes<io.vlingo.symbio.store.journal.StreamReader<T>> completes = Completes.using(
               actor.scheduler());
       if (mailbox.isPreallocated()) {
         mailbox.send(actor, Journal.class, consumer, Returns.value(completes), streamReaderRepresentation6);
