@@ -25,9 +25,11 @@ import io.vlingo.symbio.store.StorageException;
  * The basic State Store interface, defining standard dispatching and control types.
  */
 public interface StateStore extends StateStoreReader, StateStoreWriter {
-  static final long DefaultCheckConfirmationExpirationInterval = 1000;
-  static final long DefaultConfirmationExpiration = 1000;
+  long DefaultCheckConfirmationExpirationInterval = 1000;
+  long DefaultConfirmationExpiration = 1000;
 
+  long DefaultTimeBetweenFlushWrites = 20;
+  long DefaultBatchWriteCount = 200;
   /**
    * Answer the {@code StateStoreEntriesReader<ET>} identified by the {@code name}.
    * @param name the String name of the reader
