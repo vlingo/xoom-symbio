@@ -130,6 +130,7 @@ public interface StateStoreReader {
 
     /**
      * Answer my {@code Outcome<StorageException, Result>}.
+     * @param expectedReads the int number of excepted reads
      * @return {@code Outcome<StorageException, Result>}
      */
     public Outcome<StorageException, Result> readResultOutcome(final int expectedReads) {
