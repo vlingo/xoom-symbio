@@ -56,7 +56,6 @@ public class PartitioningStateStore implements StateStore {
   /**
    * A provider of {@code ActorInstantiator<A>} instances, one for each read
    * partition and one for each write partition.
-   * @param <A> the A typed Actor to be used by the partition
    */
   public static interface InstantiatorProvider {
     /**
@@ -65,7 +64,7 @@ public class PartitioningStateStore implements StateStore {
      * @param type the InstantiationType of the instance to come from the resulting {@code ActorInstantiator<A>}
      * @param currentPartition the int index of the current partition to be instantiated, 0 to totalPartitions - 1
      * @param totalPartitions the int total number of partitions
-     * @param A the concrete type of Actor
+     * @param <A> the concrete type of Actor
      * @return {@code ActorInstantiator<A>}
      */
     <A extends Actor> ActorInstantiator<A> instantiator(final InstantiationType type, final int currentPartition, final int totalPartitions);
