@@ -24,44 +24,95 @@ import io.vlingo.symbio.store.QueryExpression;
 
 /**
  * Provides a partitioning {@code StateStore}. All reads and writes are from/to the same storage and tables.
- * The partitioning based on id hashing, which is meant to read and write in parallel using more than one
- * connection. For reader operations, such as queries and streaming, the partitioning is based on smallest mailbox.
+ * The partitioning is based on id hashing, which is meant to read and write in parallel using more than one
+ * connection. For reader operations not subject to id, such as queries and streaming, the partitioning is
+ * based on smallest mailbox.
  * <p>
- * WARNING: When utilizing the smallest mailbox (least busy reader) operations, it is important not request
- * additional operations of the same type
+ * WARNING: (1) When utilizing the smallest mailbox (least busy reader) operations, it is important to not request
+ * additional operations of the same type if the earlier query must complete before the subsequent request.
+ * (2) The underlying {@code Actor} must use a {@code Mailbox} that supports {@code int pendingMessages()}. Otherwise,
+ * the smallest mailbox (least busy reader) operations cannot be supported, and it does not make much sense to use
+ * this a partitioning {@code StateStore}.
  */
 public class PartitioningStateStore implements StateStore {
+
+  /**
+   * Set on the {@code ActorInstantiator<A>} prior to {@code instantiate()}.
+   */
+  public static enum InstantiationType {
+    None,
+    Reader,
+    Writer;
+
+    public boolean isReader() {
+      return this == Reader;
+    }
+
+    public boolean isWriter() {
+      return this == Writer;
+    }
+  };
+
+  /**
+   * A provider of {@code ActorInstantiator<A>} instances, one for each read
+   * partition and one for each write partition.
+   * @param <A> the A typed Actor to be used by the partition
+   */
+  public static interface InstantiatorProvider {
+    /**
+     * Answer a new instance of an {@code ActorInstantiator<A>} for the {@code type}
+     * and {@code currentPartition}.
+     * @param type the InstantiationType of the instance to come from the resulting {@code ActorInstantiator<A>}
+     * @param currentPartition the int index of the current partition to be instantiated, 0 to totalPartitions - 1
+     * @param totalPartitions the int total number of partitions
+     * @param A the concrete type of Actor
+     * @return {@code ActorInstantiator<A>}
+     */
+    <A extends Actor> ActorInstantiator<A> instantiator(final InstantiationType type, final int currentPartition, final int totalPartitions);
+  }
+
   public static int MinimumReaders = 5;
-  public static int MaximumReaders = 128;
+  public static int MaximumReaders = 256;
 
   public static int MinimumWriters = 3;
-  public static int MaxWriters = 128;
+  public static int MaximumWriters = 256;
 
+  private final InstantiatorProvider instantiatorProvider;
   private Tuple2<StateStore, Actor>[] readers;
   private Tuple2<StateStore, Actor>[] writers;
+
+  /**
+   * Answer the partition of {@code identity} when there are {@code totalPartitions}.
+   * @param identity the String identity
+   * @param totalPartitions the int number of partitions
+   * @return int
+   */
+  public static int partitionOf(final String identity, final int totalPartitions) {
+    return identity.hashCode() % totalPartitions;
+  }
 
   /**
    * Answer a new {@code PartitioningStateStore} as a {@code StateStore} with
    * {@code totalReaders} and {@code totalWriters}. Each actor is created by
    * means of the given {@code instantiator}, which must be renewable on each
-   * use of {@code instantate()} if that is necessary for the type of
+   * use of {@code instantiate()} if that is necessary for the type of
    * {@code ActorInstantiator<A>} in use.
    * @param <A> the concrete Actor type of each StateStore actor
    * @param stage the Stage within which the StateStore actors are created
    * @param stateStoreActorType the {@code Class<A>} of the Actor that implements StateStore
-   * @param instantiator the {@code ActorInstantiator<A>} that is used for every reader and writer actor, and thus must be renewed on each use if needed
+   * @param instantiatorProvider the {@code InstantiatorProvider} that is used to get an {@code ActorInstantiator<A>} for every reader and writer actor
    * @param totalReaders the int total number of readers, which may be between {@code MinimumReaders} and {@code MaximumReaders}
    * @param totalWriters the int total number of writers, which may be between {@code MinimumWriters} and {@code MaxWriters}
    * @return StateStore
    */
-  public static <A extends Actor> StateStore stateStoreUsing(
+  public static <A extends Actor> StateStore using(
           final Stage stage,
           final Class<A> stateStoreActorType,
-          final ActorInstantiator<A> instantiator,
+          final InstantiatorProvider instantiatorProvider,
           final int totalReaders,
           final int totalWriters) {
 
-    return new PartitioningStateStore(stage, stateStoreActorType, instantiator, totalReaders, totalWriters);
+    return new PartitioningStateStore(stage, stateStoreActorType, instantiatorProvider, totalReaders, totalWriters);
   }
 
   /**
@@ -115,13 +166,15 @@ public class PartitioningStateStore implements StateStore {
   private <A extends Actor> PartitioningStateStore(
           final Stage stage,
           final Class<A> stateStoreActorType,
-          final ActorInstantiator<A> instantiator,
+          final InstantiatorProvider instantiatorProvider,
           final int totalReaders,
           final int totalWriters) {
 
-    this.readers = createStateStores(stage, stateStoreActorType, instantiator, actualTotal(totalReaders, MinimumReaders, MaximumReaders));
+    this.instantiatorProvider = instantiatorProvider;
 
-    this.writers = createStateStores(stage, stateStoreActorType, instantiator, actualTotal(totalWriters, MinimumWriters, MaxWriters));
+    this.readers = createStateStores(stage, stateStoreActorType, InstantiationType.Reader, actualTotal(totalReaders, MinimumReaders, MaximumReaders));
+
+    this.writers = createStateStores(stage, stateStoreActorType, InstantiationType.Writer, actualTotal(totalWriters, MinimumWriters, MaximumWriters));
   }
 
   private int actualTotal(final int total, final int minimum, final int maximum) {
@@ -136,15 +189,16 @@ public class PartitioningStateStore implements StateStore {
   private <A extends Actor> Tuple2<StateStore, Actor>[] createStateStores(
           final Stage stage,
           final Class<A> stateStoreActorType,
-          final ActorInstantiator<A> instantiator,
+          final InstantiationType type,
           final int total) {
 
     final Tuple2<StateStore, Actor>[] stateStores = new Tuple2[total];
 
-    final HookInstantiator<A> hook = new HookInstantiator<>(instantiator);
-
     for (int idx = 0; idx < total; ++idx) {
+      final ActorInstantiator<A> instantiator = instantiatorProvider.instantiator(type, idx, total);
+      final HookInstantiator<A> hook = new HookInstantiator<>(instantiator);
       final StateStore stateStore = stage.actorFor(StateStore.class, stateStoreActorType, hook);
+      pending(hook.actor); // assertion that Mailbox supports pendingMessages()
       stateStores[idx] = Tuple2.from(stateStore, hook.actor);
     }
 
@@ -156,7 +210,7 @@ public class PartitioningStateStore implements StateStore {
     StateStore reader = null;
 
     for (int idx = 0; idx < readers.length; ++idx) {
-      final int pending = Environment.environmentOf(readers[idx]._2).pendingMessages();
+      final int pending = pending(readers[idx]._2);
 
       if (pending < totalMessages) {
         totalMessages = pending;
@@ -167,12 +221,18 @@ public class PartitioningStateStore implements StateStore {
     return reader;
   }
 
+  private int pending(final Actor actor) {
+    return Environment.of(actor).pendingMessages();
+  }
+
   private StateStore readerOf(final String identity) {
-    return readers[identity.hashCode() / readers.length]._1;
+    final int index = partitionOf(identity, readers.length);
+    return readers[index]._1;
   }
 
   private StateStore writerOf(final String identity) {
-    return writers[identity.hashCode() / readers.length]._1;
+    final int index = partitionOf(identity, writers.length);
+    return writers[index]._1;
   }
 
   private class HookInstantiator<A extends Actor> implements ActorInstantiator<A> {
