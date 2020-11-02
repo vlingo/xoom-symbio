@@ -8,13 +8,17 @@
 package io.vlingo.symbio.store.state;
 
 import java.util.Arrays;
+import java.util.Properties;
 import java.util.UUID;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import io.vlingo.actors.Configuration;
 import io.vlingo.actors.World;
+import io.vlingo.actors.plugin.PluginProperties;
+import io.vlingo.actors.plugin.mailbox.concurrentqueue.ConcurrentQueueMailboxPlugin.ConcurrentQueueMailboxPluginConfiguration;
 import io.vlingo.symbio.store.state.MessageCountingStateStoreActor.MessageCountingInstantiatorProvider;
 import io.vlingo.symbio.store.state.MessageCountingStateStoreActor.MessageCountingResults;
 import io.vlingo.symbio.store.state.StateStore.TypedStateBundle;
@@ -29,7 +33,7 @@ public class PartitioningStateStoreTest {
     final int times = PartitioningStateStore.MinimumReaders + PartitioningStateStore.MinimumWriters;
 
     final MessageCountingResults results = new MessageCountingResults(times);
-    final MessageCountingInstantiatorProvider instantiatorProvider = new MessageCountingInstantiatorProvider(results);
+    final MessageCountingInstantiatorProvider instantiatorProvider = new MessageCountingInstantiatorProvider(results, true); // use Definition
 
     // 3, 2 must be minimum MinimumReaders, MinimumWriters and must default to that if below minimum is given
     final StateStore store = PartitioningStateStore.using(world.stage(), MessageCountingStateStoreActor.class, instantiatorProvider, readers, writers);
@@ -49,7 +53,7 @@ public class PartitioningStateStoreTest {
     final int times = PartitioningStateStore.MaximumReaders + PartitioningStateStore.MaximumWriters;
 
     final MessageCountingResults results = new MessageCountingResults(times);
-    final MessageCountingInstantiatorProvider instantiatorProvider = new MessageCountingInstantiatorProvider(results);
+    final MessageCountingInstantiatorProvider instantiatorProvider = new MessageCountingInstantiatorProvider(results, false); // don't use Definition
 
     // 3, 2 must be minimum 5, 3 and must default to that below minimum given
     final StateStore store = PartitioningStateStore.using(world.stage(), MessageCountingStateStoreActor.class, instantiatorProvider, readers, writers);
@@ -69,7 +73,7 @@ public class PartitioningStateStoreTest {
     final int times = readers + writers;
 
     final MessageCountingResults results = new MessageCountingResults(times);
-    final MessageCountingInstantiatorProvider instantiatorProvider = new MessageCountingInstantiatorProvider(results);
+    final MessageCountingInstantiatorProvider instantiatorProvider = new MessageCountingInstantiatorProvider(results, false); // don't use Definition
 
     // must be exact
     final StateStore store = PartitioningStateStore.using(world.stage(), MessageCountingStateStoreActor.class, instantiatorProvider, readers, writers);
@@ -78,6 +82,11 @@ public class PartitioningStateStoreTest {
     Assert.assertEquals(times, results.ctor());
     Assert.assertEquals(readers, results.readerCtor());
     Assert.assertEquals(writers, results.writerCtor());
+  }
+
+  @Test
+  public void testThatStoreCreationFailsFromWrongMailboxType() {
+
   }
 
   @Test
@@ -91,7 +100,7 @@ public class PartitioningStateStoreTest {
     final int times = ctors + reads + readAlls;
 
     final MessageCountingResults results = new MessageCountingResults(times);
-    final MessageCountingInstantiatorProvider instantiatorProvider = new MessageCountingInstantiatorProvider(results);
+    final MessageCountingInstantiatorProvider instantiatorProvider = new MessageCountingInstantiatorProvider(results, true); // use Definition
 
     final StateStore store = PartitioningStateStore.using(world.stage(), MessageCountingStateStoreActor.class, instantiatorProvider, 0, 0);
 
@@ -128,7 +137,7 @@ public class PartitioningStateStoreTest {
     final int times = ctors + (writes * iterations);
 
     final MessageCountingResults results = new MessageCountingResults(times);
-    final MessageCountingInstantiatorProvider instantiatorProvider = new MessageCountingInstantiatorProvider(results);
+    final MessageCountingInstantiatorProvider instantiatorProvider = new MessageCountingInstantiatorProvider(results, false); // don't use Definition
 
     final StateStore store = PartitioningStateStore.using(world.stage(), MessageCountingStateStoreActor.class, instantiatorProvider, 0, 0);
 
@@ -153,7 +162,31 @@ public class PartitioningStateStoreTest {
 
   @Before
   public void setUp() {
-    world = World.startWithDefaults("test-partitioning-statestore");
+//    world = World.startWithDefaults("test-partitioning-statestore");
+
+    final Configuration configuration = Configuration.define();
+
+    JDBCConcurrentQueueMailboxPluginConfiguration.register(configuration);
+
+    world = World.start("test-partitioning-statestore", configuration);
+  }
+
+  private static class JDBCConcurrentQueueMailboxPluginConfiguration extends ConcurrentQueueMailboxPluginConfiguration {
+    public static JDBCConcurrentQueueMailboxPluginConfiguration register(final Configuration configuration) {
+      return new JDBCConcurrentQueueMailboxPluginConfiguration(configuration);
+    }
+
+    JDBCConcurrentQueueMailboxPluginConfiguration(final Configuration configuration) {
+      final String name = "jdbcQueueMailbox";
+
+      final Properties properties = new Properties();
+
+      properties.setProperty("plugin." + name + ".defaultMailbox", "false");
+
+      this.buildWith(configuration, new PluginProperties(name, properties));
+
+      configuration.with(this);
+    }
   }
 
   private String idFor(final int targetPartition, final int max) {

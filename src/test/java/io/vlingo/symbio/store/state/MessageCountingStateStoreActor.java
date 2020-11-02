@@ -10,11 +10,13 @@ package io.vlingo.symbio.store.state;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import io.vlingo.actors.Actor;
 import io.vlingo.actors.ActorInstantiator;
+import io.vlingo.actors.Definition;
 import io.vlingo.actors.testkit.AccessSafely;
 import io.vlingo.common.Completes;
 import io.vlingo.reactivestreams.Stream;
@@ -22,8 +24,8 @@ import io.vlingo.symbio.Entry;
 import io.vlingo.symbio.Metadata;
 import io.vlingo.symbio.Source;
 import io.vlingo.symbio.store.QueryExpression;
-import io.vlingo.symbio.store.state.PartitioningStateStore.InstantiationType;
 import io.vlingo.symbio.store.state.PartitioningStateStore.InstantiatorProvider;
+import io.vlingo.symbio.store.state.PartitioningStateStore.StateStoreRole;
 
 public abstract class MessageCountingStateStoreActor extends Actor implements StateStore {
   private final MessageCountingResults results;
@@ -74,7 +76,7 @@ public abstract class MessageCountingStateStoreActor extends Actor implements St
     public ReaderMessageCountingStateStoreActor(MessageCountingResults results, final int totalPartitions) {
       super(results, totalPartitions);
 
-      results.incrementCtor(InstantiationType.Reader);
+      results.incrementCtor(StateStoreRole.Reader);
     }
   }
 
@@ -82,24 +84,36 @@ public abstract class MessageCountingStateStoreActor extends Actor implements St
     public WriterMessageCountingStateStoreActor(MessageCountingResults results, final int totalPartitions) {
       super(results, totalPartitions);
 
-      results.incrementCtor(InstantiationType.Writer);
+      results.incrementCtor(StateStoreRole.Writer);
     }
   }
 
   public static class MessageCountingInstantiatorProvider implements InstantiatorProvider {
+    private final boolean provideDefinition;
     private final MessageCountingResults results;
 
-    public MessageCountingInstantiatorProvider(final MessageCountingResults results) {
+    public MessageCountingInstantiatorProvider(final MessageCountingResults results, final boolean provideDefinition) {
       this.results = results;
+      this.provideDefinition = provideDefinition;
     }
 
     @Override
-    public <A extends Actor> ActorInstantiator<A> instantiator(
-            final InstantiationType type,
-            final int currentPartition,
-            final int totalPartitions) {
+    public <A extends Actor> Optional<Definition> definitionFor(
+            final Class<A> stateStoreActorType,
+            ActorInstantiator<A> instantiator,
+            StateStoreRole role,
+            int currentPartition,
+            int totalPartitions) {
 
-      return new MessageCountingInstantiator<>(results, type, totalPartitions);
+      return provideDefinition ?
+              Optional.of(Definition.has(stateStoreActorType, instantiator, "jdbcQueueMailbox", "StateStore" + role.name() + currentPartition)) :
+              Optional.empty();
+    }
+
+    @Override
+    public <A extends Actor> ActorInstantiator<A> instantiatorFor(Class<A> stateStoreActorType, StateStoreRole role,
+            int currentPartition, int totalPartitions) {
+      return new MessageCountingInstantiator<>(results, role, totalPartitions);
     }
   }
 
@@ -107,24 +121,24 @@ public abstract class MessageCountingStateStoreActor extends Actor implements St
     private static final long serialVersionUID = 1L;
 
     private final MessageCountingResults results;
-    private final InstantiationType type;
+    private final StateStoreRole role;
     private final int totalPartitions;
 
-    public MessageCountingInstantiator(final MessageCountingResults results, final InstantiationType type, final int totalPartitions) {
+    public MessageCountingInstantiator(final MessageCountingResults results, final StateStoreRole role, final int totalPartitions) {
       this.results = results;
-      this.type = type;
+      this.role = role;
       this.totalPartitions = totalPartitions;
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public A instantiate() {
-      if (type.isReader()) {
+      if (role.isReader()) {
         return (A) new ReaderMessageCountingStateStoreActor(results, totalPartitions);
-      } else if (type.isWriter()) {
+      } else if (role.isWriter()) {
         return (A) new WriterMessageCountingStateStoreActor(results, totalPartitions);
       }
-      throw new IllegalStateException("Unknown PartitioningStateStore type.");
+      throw new IllegalStateException("Unknown PartitioningStateStore role.");
     }
   }
 
@@ -146,7 +160,7 @@ public abstract class MessageCountingStateStoreActor extends Actor implements St
     public MessageCountingResults(final int times) {
       this.access = AccessSafely.afterCompleting(times);
 
-      access.writingWith("ctor", (InstantiationType type) -> {
+      access.writingWith("ctor", (StateStoreRole type) -> {
         ctor.incrementAndGet();
         if (type.isReader()) {
           readerCtor.incrementAndGet();
@@ -233,7 +247,7 @@ public abstract class MessageCountingStateStoreActor extends Actor implements St
       return access.readFrom("entryReader");
     }
 
-    private void incrementCtor(final InstantiationType type) {
+    private void incrementCtor(final StateStoreRole type) {
       access.writeUsing("ctor", type);
     }
 

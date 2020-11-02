@@ -9,9 +9,11 @@ package io.vlingo.symbio.store.state;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 import io.vlingo.actors.Actor;
 import io.vlingo.actors.ActorInstantiator;
+import io.vlingo.actors.Definition;
 import io.vlingo.actors.Environment;
 import io.vlingo.actors.Stage;
 import io.vlingo.common.Completes;
@@ -39,8 +41,7 @@ public class PartitioningStateStore implements StateStore {
   /**
    * Set on the {@code ActorInstantiator<A>} prior to {@code instantiate()}.
    */
-  public static enum InstantiationType {
-    None,
+  public static enum StateStoreRole {
     Reader,
     Writer;
 
@@ -59,15 +60,29 @@ public class PartitioningStateStore implements StateStore {
    */
   public static interface InstantiatorProvider {
     /**
+     * Answer an {@code Optional<Definition>} that, if defined, will be used to pass to the {@code Stage.actorOf(protocolClass, definition)}.
+     * <p>NOTE: This {@code definitionFor()} is sent following the creation of {@code instantiator} by {@code instantiatorFor()} and includes that {@code instantiator}.
+     * @param stateStoreActorType the {@code Class<A>} of the concrete StateStore protocol implementing Actor type
+     * @param instantiator the {@code ActorInstantiator<A>} instance that must be included in the Definition should one be provided
+     * @param role the StateStoreRole of the {@code ActorInstantiator<A>}
+     * @param currentPartition the int index of the current partition instantiator, 0 to totalPartitions - 1
+     * @param totalPartitions the int total number of partitions
+     * @param <A> the concrete type of Actor
+     * @return {@code Optional<Definition>}
+     */
+    <A extends Actor> Optional<Definition> definitionFor(final Class<A> stateStoreActorType, final ActorInstantiator<A> instantiator, final StateStoreRole role, final int currentPartition, final int totalPartitions);
+
+    /**
      * Answer a new instance of an {@code ActorInstantiator<A>} for the {@code type}
      * and {@code currentPartition}.
-     * @param type the InstantiationType of the instance to come from the resulting {@code ActorInstantiator<A>}
+     * @param stateStoreActorType the {@code Class<A>} of the concrete StateStore protocol implementing Actor type
+     * @param role the StateStoreRole of the instance to come from the resulting {@code ActorInstantiator<A>}
      * @param currentPartition the int index of the current partition to be instantiated, 0 to totalPartitions - 1
      * @param totalPartitions the int total number of partitions
      * @param <A> the concrete type of Actor
      * @return {@code ActorInstantiator<A>}
      */
-    <A extends Actor> ActorInstantiator<A> instantiator(final InstantiationType type, final int currentPartition, final int totalPartitions);
+    <A extends Actor> ActorInstantiator<A> instantiatorFor(final Class<A> stateStoreActorType, final StateStoreRole role, final int currentPartition, final int totalPartitions);
   }
 
   public static int MinimumReaders = 5;
@@ -171,9 +186,9 @@ public class PartitioningStateStore implements StateStore {
 
     this.instantiatorProvider = instantiatorProvider;
 
-    this.readers = createStateStores(stage, stateStoreActorType, InstantiationType.Reader, actualTotal(totalReaders, MinimumReaders, MaximumReaders));
+    this.readers = createStateStores(stage, stateStoreActorType, StateStoreRole.Reader, actualTotal(totalReaders, MinimumReaders, MaximumReaders));
 
-    this.writers = createStateStores(stage, stateStoreActorType, InstantiationType.Writer, actualTotal(totalWriters, MinimumWriters, MaximumWriters));
+    this.writers = createStateStores(stage, stateStoreActorType, StateStoreRole.Writer, actualTotal(totalWriters, MinimumWriters, MaximumWriters));
   }
 
   private int actualTotal(final int total, final int minimum, final int maximum) {
@@ -188,15 +203,16 @@ public class PartitioningStateStore implements StateStore {
   private <A extends Actor> Tuple2<StateStore, Actor>[] createStateStores(
           final Stage stage,
           final Class<A> stateStoreActorType,
-          final InstantiationType type,
+          final StateStoreRole type,
           final int total) {
 
     final Tuple2<StateStore, Actor>[] stateStores = new Tuple2[total];
 
     for (int idx = 0; idx < total; ++idx) {
-      final ActorInstantiator<A> instantiator = instantiatorProvider.instantiator(type, idx, total);
+      final ActorInstantiator<A> instantiator = instantiatorProvider.instantiatorFor(stateStoreActorType, type, idx, total);
       final HookInstantiator<A> hook = new HookInstantiator<>(instantiator);
-      final StateStore stateStore = stage.actorFor(StateStore.class, stateStoreActorType, hook);
+      final Optional<Definition> definition = instantiatorProvider.definitionFor(stateStoreActorType, hook, type, idx, total);
+      final StateStore stateStore = stage.actorFor(StateStore.class, definition.orElse(Definition.has(stateStoreActorType, hook)));
       pending(hook.actor); // assertion that Mailbox supports pendingMessages()
       stateStores[idx] = Tuple2.from(stateStore, hook.actor);
     }
