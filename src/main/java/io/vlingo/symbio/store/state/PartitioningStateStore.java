@@ -102,7 +102,7 @@ public class PartitioningStateStore implements StateStore {
    * @return int
    */
   public static int partitionOf(final String identity, final int totalPartitions) {
-    return identity.hashCode() % totalPartitions;
+    return Math.abs(identity.hashCode() % totalPartitions);
   }
 
   /**
