@@ -7,6 +7,8 @@
 
 package io.vlingo.symbio;
 
+import io.vlingo.symbio.store.StoredTypes;
+
 import java.util.Collections;
 import java.util.List;
 
@@ -39,7 +41,7 @@ public interface Entry<T> extends Comparable<Entry<T>> {
   @SuppressWarnings("unchecked")
   public static <C> Class<C> typed(final String type) {
     try {
-      return (Class<C>) Class.forName(type);
+      return (Class<C>) StoredTypes.forName(type);
     } catch (Exception e) {
       throw new IllegalStateException("Cannot get class for type: " + type);
     }

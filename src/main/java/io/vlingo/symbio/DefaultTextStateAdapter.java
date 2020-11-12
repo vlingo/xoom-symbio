@@ -9,6 +9,7 @@ package io.vlingo.symbio;
 
 import io.vlingo.common.serialization.JsonSerialization;
 import io.vlingo.symbio.State.TextState;
+import io.vlingo.symbio.store.StoredTypes;
 
 public class DefaultTextStateAdapter implements StateAdapter<Object, TextState> {
   @Override
@@ -19,7 +20,7 @@ public class DefaultTextStateAdapter implements StateAdapter<Object, TextState> 
   @Override
   public Object fromRawState(final TextState raw) {
     try {
-      final Class<?> stateType = Class.forName(raw.type);
+      final Class<?> stateType = StoredTypes.forName(raw.type);
       return JsonSerialization.deserialized(raw.data, stateType);
     } catch (Exception e) {
       throw new IllegalStateException("Cannot convert to type: " + raw.type);

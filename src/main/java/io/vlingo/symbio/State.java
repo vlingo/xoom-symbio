@@ -7,6 +7,8 @@
 
 package io.vlingo.symbio;
 
+import io.vlingo.symbio.store.StoredTypes;
+
 import java.util.Comparator;
 
 public abstract class State<T> implements Comparable<State<T>> {
@@ -81,7 +83,7 @@ public abstract class State<T> implements Comparable<State<T>> {
   @SuppressWarnings("unchecked")
   public <C> Class<C> typed() {
     try {
-      return (Class<C>) Class.forName(type);
+      return (Class<C>) StoredTypes.forName(type);
     } catch (Exception e) {
       throw new IllegalStateException("Cannot get class for type: " + type);
     }

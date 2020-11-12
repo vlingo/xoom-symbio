@@ -9,6 +9,7 @@ package io.vlingo.symbio;
 
 import io.vlingo.common.serialization.JsonSerialization;
 import io.vlingo.symbio.BaseEntry.TextEntry;
+import io.vlingo.symbio.store.StoredTypes;
 
 @SuppressWarnings("rawtypes")
 public final class DefaultTextEntryAdapter implements EntryAdapter {
@@ -16,7 +17,7 @@ public final class DefaultTextEntryAdapter implements EntryAdapter {
   @Override
   public Source fromEntry(final Entry entry) {
     try {
-      final Class<?> sourceType = Class.forName(entry.typeName());
+      final Class<?> sourceType = StoredTypes.forName(entry.typeName());
       final Object bland = JsonSerialization.deserialized((String) entry.entryData(), sourceType);
       return (Source) bland;
     } catch (Exception e) {
