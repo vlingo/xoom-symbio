@@ -1,6 +1,6 @@
 # vlingo-symbio
 
-[![Javadocs](http://javadoc.io/badge/io.vlingo/vlingo-symbio.svg?color=brightgreen)](http://javadoc.io/doc/io.vlingo/vlingo-symbio) [![Build Status](https://travis-ci.org/vlingo/vlingo-symbio.svg?branch=master)](https://travis-ci.org/vlingo/vlingo-symbio) [ ![Download](https://api.bintray.com/packages/vlingo/vlingo-platform-java/vlingo-symbio/images/download.svg) ](https://bintray.com/vlingo/vlingo-platform-java/vlingo-symbio/_latestVersion) [![Gitter chat](https://badges.gitter.im/gitterHQ/gitter.png)](https://gitter.im/vlingo-platform-java/symbio)
+[![Javadocs](http://javadoc.io/badge/io.vlingo/vlingo-symbio.svg?color=brightgreen)](http://javadoc.io/doc/io.vlingo/vlingo-symbio) [![Build](https://github.com/vlingo/vlingo-symbio/workflows/Build/badge.svg)](https://github.com/vlingo/vlingo-symbio/actions?query=workflow%3ABuild) [ ![Download](https://api.bintray.com/packages/vlingo/vlingo-platform-java/vlingo-symbio/images/download.svg) ](https://bintray.com/vlingo/vlingo-platform-java/vlingo-symbio/_latestVersion) [![Gitter chat](https://badges.gitter.im/gitterHQ/gitter.png)](https://gitter.im/vlingo-platform-java/symbio)
 
 Docs: https://docs.vlingo.io/vlingo-symbio
 
