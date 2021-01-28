@@ -130,6 +130,7 @@ public interface StateStore extends StateStoreReader, StateStoreWriter {
     void close();
     boolean isClosed();
     EntryReader.Advice entryReaderAdvice();
+    void initialize();
     default <A extends Actor> ActorInstantiator<A> instantiator() { return null; }
     String originatorId();
     <S,R> S stateFrom(final R result, final String id) throws Exception;

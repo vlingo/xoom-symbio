@@ -29,6 +29,11 @@ public class NoOpStorageDelegate implements StorageDelegate {
   }
 
   @Override
+  public void initialize() {
+
+  }
+
+  @Override
   public String originatorId() {
     return null;
   }
