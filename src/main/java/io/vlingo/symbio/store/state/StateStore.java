@@ -136,4 +136,16 @@ public interface StateStore extends StateStoreReader, StateStoreWriter {
     <S,R> S stateFrom(final R result, final String id) throws Exception;
     <S,R> S stateFrom(final R result, final String id, final int columnOffset) throws Exception;
   }
+
+  /**
+   * Use the pre-initialized {@code StateStore} to prime
+   * the initialization before it's attempted.
+   */
+  public static interface InitializationPrimer {
+    /**
+     * Received by the implementor just prior to initialization.
+     * @param stateStore the pre-initialized StateStore
+     */
+    void prime(final StateStore stateStore);
+  }
 }
