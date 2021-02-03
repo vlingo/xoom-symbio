@@ -12,7 +12,6 @@ import io.vlingo.actors.DeadLetter;
 import io.vlingo.actors.LocalMessage;
 import io.vlingo.actors.Mailbox;
 import io.vlingo.actors.Returns;
-import io.vlingo.common.BasicCompletes;
 import io.vlingo.common.Completes;
 import io.vlingo.common.SerializableConsumer;
 import io.vlingo.reactivestreams.Stream;
@@ -54,7 +53,7 @@ public class JournalReader__Proxy<T extends Entry<?>> implements io.vlingo.symbi
   public io.vlingo.common.Completes<java.lang.String> name() {
     if (!actor.isStopped()) {
       final SerializableConsumer<JournalReader> consumer = (actor) -> actor.name();
-      final io.vlingo.common.Completes<java.lang.String> completes = new BasicCompletes<>(actor.scheduler());
+      final io.vlingo.common.Completes<java.lang.String> completes = Completes.using(actor.scheduler());
       if (mailbox.isPreallocated()) { mailbox.send(actor, JournalReader.class, consumer, Returns.value(completes), nameRepresentation1); }
       else { mailbox.send(new LocalMessage<JournalReader>(actor, JournalReader.class, consumer, Returns.value(completes), nameRepresentation1)); }
       return completes;
@@ -79,7 +78,7 @@ public class JournalReader__Proxy<T extends Entry<?>> implements io.vlingo.symbi
   public io.vlingo.common.Completes<java.lang.String> seekTo(java.lang.String arg0) {
     if (!actor.isStopped()) {
       final SerializableConsumer<JournalReader> consumer = (actor) -> actor.seekTo(arg0);
-      final io.vlingo.common.Completes<java.lang.String> completes = new BasicCompletes<>(actor.scheduler());
+      final io.vlingo.common.Completes<java.lang.String> completes = Completes.using(actor.scheduler());
       if (mailbox.isPreallocated()) { mailbox.send(actor, JournalReader.class, consumer, Returns.value(completes), seekToRepresentation3); }
       else { mailbox.send(new LocalMessage<JournalReader>(actor, JournalReader.class, consumer, Returns.value(completes), seekToRepresentation3)); }
       return completes;
@@ -93,7 +92,7 @@ public class JournalReader__Proxy<T extends Entry<?>> implements io.vlingo.symbi
   public io.vlingo.common.Completes<T> readNext() {
     if (!actor.isStopped()) {
       final SerializableConsumer<JournalReader> consumer = (actor) -> actor.readNext();
-      final io.vlingo.common.Completes<T> completes = new BasicCompletes<>(actor.scheduler());
+      final io.vlingo.common.Completes<T> completes = Completes.using(actor.scheduler());
       if (mailbox.isPreallocated()) { mailbox.send(actor, JournalReader.class, consumer, Returns.value(completes), readNextRepresentation4); }
       else { mailbox.send(new LocalMessage<JournalReader>(actor, JournalReader.class, consumer, Returns.value(completes), readNextRepresentation4)); }
       return completes;
@@ -107,7 +106,7 @@ public class JournalReader__Proxy<T extends Entry<?>> implements io.vlingo.symbi
   public io.vlingo.common.Completes<T> readNext(final String fromId) {
     if (!actor.isStopped()) {
       final SerializableConsumer<JournalReader> consumer = (actor) -> actor.readNext(fromId);
-      final io.vlingo.common.Completes<T> completes = new BasicCompletes<>(actor.scheduler());
+      final io.vlingo.common.Completes<T> completes = Completes.using(actor.scheduler());
       if (mailbox.isPreallocated()) { mailbox.send(actor, JournalReader.class, consumer, Returns.value(completes), readNextRepresentation4); }
       else { mailbox.send(new LocalMessage<JournalReader>(actor, JournalReader.class, consumer, Returns.value(completes), readNextRepresentation4)); }
       return completes;
@@ -121,7 +120,7 @@ public class JournalReader__Proxy<T extends Entry<?>> implements io.vlingo.symbi
   public io.vlingo.common.Completes<java.util.List<T>> readNext(int arg0) {
     if (!actor.isStopped()) {
       final SerializableConsumer<JournalReader> consumer = (actor) -> actor.readNext(arg0);
-      final io.vlingo.common.Completes<java.util.List<T>> completes = new BasicCompletes<>(actor.scheduler());
+      final io.vlingo.common.Completes<java.util.List<T>> completes = Completes.using(actor.scheduler());
       if (mailbox.isPreallocated()) { mailbox.send(actor, JournalReader.class, consumer, Returns.value(completes), readNextRepresentation5); }
       else { mailbox.send(new LocalMessage<JournalReader>(actor, JournalReader.class, consumer, Returns.value(completes), readNextRepresentation5)); }
       return completes;
@@ -135,7 +134,7 @@ public class JournalReader__Proxy<T extends Entry<?>> implements io.vlingo.symbi
   public io.vlingo.common.Completes<java.util.List<T>> readNext(final String fromId, int arg0) {
     if (!actor.isStopped()) {
       final SerializableConsumer<JournalReader> consumer = (actor) -> actor.readNext(fromId, arg0);
-      final io.vlingo.common.Completes<java.util.List<T>> completes = new BasicCompletes<>(actor.scheduler());
+      final io.vlingo.common.Completes<java.util.List<T>> completes = Completes.using(actor.scheduler());
       if (mailbox.isPreallocated()) { mailbox.send(actor, JournalReader.class, consumer, Returns.value(completes), readNextRepresentation5); }
       else { mailbox.send(new LocalMessage<JournalReader>(actor, JournalReader.class, consumer, Returns.value(completes), readNextRepresentation5)); }
       return completes;
@@ -150,7 +149,7 @@ public class JournalReader__Proxy<T extends Entry<?>> implements io.vlingo.symbi
   public Completes<Long> size() {
     if (!actor.isStopped()) {
       final SerializableConsumer<JournalReader> consumer = (actor) -> actor.size();
-      final io.vlingo.common.Completes<Long> completes = new BasicCompletes<>(actor.scheduler());
+      final io.vlingo.common.Completes<Long> completes = Completes.using(actor.scheduler());
       if (mailbox.isPreallocated()) { mailbox.send(actor, JournalReader.class, consumer, Returns.value(completes), sizeRepresentation6); }
       else { mailbox.send(new LocalMessage<JournalReader>(actor, JournalReader.class, consumer, Returns.value(completes), sizeRepresentation6)); }
       return completes;
@@ -165,7 +164,7 @@ public class JournalReader__Proxy<T extends Entry<?>> implements io.vlingo.symbi
   public Completes<Stream> streamAll() {
     if (!actor.isStopped()) {
       final SerializableConsumer<JournalReader> consumer = (actor) -> actor.streamAll();
-      final io.vlingo.common.Completes<Stream> completes = new BasicCompletes<>(actor.scheduler());
+      final io.vlingo.common.Completes<Stream> completes = Completes.using(actor.scheduler());
       if (mailbox.isPreallocated()) { mailbox.send(actor, JournalReader.class, consumer, Returns.value(completes), sizeRepresentation7); }
       else { mailbox.send(new LocalMessage<JournalReader>(actor, JournalReader.class, consumer, Returns.value(completes), sizeRepresentation7)); }
       return completes;
