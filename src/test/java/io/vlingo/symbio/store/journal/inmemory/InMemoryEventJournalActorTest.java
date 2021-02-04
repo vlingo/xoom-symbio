@@ -240,7 +240,7 @@ public class InMemoryEventJournalActorTest {
     world = World.startWithDefaults("test-journal");
     this.dispatcher = new MockDispatcher<>(new MockConfirmDispatchedResultInterest());
 
-    journal = Journal.using(world.stage(), InMemoryJournalActor.class, this.dispatcher);
+    journal = Journal.using(world.stage(), InMemoryJournalActor.class, Arrays.asList(this.dispatcher));
     EntryAdapterProvider.instance(world).registerAdapter(Test1Source.class, new Test1SourceAdapter());
     EntryAdapterProvider.instance(world).registerAdapter(Test2Source.class, new Test2SourceAdapter());
     StateAdapterProvider.instance(world).registerAdapter(SnapshotState.class, new SnapshotStateAdapter());

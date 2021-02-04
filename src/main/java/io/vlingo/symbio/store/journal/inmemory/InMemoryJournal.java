@@ -88,6 +88,10 @@ public class InMemoryJournal<T,RS extends State<?>> implements Journal<T>, Stopp
     this(Arrays.asList(dispatcher), world, 1000L, 1000L);
   }
 
+  public InMemoryJournal(final List<Dispatcher<Dispatchable<Entry<T>,RS>>> dispatchers, final World world ) {
+    this(dispatchers, world, 1000L, 1000L);
+  }
+
   @Override
   public <S, ST> void append(final String streamName, final int streamVersion, final Source<S> source, final Metadata metadata,
           final AppendResultInterest interest, final Object object) {

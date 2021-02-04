@@ -132,7 +132,7 @@ public class InMemoryObjectStoreActorTest {
     entryAdapterProvider.registerAdapter(Test1Source.class, new Test1SourceAdapter());
 
     this.dispatcher = new MockDispatcher<>(new MockConfirmDispatchedResultInterest());
-    objectStore = world.actorFor(ObjectStore.class, InMemoryObjectStoreActor.class, this.dispatcher);
+    objectStore = world.actorFor(ObjectStore.class, InMemoryObjectStoreActor.class, Arrays.asList(this.dispatcher));
   }
 
   public static final class Test1Source extends Source<String> {

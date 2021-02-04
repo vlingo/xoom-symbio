@@ -56,6 +56,10 @@ public class InMemoryStateStoreActor<RS extends State<?>> extends Actor
   private final ReadAllResultCollector readAllResultCollector;
   private final Map<String, Map<String, RS>> store;
 
+  public InMemoryStateStoreActor(final List<Dispatcher<Dispatchable<Entry<?>, RS>>> dispatchers) {
+    this(dispatchers, 1000L, 1000L);
+  }
+
   @SuppressWarnings({ "unchecked", "rawtypes" })
   public InMemoryStateStoreActor(
           final List<Dispatcher<Dispatchable<Entry<?>, RS>>> dispatchers,
@@ -86,21 +90,6 @@ public class InMemoryStateStoreActor<RS extends State<?>> extends Actor
           checkConfirmationExpirationInterval,
           confirmationExpiration)));
   }
-
-//  public InMemoryStateStoreActor(
-//          final Dispatcher<Dispatchable<Entry<?>, RS>> dispatcher,
-//          final long checkConfirmationExpirationInterval,
-//          final long confirmationExpiration) {
-//    this(Arrays.asList(dispatcher), checkConfirmationExpirationInterval, confirmationExpiration);
-//  }
-
-  public InMemoryStateStoreActor(final List<Dispatcher<Dispatchable<Entry<?>, RS>>> dispatchers) {
-    this(dispatchers, 1000L, 1000L);
-  }
-
-//  public InMemoryStateStoreActor(final Dispatcher<Dispatchable<Entry<?>, RS>> dispatcher) {
-//    this(dispatcher, 1000L, 1000L);
-//  }
 
   @Override
   public void stop() {
