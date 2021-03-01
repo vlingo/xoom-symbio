@@ -55,21 +55,42 @@ public interface DispatcherControl {
 
   public static class DispatcherControlInstantiator<ET extends Entry<?>, ST extends State<?>> implements ActorInstantiator<DispatcherControlActor> {
     private static final long serialVersionUID = 1739556269104244158L;
+    private static final long DEFAULT_REDISPATCH_DELAY = 2000L;
 
     private final List<Dispatcher<Dispatchable<? extends Entry<?>, ? extends State<?>>>> dispatchers;
     private final DispatcherControlDelegate<? extends Entry<?>, ? extends State<?>> delegate;
+    private final long redispatchDelay;
     private final long checkConfirmationExpirationInterval;
     private final long confirmationExpiration;
 
     public DispatcherControlInstantiator(
             final List<Dispatcher<Dispatchable<? extends Entry<?>, ? extends State<?>>>> dispatchers,
             final DispatcherControlDelegate<? extends Entry<?>, ? extends State<?>> delegate,
+            final long redispatchDelay,
             final long checkConfirmationExpirationInterval,
             final long confirmationExpiration) {
       this.dispatchers = dispatchers;
       this.delegate = delegate;
+      this.redispatchDelay = redispatchDelay;
       this.checkConfirmationExpirationInterval = checkConfirmationExpirationInterval;
       this.confirmationExpiration = confirmationExpiration;
+    }
+
+    public DispatcherControlInstantiator(
+            final List<Dispatcher<Dispatchable<? extends Entry<?>, ? extends State<?>>>> dispatchers,
+            final DispatcherControlDelegate<? extends Entry<?>, ? extends State<?>> delegate,
+            final long checkConfirmationExpirationInterval,
+            final long confirmationExpiration) {
+      this(dispatchers, delegate, DEFAULT_REDISPATCH_DELAY, checkConfirmationExpirationInterval, confirmationExpiration);
+    }
+
+    public DispatcherControlInstantiator(
+            final Dispatcher<Dispatchable<? extends Entry<?>, ? extends State<?>>> dispatcher,
+            final DispatcherControlDelegate<? extends Entry<?>, ? extends State<?>> delegate,
+            final long redispatchDelay,
+            final long checkConfirmationExpirationInterval,
+            final long confirmationExpiration) {
+      this(Arrays.asList(dispatcher), delegate, redispatchDelay, checkConfirmationExpirationInterval, confirmationExpiration);
     }
 
     public DispatcherControlInstantiator(
@@ -85,6 +106,7 @@ public interface DispatcherControl {
       return new DispatcherControlActor(
               dispatchers,
               delegate,
+              redispatchDelay,
               checkConfirmationExpirationInterval,
               confirmationExpiration);
     }
