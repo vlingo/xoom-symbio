@@ -23,8 +23,6 @@ import io.vlingo.symbio.store.dispatch.Dispatcher;
 import io.vlingo.symbio.store.dispatch.DispatcherControl;
 
 public class DispatcherControlActor extends Actor implements DispatcherControl, Scheduled<Object> {
-  private final static long DEFAULT_REDISPATCH_DELAY = 2000L;
-
   private final List<Dispatcher<Dispatchable<? extends Entry<?>, ? extends State<?>>>> dispatchers;
   private final DispatcherControlDelegate<? extends Entry<?>, ? extends State<?>> delegate;
   private final Cancellable cancellable;
@@ -33,22 +31,15 @@ public class DispatcherControlActor extends Actor implements DispatcherControl, 
   public DispatcherControlActor(
           final List<Dispatcher<Dispatchable<? extends Entry<?>, ? extends State<?>>>> dispatchers,
           final DispatcherControlDelegate<? extends Entry<?>, ? extends State<?>> delegate,
+          final long redispatchDelay,
           final long checkConfirmationExpirationInterval,
           final long confirmationExpiration) {
     this.dispatchers = dispatchers;
     this.delegate = delegate;
     this.confirmationExpiration = confirmationExpiration;
-    this.cancellable = scheduler().schedule(this, null, DEFAULT_REDISPATCH_DELAY, checkConfirmationExpirationInterval);
+    this.cancellable = scheduler().schedule(this, null, redispatchDelay, checkConfirmationExpirationInterval);
     this.dispatchers.forEach(d -> d.controlWith(this));
   }
-
-//  public DispatcherControlActor(
-//          final Dispatcher<Dispatchable<? extends Entry<?>, ? extends State<?>>> dispatcher,
-//          final DispatcherControlDelegate<? extends Entry<?>, ? extends State<?>> delegate,
-//          final long checkConfirmationExpirationInterval,
-//          final long confirmationExpiration) {
-//    this(Arrays.asList(dispatcher), delegate, checkConfirmationExpirationInterval, confirmationExpiration);
-//  }
 
   @Override
   public void intervalSignal(final Scheduled<Object> scheduled, final Object data) {
