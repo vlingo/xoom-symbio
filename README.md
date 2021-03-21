@@ -26,13 +26,6 @@ belonging to entities/aggregates in your application. There is a growing number 
    - JDBC over Postgres: `PostgresJournalActor` and supporting asynchronous readers
    - FoundationDB support: `FoundationDBJournalActor` and supporting asynchronous readers
 
-### Object Storage
-The `ObjectStore` is a simple object-relational mapped storage mechanism that can be run against a number of
-persistence engines. These are the available implementations:
-
-   - Jdbi over JDBC: `JdbiObjectStoreDelegate` controlled under `JDBCObjectStoreActor`
-   - JPA standard: `JPAObjectStoreDelegate` for JPA implementations, including EclipseLink, OpenJPA, and Hibernate
-
 ### State Storage
 The `StateStore` is a simple CQRS Key-Value (Key-CLOB/BLOB) storage mechanism that can be run against a number of persistence engines.
 Use it for both Command/Write Models and Query/Read Models. These are the available storage implementations:
@@ -52,6 +45,13 @@ The `JDBCTextStateStoreActor` has these database delegate implementations:
 Adding additional JDBC storage delegates is a straightforward process requiring a few hours of work.
 
 We welcome you to add support for your favorite database!
+
+### Object Storage
+The `ObjectStore` is a simple object-relational mapped storage mechanism that can be run against a number of
+persistence engines. These are the available implementations:
+
+   - Jdbi over JDBC: `JdbiObjectStoreDelegate` controlled under `JDBCObjectStoreActor`
+   - JPA standard: `JPAObjectStoreDelegate` for JPA implementations, including EclipseLink, OpenJPA, and Hibernate
 
 ### Bintray
 
