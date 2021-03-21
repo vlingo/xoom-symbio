@@ -2,9 +2,12 @@
 
 [![Javadocs](http://javadoc.io/badge/io.vlingo/vlingo-symbio.svg?color=brightgreen)](http://javadoc.io/doc/io.vlingo/vlingo-symbio) [![Build](https://github.com/vlingo/vlingo-symbio/workflows/Build/badge.svg)](https://github.com/vlingo/vlingo-symbio/actions?query=workflow%3ABuild) [ ![Download](https://api.bintray.com/packages/vlingo/vlingo-platform-java/vlingo-symbio/images/download.svg) ](https://bintray.com/vlingo/vlingo-platform-java/vlingo-symbio/_latestVersion) [![Gitter chat](https://badges.gitter.im/gitterHQ/gitter.png)](https://gitter.im/vlingo-platform-java/symbio)
 
+The VLINGO XOOM platform SDK delivering Reactive storage that is scalable, high-throughput, and resilient for CQRS, Event Sourcing, Key-Value, and Objects used by services and applications.
+
 Docs: https://docs.vlingo.io/vlingo-symbio
 
-The VLINGO/PLATFORM reactive, scalable, and resilient Object, K-V, CQRS, and Event Sourcing storage tools for services and applications.
+### Important
+If using snapshot builds [follow these instructions](https://github.com/vlingo/vlingo-platform#snapshots-repository) or you will experience failures.
 
 ### Name
 The name "symbio" highlights the symbiotic relationship between domain models and persistence mechanisms.
