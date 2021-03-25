@@ -66,7 +66,7 @@ persistence engines. These are the available implementations:
     <dependency>
       <groupId>io.vlingo</groupId>
       <artifactId>vlingo-symbio</artifactId>
-      <version>1.5.1</version>
+      <version>1.5.2</version>
       <scope>compile</scope>
     </dependency>
   </dependencies>
@@ -74,7 +74,7 @@ persistence engines. These are the available implementations:
 
 ```gradle
 dependencies {
-    compile 'io.vlingo:vlingo-symbio:1.5.1'
+    compile 'io.vlingo:vlingo-symbio:1.5.2'
 }
 
 repositories {
