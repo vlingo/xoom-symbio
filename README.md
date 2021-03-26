@@ -1,6 +1,6 @@
 # vlingo-symbio
 
-[![Javadocs](http://javadoc.io/badge/io.vlingo/vlingo-symbio.svg?color=brightgreen)](http://javadoc.io/doc/io.vlingo/vlingo-symbio) [![Build](https://github.com/vlingo/vlingo-symbio/workflows/Build/badge.svg)](https://github.com/vlingo/vlingo-symbio/actions?query=workflow%3ABuild) [ ![Download](https://api.bintray.com/packages/vlingo/vlingo-platform-java/vlingo-symbio/images/download.svg) ](https://bintray.com/vlingo/vlingo-platform-java/vlingo-symbio/_latestVersion) [![Gitter chat](https://badges.gitter.im/gitterHQ/gitter.png)](https://gitter.im/vlingo-platform-java/symbio)
+[![Javadocs](http://javadoc.io/badge/io.vlingo/vlingo-symbio.svg?color=brightgreen)](http://javadoc.io/doc/io.vlingo/vlingo-symbio) [![Build](https://github.com/vlingo/vlingo-symbio/workflows/Build/badge.svg)](https://github.com/vlingo/vlingo-symbio/actions?query=workflow%3ABuild) [![Download](https://img.shields.io/maven-central/v/io.vlingo/vlingo-symbio?label=maven)](https://search.maven.org/artifact/io.vlingo/vlingo-symbio) [![Gitter chat](https://badges.gitter.im/gitterHQ/gitter.png)](https://gitter.im/vlingo-platform-java/symbio)
 
 The VLINGO XOOM platform SDK delivering Reactive storage that is scalable, high-throughput, and resilient for CQRS, Event Sourcing, Key-Value, and Objects used by services and applications.
 
