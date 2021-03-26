@@ -6,9 +6,6 @@ The VLINGO XOOM platform SDK delivering Reactive storage that is scalable, high-
 
 Docs: https://docs.vlingo.io/vlingo-symbio
 
-### Important
-If using snapshot builds [follow these instructions](https://github.com/vlingo/vlingo-platform#snapshots-repository) or you will experience failures.
-
 ### Name
 The name "symbio" highlights the symbiotic relationship between domain models and persistence mechanisms.
 Domain models must be persisted and individual parts must be reconstituted to memory when needed. Persistence
@@ -53,15 +50,9 @@ persistence engines. These are the available implementations:
    - Jdbi over JDBC: `JdbiObjectStoreDelegate` controlled under `JDBCObjectStoreActor`
    - JPA standard: `JPAObjectStoreDelegate` for JPA implementations, including EclipseLink, OpenJPA, and Hibernate
 
-### Bintray
+### Installation
 
 ```xml
-  <repositories>
-    <repository>
-      <id>jcenter</id>
-      <url>https://jcenter.bintray.com/</url>
-    </repository>
-  </repositories>
   <dependencies>
     <dependency>
       <groupId>io.vlingo</groupId>
@@ -75,10 +66,6 @@ persistence engines. These are the available implementations:
 ```gradle
 dependencies {
     compile 'io.vlingo:vlingo-symbio:1.5.2'
-}
-
-repositories {
-    jcenter()
 }
 ```
 
