@@ -389,6 +389,23 @@ public class InMemoryStateStoreTest {
     Assert.assertEquals(10000, totalStates.get());
   }
 
+  @Test
+  public void testThatAllOfTypeStreamsAnEmptyStream() {
+    final Stream all = store.streamAllOf(Entity1.class).await();
+
+    final AccessSafely access = AccessSafely.afterCompleting(0);
+
+    access.writingWith("stateCounter", (state) -> { totalStates.incrementAndGet(); });
+    access.readingWith("stateCount", () -> totalStates.get());
+
+    all.flowInto(new ConsumerSink<>((state) -> access.writeUsing("stateCounter", 1)), 10);
+
+    final int stateCount = access.readFromExpecting("stateCount", 0);
+
+    Assert.assertEquals(totalStates.get(), 0);
+    Assert.assertEquals(totalStates.get(), stateCount);
+  }
+
   @Before
   public void setUp() {
     testWorld = TestWorld.startWithDefaults("test-store");

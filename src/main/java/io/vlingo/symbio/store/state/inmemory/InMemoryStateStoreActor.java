@@ -131,8 +131,11 @@ public class InMemoryStateStoreActor<RS extends State<?>> extends Actor
   @Override
   public Completes<Stream> streamAllOf(final Class<?> stateType) {
     final String storeName = StateTypeStateStoreMap.storeNameFrom(stateType);
-
-    return completes().with(new StateStream<>(stage(), store.get(storeName), stateAdapterProvider));
+    Map<String, RS> typeStore = store.get(storeName);
+    if (typeStore == null) {
+      typeStore = new HashMap<>();
+    }
+    return completes().with(new StateStream<>(stage(), typeStore, stateAdapterProvider));
   }
 
   @Override
