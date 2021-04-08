@@ -1,10 +1,10 @@
-# vlingo-symbio
+# xoom-symbio
 
-[![Javadocs](http://javadoc.io/badge/io.vlingo/vlingo-symbio.svg?color=brightgreen)](http://javadoc.io/doc/io.vlingo/vlingo-symbio) [![Build](https://github.com/vlingo/vlingo-symbio/workflows/Build/badge.svg)](https://github.com/vlingo/vlingo-symbio/actions?query=workflow%3ABuild) [![Download](https://img.shields.io/maven-central/v/io.vlingo/vlingo-symbio?label=maven)](https://search.maven.org/artifact/io.vlingo/vlingo-symbio) [![Gitter chat](https://badges.gitter.im/gitterHQ/gitter.png)](https://gitter.im/vlingo-platform-java/symbio)
+[![Javadocs](http://javadoc.io/badge/io.vlingo.xoom/xoom-symbio.svg?color=brightgreen)](http://javadoc.io/doc/io.vlingo.xoom/xoom-symbio) [![Build](https://github.com/vlingo/xoom-symbio/workflows/Build/badge.svg)](https://github.com/vlingo/xoom-symbio/actions?query=workflow%3ABuild) [![Download](https://img.shields.io/maven-central/v/io.vlingo.xoom/xoom-symbio?label=maven)](https://search.maven.org/artifact/io.vlingo.xoom/xoom-symbio) [![Gitter chat](https://badges.gitter.im/gitterHQ/gitter.png)](https://gitter.im/vlingo-platform-java/symbio)
 
 The VLINGO XOOM platform SDK delivering Reactive storage that is scalable, high-throughput, and resilient for CQRS, Event Sourcing, Key-Value, and Objects used by services and applications.
 
-Docs: https://docs.vlingo.io/vlingo-symbio
+Docs: https://docs.vlingo.io/xoom-symbio
 
 ### Name
 The name "symbio" highlights the symbiotic relationship between domain models and persistence mechanisms.
@@ -55,8 +55,8 @@ persistence engines. These are the available implementations:
 ```xml
   <dependencies>
     <dependency>
-      <groupId>io.vlingo</groupId>
-      <artifactId>vlingo-symbio</artifactId>
+      <groupId>io.vlingo.xoom</groupId>
+      <artifactId>xoom-symbio</artifactId>
       <version>1.6.0</version>
       <scope>compile</scope>
     </dependency>
@@ -65,7 +65,7 @@ persistence engines. These are the available implementations:
 
 ```gradle
 dependencies {
-    compile 'io.vlingo:vlingo-symbio:1.6.0'
+    compile 'io.vlingo.xoom:xoom-symbio:1.6.0'
 }
 ```
 

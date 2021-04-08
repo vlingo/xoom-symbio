@@ -6,6 +6,6 @@ postgres:
     - '5432:5432'
   environment:
     # create the DB after the service is up with:
-    # $> docker-compose exec postgres psql -c "CREATE DATABASE vlingo_test;" -U postgres
+    # $> docker-compose exec postgres psql -c "CREATE DATABASE xoom_test;" -U postgres
     POSTGRES_PASSWORD: vlingo123
-    POSTGRES_USER: vlingo_test
+    POSTGRES_USER: xoom_test

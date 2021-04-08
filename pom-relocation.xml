@@ -1,9 +1,9 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>io.vlingo.xoom</groupId>
-  <artifactId>xoom-symbio</artifactId>
+  <groupId>io.vlingo</groupId>
+  <artifactId>vlingo-symbio</artifactId>
   <version>1.6.1-SNAPSHOT</version>
-  <name>xoom-symbio</name>
+  <name>vlingo-symbio</name>
   <description>The reactive, scalable, and resilient CQRS storage and projection tool for services and applications built on the vlingo/platform.</description>
   <url>https://github.com/vlingo/xoom-actors</url>
   <licenses>
@@ -31,6 +31,12 @@
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
   </properties>
+  <distributionManagement>
+    <relocation>
+      <groupId>io.vlingo.xoom</groupId>
+      <artifactId>xoom-symbio</artifactId>
+    </relocation>
+  </distributionManagement>
   <build>
     <plugins>
       <plugin>
@@ -155,6 +161,10 @@
         </property>
       </activation>
       <distributionManagement>
+        <relocation>
+          <groupId>io.vlingo.xoom</groupId>
+          <artifactId>xoom-symbio</artifactId>
+        </relocation>
         <snapshotRepository>
           <id>central-repository-ossrh</id>
           <name>Snapshots Repository OSSRH</name>
@@ -186,6 +196,10 @@
         </property>
       </activation>
       <distributionManagement>
+        <relocation>
+          <groupId>io.vlingo.xoom</groupId>
+          <artifactId>xoom-symbio</artifactId>
+        </relocation>
         <repository>
           <id>github</id>
           <name>GitHub Packages</name>
