@@ -1,4 +1,4 @@
-package io.vlingo.xoom.symbio.implnative;
+package io.vlingo.xoom.symbio.nativebuild;
 
 import io.vlingo.xoom.actors.World;
 import io.vlingo.xoom.symbio.State;
