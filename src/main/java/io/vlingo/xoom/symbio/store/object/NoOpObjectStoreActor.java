@@ -7,15 +7,14 @@
 
 package io.vlingo.xoom.symbio.store.object;
 
+import java.util.Collection;
+
 import io.vlingo.xoom.actors.Actor;
-import io.vlingo.xoom.actors.DeadLetters;
 import io.vlingo.xoom.common.Completes;
 import io.vlingo.xoom.symbio.Entry;
 import io.vlingo.xoom.symbio.Metadata;
 import io.vlingo.xoom.symbio.store.EntryReader;
 import io.vlingo.xoom.symbio.store.QueryExpression;
-
-import java.util.Collection;
 
 public class NoOpObjectStoreActor extends Actor implements ObjectStore {
 

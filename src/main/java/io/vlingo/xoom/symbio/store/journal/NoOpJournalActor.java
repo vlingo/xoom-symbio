@@ -6,15 +6,14 @@
 // one at https://mozilla.org/MPL/2.0/.
 package io.vlingo.xoom.symbio.store.journal;
 
+import java.util.List;
+
 import io.vlingo.xoom.actors.Actor;
-import io.vlingo.xoom.actors.DeadLetters;
 import io.vlingo.xoom.common.Completes;
 import io.vlingo.xoom.symbio.Entry;
 import io.vlingo.xoom.symbio.Metadata;
 import io.vlingo.xoom.symbio.Source;
 import io.vlingo.xoom.symbio.State;
-
-import java.util.List;
 
 public class NoOpJournalActor<T,RS extends State<?>> extends Actor implements Journal<T> {
 
