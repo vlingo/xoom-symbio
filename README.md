@@ -57,7 +57,7 @@ persistence engines. These are the available implementations:
     <dependency>
       <groupId>io.vlingo.xoom</groupId>
       <artifactId>xoom-symbio</artifactId>
-      <version>1.8.7</version>
+      <version>1.8.8</version>
       <scope>compile</scope>
     </dependency>
   </dependencies>
@@ -65,7 +65,7 @@ persistence engines. These are the available implementations:
 
 ```gradle
 dependencies {
-    compile 'io.vlingo.xoom:xoom-symbio:1.8.7'
+    compile 'io.vlingo.xoom:xoom-symbio:1.8.8'
 }
 ```
 
