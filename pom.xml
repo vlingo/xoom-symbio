@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.vlingo.xoom</groupId>
   <artifactId>xoom-symbio</artifactId>
-  <version>1.9.3</version>
+  <version>1.9.4-SNAPSHOT</version>
   <name>xoom-symbio</name>
   <description>The reactive, scalable, and resilient CQRS storage and projection tool for services and applications built on the VLINGO XOOM Platform.</description>
   <url>https://github.com/vlingo/xoom-actors</url>
@@ -90,17 +90,17 @@
     <dependency>
       <groupId>io.vlingo.xoom</groupId>
       <artifactId>xoom-common</artifactId>
-      <version>1.9.3</version>
+      <version>1.9.4-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>io.vlingo.xoom</groupId>
       <artifactId>xoom-actors</artifactId>
-      <version>1.9.3</version>
+      <version>1.9.4-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>io.vlingo.xoom</groupId>
       <artifactId>xoom-streams</artifactId>
-      <version>1.9.3</version>
+      <version>1.9.4-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>org.graalvm.sdk</groupId>
