@@ -13,6 +13,10 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
 public class MetadataTest {
 
   @Test
@@ -20,14 +24,37 @@ public class MetadataTest {
     final Metadata metadata = new Metadata();
     assertFalse(metadata.hasValue());
     assertFalse(metadata.hasOperation());
+    assertFalse(metadata.hasProperties());
   }
 
   @Test
+  public void testNullMetadata() {
+    final Metadata metadata = Metadata.nullMetadata();
+    assertFalse(metadata.hasValue());
+    assertFalse(metadata.hasOperation());
+    assertFalse(metadata.hasProperties());
+  }
+
+  @Test
+  @Deprecated
   public void testMetadataObject() {
     final Object object = new Object();
     final Metadata metadata = Metadata.withObject(object);
     assertTrue(metadata.hasObject());
     assertEquals(object, metadata.object);
+    assertFalse(metadata.hasValue());
+    assertFalse(metadata.hasOperation());
+  }
+
+  @Test
+  public void testMetadataProperties() {
+    final Map<String, String> properties = new HashMap<String, String>() {{
+      put("prop1", "value1");
+      put("prop2", "value2");
+    }};
+    final Metadata metadata = Metadata.withProperties(properties);
+    assertTrue(metadata.hasProperties());
+    assertEquals(properties, metadata.properties);
     assertFalse(metadata.hasValue());
     assertFalse(metadata.hasOperation());
   }
@@ -55,5 +82,44 @@ public class MetadataTest {
     assertEquals("value", metadata.value);
     assertTrue(metadata.hasOperation());
     assertEquals("op", metadata.operation);
+  }
+
+  @Test
+  public void testMetadataPropertiesValueOperation() {
+    final Map<String, String> properties = new HashMap<String, String>() {{
+      put("prop1", "value1");
+      put("prop2", "value2");
+    }};
+    final Metadata metadata = Metadata.with(properties, "value", "op");
+    assertTrue(metadata.hasProperties());
+    assertEquals(properties, metadata.properties);
+    assertTrue(metadata.hasValue());
+    assertEquals("value", metadata.value);
+    assertTrue(metadata.hasOperation());
+    assertEquals("op", metadata.operation);
+  }
+
+  @Test
+  public void testMetadataWithClassOperationType() {
+    final Map<String, String> properties = Collections.singletonMap("prop1", "value1");
+    final Metadata metadata = Metadata.with(properties, "value", MetadataTest.class);
+    assertTrue(metadata.hasProperties());
+    assertEquals(properties, metadata.properties);
+    assertTrue(metadata.hasValue());
+    assertEquals("value", metadata.value);
+    assertTrue(metadata.hasOperation());
+    assertEquals("MetadataTest", metadata.operation);
+  }
+
+  @Test
+  public void testMetadataWithNonCompactClassOperationType() {
+    final Map<String, String> properties = Collections.singletonMap("prop1", "value1");
+    final Metadata metadata = Metadata.with(properties, "value", MetadataTest.class, false);
+    assertTrue(metadata.hasProperties());
+    assertEquals(properties, metadata.properties);
+    assertTrue(metadata.hasValue());
+    assertEquals("value", metadata.value);
+    assertTrue(metadata.hasOperation());
+    assertEquals("io.vlingo.xoom.symbio.MetadataTest", metadata.operation);
   }
 }
