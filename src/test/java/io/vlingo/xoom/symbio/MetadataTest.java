@@ -36,17 +36,6 @@ public class MetadataTest {
   }
 
   @Test
-  @Deprecated
-  public void testMetadataObject() {
-    final Object object = new Object();
-    final Metadata metadata = Metadata.withObject(object);
-    assertTrue(metadata.hasObject());
-    assertEquals(object, metadata.object);
-    assertFalse(metadata.hasValue());
-    assertFalse(metadata.hasOperation());
-  }
-
-  @Test
   public void testMetadataProperties() {
     final Map<String, String> properties = new HashMap<String, String>() {{
       put("prop1", "value1");
@@ -64,6 +53,7 @@ public class MetadataTest {
     final Metadata metadata = Metadata.withValue("value");
     assertTrue(metadata.hasValue());
     assertEquals("value", metadata.value);
+    assertEquals("value", metadata.value());
     assertFalse(metadata.hasOperation());
   }
 
@@ -73,6 +63,7 @@ public class MetadataTest {
     assertFalse(metadata.hasValue());
     assertTrue(metadata.hasOperation());
     assertEquals("op", metadata.operation);
+    assertEquals("op", metadata.operation());
   }
 
   @Test
